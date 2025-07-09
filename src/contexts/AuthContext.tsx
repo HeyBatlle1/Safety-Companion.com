@@ -9,6 +9,7 @@ interface AuthContextType {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
+  signInWithProvider: (provider: 'google' | 'azure') => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -36,6 +37,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             id: session.user.id, 
             email: session.user.email || '' 
           });
+          
+          // If user just signed in via OAuth, navigate to dashboard
+          if (event === 'SIGNED_IN' && session.user.app_metadata?.provider) {
+            navigate('/');
+            showToast(`Successfully signed in with ${session.user.app_metadata.provider}`, 'success');
+          }
         } else {
           setUser(null);
         }
@@ -70,7 +77,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [navigate]);
 
   const signIn = async (email: string, password: string) => {
     setLoading(true);
@@ -114,6 +121,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const signInWithProvider = async (provider: 'google' | 'azure') => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: provider === 'azure' ? 'azure' : 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`,
+          queryParams: provider === 'azure' ? {
+            prompt: 'select_account',
+          } : undefined,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // Note: The actual sign-in completion will be handled by the auth state change listener
+      // when the OAuth flow completes and redirects back to the app
+    } catch (error) {
+      logError(error, `Auth:OAuth:${provider}`);
+      const message = error instanceof Error ? error.message : `Failed to sign in with ${provider}`;
+      showToast(message, 'error');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = async () => {
     setLoading(true);
     try {
@@ -131,7 +167,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, logout }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, signInWithProvider, logout }}>
       {children}
     </AuthContext.Provider>
   );
