@@ -19,7 +19,7 @@ import Profiles from './pages/Profiles';
 import ToastContainer from './components/common/ToastContainer';
 
 function App() {
-  const { loading } = useAuth();
+  const { loading, user } = useAuth();
 
   // Show loading screen while auth is initializing
   if (loading) {
@@ -28,10 +28,13 @@ function App() {
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-300">Loading Safety Companion...</p>
+          <p className="text-gray-500 text-sm mt-2">Initializing authentication system</p>
         </div>
       </div>
     );
   }
+
+  console.log('App render - loading:', loading, 'user:', user ? 'logged in' : 'not logged in');
 
   return (
     <div className="min-h-screen bg-slate-900">

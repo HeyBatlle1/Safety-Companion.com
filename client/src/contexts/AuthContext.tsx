@@ -42,20 +42,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Get initial session
     const initializeAuth = async () => {
       try {
+        console.log('Initializing authentication...');
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) {
           console.error('Error getting session:', error);
+          setUser(null);
         } else {
+          console.log('Session initialized:', session?.user ? 'User logged in' : 'No active session');
           setUser(session?.user ?? null);
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
+        setUser(null);
       } finally {
+        console.log('Auth initialization complete, setting loading to false');
         setLoading(false);
       }
     };
 
-    initializeAuth();
+    // Add a timeout to ensure loading state doesn't persist indefinitely
+    const timeoutId = setTimeout(() => {
+      console.log('Auth initialization timeout - forcing loading to false');
+      setLoading(false);
+    }, 5000);
+
+    initializeAuth().then(() => {
+      clearTimeout(timeoutId);
+    });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
