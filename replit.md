@@ -8,6 +8,8 @@ Preferred communication style: Simple, everyday language.
 UI Design: Professional, enterprise-grade styling with dark theme and blue/cyan gradients
 Navigation: Profiles icon positioned at the end of navigation list
 Code Organization: Checklist functionality separated from SDS chat - clean separation of concerns
+Security: Enterprise-grade RLS policies, audit trails, secure file uploads with virus scanning
+Profile System: Tabbed interface with personal info, certifications, safety records, and preferences
 
 # System Architecture
 

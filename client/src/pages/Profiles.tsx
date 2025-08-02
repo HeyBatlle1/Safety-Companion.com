@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Filter, Plus, Users, Shield, MapPin, Building2, Award, Clock } from 'lucide-react';
+import { Search, Filter, Plus, Users, Shield, MapPin, Building2, Award, Clock, Eye, X } from 'lucide-react';
 import ProfileCard from '@/components/profile/ProfileCard';
 import LoadingState, { ProfileCardSkeleton } from '@/components/profile/LoadingState';
+import ProfileTabs from '@/components/profile/ProfileTabs';
 import { useToast } from '../hooks/use-toast';
 
 interface UserProfile {
@@ -28,6 +29,8 @@ const Profiles: React.FC = () => {
   const [roleFilter, setRoleFilter] = useState('all');
   const [departmentFilter, setDepartmentFilter] = useState('all');
   const [currentUser] = useState<UserProfile | null>(null); // Would be set from auth context
+  const [selectedProfile, setSelectedProfile] = useState<UserProfile | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'detail'>('grid');
   const { toast } = useToast();
 
   // Mock data for demonstration - in production this would come from Supabase
@@ -370,10 +373,10 @@ const Profiles: React.FC = () => {
                 <ProfileCard
                   profile={profile}
                   isCurrentUser={currentUser?.id === profile.id}
-                  onEdit={() => toast({
-                    title: 'Edit Profile',
-                    description: `Opening edit form for ${profile.firstName} ${profile.lastName}`,
-                  })}
+                  onEdit={() => {
+                    setSelectedProfile(profile);
+                    setViewMode('detail');
+                  }}
                 />
               </motion.div>
             ))}
@@ -393,6 +396,63 @@ const Profiles: React.FC = () => {
                 Try adjusting your search or filter criteria
               </p>
             </div>
+          </motion.div>
+        )}
+
+        {/* Profile Detail Modal */}
+        {selectedProfile && viewMode === 'detail' && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => {
+              setSelectedProfile(null);
+              setViewMode('grid');
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="bg-slate-900 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="sticky top-0 bg-slate-900 border-b border-blue-500/20 p-6 flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-lg font-semibold">
+                    {selectedProfile.firstName.charAt(0)}{selectedProfile.lastName.charAt(0)}
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-white">
+                      {selectedProfile.firstName} {selectedProfile.lastName}
+                    </h2>
+                    <p className="text-gray-400">{selectedProfile.role.replace('_', ' ')}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setSelectedProfile(null);
+                    setViewMode('grid');
+                  }}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              
+              <div className="p-6">
+                <ProfileTabs
+                  profile={selectedProfile}
+                  isCurrentUser={currentUser?.id === selectedProfile.id}
+                  onSave={(data) => {
+                    // Handle profile save
+                    toast({
+                      title: 'Profile Updated',
+                      description: 'Profile changes have been saved successfully.',
+                    });
+                  }}
+                />
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </div>
