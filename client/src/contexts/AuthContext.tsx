@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { signIn as supabaseSignIn, signUp as supabaseSignUp, signOut as supabaseSignOut, getCurrentUser, supabase } from '../services/supabase';
 import { showToast } from '../components/common/ToastContainer';
 import { logError } from '../utils/errorHandler';
@@ -26,7 +25,6 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     // Listen for authentication state changes
@@ -38,9 +36,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             email: session.user.email || '' 
           });
           
-          // If user just signed in via OAuth, navigate to dashboard
+          // If user just signed in via OAuth, show success message
           if (event === 'SIGNED_IN' && session.user.app_metadata?.provider) {
-            navigate('/');
             showToast(`Successfully signed in with ${session.user.app_metadata.provider}`, 'success');
           }
         } else {
@@ -77,7 +74,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, []);
 
   const signIn = async (email: string, password: string) => {
     setLoading(true);
@@ -85,8 +82,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const user = await supabaseSignIn(email, password);
       if (user) {
         setUser({ id: user.id, email: user.email || '' });
-        navigate('/');
         showToast('Successfully signed in', 'success');
+        // Navigation will be handled by PrivateRoute redirect
       } else {
         throw new Error('Invalid credentials');
       }
@@ -106,8 +103,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const user = await supabaseSignUp(email, password);
       if (user) {
         setUser({ id: user.id, email: user.email || '' });
-        navigate('/');
         showToast('Successfully registered and signed in', 'success');
+        // Navigation will be handled by PrivateRoute redirect
       } else {
         throw new Error('Failed to create account');
       }
@@ -155,8 +152,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await supabaseSignOut();
       setUser(null);
-      navigate('/login');
       showToast('Successfully logged out', 'success');
+      // Navigation will be handled by PrivateRoute redirect
     } catch (error) {
       logError(error, 'Auth:Logout');
       showToast('Failed to log out', 'error');

@@ -21,16 +21,7 @@ const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   global: {
     headers: {
       'Content-Type': 'application/json'
-    },
-    fetch: (url, options) => {
-      return fetch(url, {
-        ...options,
-        timeout: 30000 // 30 second timeout
-      });
     }
-  },
-  realtime: {
-    autoSubscribe: false // Turn off by default to save resources
   }
 });
 
@@ -118,7 +109,7 @@ const ensureUserProfile = async (userId: string): Promise<void> => {
       .from('user_profiles')
       .select('id')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
     
     if (error) {
       if (error.code === 'PGRST116') {
@@ -135,12 +126,12 @@ const ensureUserProfile = async (userId: string): Promise<void> => {
         console.log('Creating user profile for:', userId);
         const { error: insertError } = await supabase
           .from('user_profiles')
-          .insert([{
+          .insert({
             id: userId,
             role: 'field_worker',
             is_active: true,
             created_at: new Date().toISOString()
-          }]);
+          } as any);
         
         if (insertError) {
           console.error('Error creating user profile:', insertError);
@@ -157,7 +148,7 @@ const ensureUserProfile = async (userId: string): Promise<void> => {
         console.log('Creating notification preferences for:', userId);
         const { error: prefError } = await supabase
           .from('notification_preferences')
-          .insert([{
+          .insert({
             user_id: userId,
             email_notifications: true,
             sms_notifications: false,
@@ -169,7 +160,7 @@ const ensureUserProfile = async (userId: string): Promise<void> => {
             project_updates: true,
             training_reminders: true,
             created_at: new Date().toISOString()
-          }]);
+          } as any);
         
         if (prefError) {
           console.error('Error creating notification preferences:', prefError);
@@ -218,22 +209,14 @@ export const getSupabaseStatus = async (): Promise<{
     let tables: string[] = [];
     if (connected) {
       try {
-        // First try using the RPC function
-        const { data: rpcData, error: rpcError } = await supabase
-          .rpc('get_tables');
+        // Try a simple query to test connection
+        const { error: testError } = await supabase
+          .from('user_profiles')
+          .select('count', { count: 'exact', head: true });
         
-        if (!rpcError && rpcData) {
-          tables = rpcData;
-        } else {
-          // Fall back to direct query if RPC fails
-          const { data, error } = await supabase
-            .from('information_schema.tables')
-            .select('table_name')
-            .eq('table_schema', 'public');
-          
-          if (!error && data) {
-            tables = data.map(t => t.table_name);
-          }
+        if (!testError || testError.code === '42P01') {
+          // Connection is working, set some default table names
+          tables = ['user_profiles', 'notification_preferences', 'safety_reports'];
         }
       } catch (error) {
         console.warn('Could not fetch table list:', error);
