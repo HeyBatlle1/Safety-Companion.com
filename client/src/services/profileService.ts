@@ -125,7 +125,7 @@ const ensureUserProfile = async (userId: string): Promise<void> => {
   try {
     // First check if profile exists
     const { data, error } = await supabase
-      .from('user_profiles')
+      .from('profiles')
       .select('id')
       .eq('id', userId)
       .single();
@@ -144,12 +144,12 @@ const ensureUserProfile = async (userId: string): Promise<void> => {
       try {
         console.log('Creating user profile for:', userId);
         const { error: insertError } = await supabase
-          .from('user_profiles')
+          .from('profiles')
           .insert([{
             id: userId,
-            role: 'field_worker',
-            is_active: true,
-            created_at: new Date().toISOString()
+            display_name: null,
+            avatar_url: null,
+            email: null
           }]);
         
         if (insertError) {
@@ -200,7 +200,7 @@ export const checkSupabaseConnection = async (): Promise<boolean> => {
   try {
     // Perform a simple query to check connectivity
     const { error } = await supabase
-      .from('user_profiles')
+      .from('profiles')
       .select('count', { count: 'exact', head: true });
     
     // If we get a specific error about the relation not existing, that's still a successful connection
@@ -265,7 +265,7 @@ export const getUserProfile = async (userId?: string): Promise<UserProfile | nul
     const targetUserId = userId || user.id;
 
     const { data, error } = await supabase
-      .from('user_profiles')
+      .from('profiles')
       .select('*')
       .eq('id', targetUserId)
       .single();
@@ -277,7 +277,7 @@ export const getUserProfile = async (userId?: string): Promise<UserProfile | nul
         
         // Try to fetch again after creating
         const { data: newData, error: newError } = await supabase
-          .from('user_profiles')
+          .from('profiles')
           .select('*')
           .eq('id', targetUserId)
           .single();
@@ -307,10 +307,9 @@ export const updateUserProfile = async (updates: Partial<UserProfile>): Promise<
     if (!user) throw new Error('User not authenticated');
 
     const { data, error } = await supabase
-      .from('user_profiles')
+      .from('profiles')
       .update({
-        ...updates,
-        updated_at: new Date().toISOString()
+        ...updates
       })
       .eq('id', user.id)
       .select()

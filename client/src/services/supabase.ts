@@ -106,7 +106,7 @@ const ensureUserProfile = async (userId: string): Promise<void> => {
   try {
     // First check if profile exists
     const { data, error } = await supabase
-      .from('user_profiles')
+      .from('profiles')
       .select('id')
       .eq('id', userId)
       .maybeSingle();
@@ -125,12 +125,12 @@ const ensureUserProfile = async (userId: string): Promise<void> => {
       try {
         console.log('Creating user profile for:', userId);
         const { error: insertError } = await supabase
-          .from('user_profiles')
+          .from('profiles')
           .insert({
             id: userId,
-            role: 'field_worker',
-            is_active: true,
-            created_at: new Date().toISOString()
+            display_name: null,
+            avatar_url: null,
+            email: null
           } as any);
         
         if (insertError) {

@@ -413,7 +413,7 @@ export const getDrawingActivity = async (drawingId: string): Promise<DrawingColl
       .from('drawing_collaborations')
       .select(`
         *,
-        user_profiles(first_name, last_name)
+        profiles(display_name)
       `)
       .eq('drawing_id', drawingId)
       .order('timestamp', { ascending: false })
