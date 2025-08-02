@@ -21,14 +21,20 @@ import ToastContainer from './components/common/ToastContainer';
 function App() {
   const { loading, user } = useAuth();
 
-  // Show loading screen while auth is initializing
+  // Show loading screen while auth is initializing (with shorter timeout)
   if (loading) {
+    console.log('App still in loading state, user:', user ? 'present' : 'null');
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-300">Loading Safety Companion...</p>
-          <p className="text-gray-500 text-sm mt-2">Initializing authentication system</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+          >
+            Click here if stuck
+          </button>
         </div>
       </div>
     );

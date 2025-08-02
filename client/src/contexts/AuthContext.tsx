@@ -74,19 +74,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
-        setUser(session?.user ?? null);
-        setLoading(false);
         
-        // Handle auth events
+        // Only update user state, don't touch loading here to avoid conflicts
+        setUser(session?.user ?? null);
+        
+        // Handle auth events (but don't set loading here)
         switch (event) {
           case 'SIGNED_IN':
             showToast('Successfully signed in', 'success');
             break;
           case 'SIGNED_OUT':
             showToast('Successfully signed out', 'success');
+            setUser(null); // Ensure user is cleared on signout
             break;
           case 'TOKEN_REFRESHED':
             console.log('Auth token refreshed');
+            break;
+          case 'INITIAL_SESSION':
+            // This is just the initial session check, don't do anything special
+            console.log('Initial session loaded');
             break;
         }
       }
@@ -99,29 +105,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signIn = async (email: string, password: string) => {
     try {
-      setLoading(true);
       await authSignIn(email, password);
       // The auth state change listener will handle setting the user
     } catch (error: any) {
       console.error('Sign in error:', error);
       showToast(error.message || 'Failed to sign in', 'error');
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
   const signUp = async (email: string, password: string, role: string = 'field_worker') => {
     try {
-      setLoading(true);
       await authSignUp(email, password, role);
       showToast('Account created successfully! Please check your email to verify your account.', 'success');
     } catch (error: any) {
       console.error('Sign up error:', error);
       showToast(error.message || 'Failed to create account', 'error');
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
