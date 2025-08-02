@@ -8,7 +8,7 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Validate the environment variables
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing Supabase configuration. Please check your .env file.');
+  // Missing configuration - will be handled by fallback
 }
 
 // Create a single Supabase client for interacting with your database
@@ -34,12 +34,12 @@ export const getCurrentUser = async () => {
   try {
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error) {
-      console.error('Error getting current user:', error);
+
       return null;
     }
     return user;
   } catch (error) {
-    console.error('Unexpected error in getCurrentUser:', error);
+
     return null;
   }
 };
@@ -62,7 +62,7 @@ export const signIn = async (email: string, password: string) => {
     
     return data.user;
   } catch (error) {
-    console.error('Sign in error:', error);
+
     throw error;
   }
 };
@@ -86,7 +86,7 @@ export const signUp = async (email: string, password: string, role: string = 'fi
 
     return data.user;
   } catch (error) {
-    console.error('Signup error:', error);
+
     throw error;
   }
 };
@@ -96,7 +96,7 @@ export const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
   } catch (error) {
-    console.error('Sign out error:', error);
+
     throw error;
   }
 };
@@ -113,9 +113,9 @@ const ensureUserProfile = async (userId: string, role: string = 'field_worker', 
     
     if (error) {
       if (error.code === 'PGRST116') {
-        console.info('User profile not found, creating new profile');
+
       } else {
-        console.error('Error checking user profile:', error);
+
         return;
       }
     }
@@ -123,7 +123,7 @@ const ensureUserProfile = async (userId: string, role: string = 'field_worker', 
     // If profile doesn't exist, create it
     if (!data) {
       try {
-        console.log('Creating user profile for:', userId, 'with role:', role);
+
         const { error: insertError } = await supabase
           .from('user_profiles')
           .insert({
@@ -136,19 +136,19 @@ const ensureUserProfile = async (userId: string, role: string = 'field_worker', 
           } as any);
         
         if (insertError) {
-          console.error('Error creating user profile:', insertError);
+
           showToast('Error creating user profile', 'error');
         } else {
-          console.log('Successfully created user profile with role:', role);
+
         }
       } catch (insertError) {
-        console.error('Exception creating user profile:', insertError);
+
       }
       
-      console.log('User profile created successfully for:', userId, 'Role:', role);
+
     }
   } catch (error) {
-    console.error('Error in ensureUserProfile:', error);
+
   }
 };
 
@@ -167,7 +167,7 @@ export const checkSupabaseConnection = async (): Promise<boolean> => {
     
     return !error;
   } catch (error) {
-    console.error('Supabase connection check error:', error);
+
     return false;
   }
 };
@@ -195,7 +195,7 @@ export const getSupabaseStatus = async (): Promise<{
           tables = ['user_profiles', 'notification_preferences', 'safety_reports'];
         }
       } catch (error) {
-        console.warn('Could not fetch table list:', error);
+
       }
     }
     
@@ -205,7 +205,7 @@ export const getSupabaseStatus = async (): Promise<{
       tables
     };
   } catch (error) {
-    console.error('Error getting Supabase status:', error);
+
     return {
       connected: false,
       authenticated: false,

@@ -46,10 +46,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Set up auth state listener
   useEffect(() => {
-    // Check initial auth state
+    // Check initial auth state with timeout
     const checkInitialAuth = async () => {
       try {
-        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        // Create a timeout promise
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Auth check timeout')), 3000); // 3 second timeout
+        });
+
+        // Race between auth check and timeout
+        const authPromise = supabase.auth.getUser();
+        
+        const { data: { user: currentUser } } = await Promise.race([authPromise, timeoutPromise]) as any;
+        
         if (currentUser) {
           setUser(currentUser);
           sessionStorage.setItem('supabase-auth-user', JSON.stringify(currentUser));
@@ -58,8 +67,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setUser(null);
         }
       } catch (error) {
-        sessionStorage.removeItem('supabase-auth-user');
-        setUser(null);
+        // On timeout or error, fallback to sessionStorage if available
+        const stored = sessionStorage.getItem('supabase-auth-user');
+        if (stored) {
+          try {
+            setUser(JSON.parse(stored));
+          } catch {
+            sessionStorage.removeItem('supabase-auth-user');
+            setUser(null);
+          }
+        } else {
+          sessionStorage.removeItem('supabase-auth-user');
+          setUser(null);
+        }
       } finally {
         setLoading(false);
       }
