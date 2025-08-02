@@ -17,7 +17,7 @@ import {
   X,
   Database
 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+// Auth removed - using Supabase directly
 import { showToast } from '../components/common/ToastContainer';
 import { 
   getUserProfile, 
@@ -36,7 +36,9 @@ import PrivacyModal from '../components/profile/PrivacyModal';
 import ProfileDatabaseInfo from '../components/profile/ProfileDatabaseInfo';
 
 const Profile: React.FC = () => {
-  const { user, logout } = useAuth();
+  // Mock user for now - auth removed
+  const user = { id: 'test-user', email: 'user@example.com' };
+  const logout = async () => { console.log('Logout called'); };
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [certifications, setCertifications] = useState<UserCertification[]>([]);
   const [drugScreens, setDrugScreens] = useState<DrugScreen[]>([]);
