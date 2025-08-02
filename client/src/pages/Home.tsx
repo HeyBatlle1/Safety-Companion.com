@@ -171,7 +171,8 @@ const Home = () => {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 1.2 }}
         >
-          <motion.div
+          <motion.button
+            onClick={() => window.location.href = '/checklists'}
             className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-3 rounded-full font-semibold"
             whileHover={{ 
               scale: 1.05,
@@ -181,7 +182,7 @@ const Home = () => {
           >
             <Shield className="w-5 h-5" />
             <span>Start Safety Check</span>
-          </motion.div>
+          </motion.button>
         </motion.div>
       </motion.div>
     </div>

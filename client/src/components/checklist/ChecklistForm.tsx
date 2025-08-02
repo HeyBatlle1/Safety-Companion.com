@@ -154,22 +154,8 @@ const ChecklistForm = () => {
     setIsProcessing(true);
     setAiResponse(null);
 
-    // Check if user is authenticated
-    const user = await getCurrentUser();
-    if (!user) {
-      setError('Please sign in to submit the checklist');
-      setIsProcessing(false);
-      showToast('Authentication required', 'error');
-      return;
-    }
-
-    // Additional check for user ID
-    if (!user.id) {
-      setError('Invalid user session');
-      setIsProcessing(false);
-      showToast('Invalid session', 'error');
-      return;
-    }
+    // Mock user for checklist submission (auth removed)
+    const user = { id: 'demo-user', email: 'demo@example.com' };
     
     try {
       // Format checklist data for AI processing

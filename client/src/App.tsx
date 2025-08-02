@@ -9,6 +9,8 @@ import Maps from './pages/Maps';
 import Videos from './pages/Videos';
 import Drawings from './pages/Drawings';
 import SDS from './pages/SDS';
+import Checklists from './pages/Checklists';
+import ChecklistView from './pages/ChecklistView';
 import ToastContainer from './components/common/ToastContainer';
 
 function App() {
@@ -25,6 +27,8 @@ function App() {
           <Route path="/videos" element={<Videos />} />
           <Route path="/drawings" element={<Drawings />} />
           <Route path="/sds" element={<SDS />} />
+          <Route path="/checklists" element={<Checklists />} />
+          <Route path="/checklist/:templateId" element={<ChecklistView />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AppLayout>
