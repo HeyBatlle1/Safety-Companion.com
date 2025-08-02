@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Construction, Zap, Beaker, Wind, HardHat, Stars as Stairs, Box, Flame, AlertTriangle, TestTube, Microscope, ClipboardCheck } from 'lucide-react';
+import { Shield, Construction, Zap, Beaker, Wind, HardHat, Stars as Stairs, Box, Flame, AlertTriangle, TestTube, Microscope, ClipboardCheck, Sparkles, Star } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 interface Template {
   id: string;
@@ -109,8 +112,66 @@ const templates: Template[] = [
 ];
 
 const ChecklistSelector: React.FC<ChecklistSelectorProps> = ({ onChecklistClick }) => {
+  const [enterpriseMode, setEnterpriseMode] = useState(false);
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <>
+      {/* Enterprise Mode Toggle */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-8 flex items-center justify-center"
+      >
+        <div className="bg-slate-800/60 backdrop-blur-sm border border-blue-500/20 rounded-full px-6 py-3 flex items-center space-x-4">
+          <Label htmlFor="enterprise-mode" className="text-sm font-medium text-gray-300 cursor-pointer">
+            Standard Mode
+          </Label>
+          <Switch
+            id="enterprise-mode"
+            checked={enterpriseMode}
+            onCheckedChange={setEnterpriseMode}
+          />
+          <Label htmlFor="enterprise-mode" className="text-sm font-medium text-gray-300 cursor-pointer flex items-center space-x-2">
+            <Sparkles className="w-4 h-4 text-cyan-400" />
+            <span>Enterprise Mode</span>
+            <Badge variant="secondary" className="ml-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white border-0">
+              NEW
+            </Badge>
+          </Label>
+        </div>
+      </motion.div>
+
+      {/* Mode Description */}
+      <motion.div
+        key={enterpriseMode ? "enterprise" : "standard"}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        className="text-center mb-8"
+      >
+        {enterpriseMode ? (
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold text-white flex items-center justify-center space-x-2">
+              <Star className="w-6 h-6 text-yellow-400" />
+              <span>Enterprise Professional Interface</span>
+            </h2>
+            <p className="text-gray-400 max-w-2xl mx-auto">
+              Advanced inspection tools with toggle switches, photo uploads, severity sliders, and professional 
+              UI components designed for tablet use in the field. Perfect for construction supervisors and safety managers.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold text-white">Standard Safety Checklists</h2>
+            <p className="text-gray-400 max-w-2xl mx-auto">
+              Traditional text-based checklists with comprehensive questions and intelligent AI analysis. 
+              Ideal for quick assessments and compliance documentation.
+            </p>
+          </div>
+        )}
+      </motion.div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {templates.map((template, index) => (
         <motion.div
           key={template.id}
@@ -119,7 +180,7 @@ const ChecklistSelector: React.FC<ChecklistSelectorProps> = ({ onChecklistClick 
           transition={{ delay: index * 0.1 }}
           whileHover={{ scale: 1.02, y: -4 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => onChecklistClick(template.id)}
+          onClick={() => onChecklistClick(enterpriseMode ? `enterprise-${template.id}` : template.id)}
           className="relative group cursor-pointer"
         >
           <div className={`absolute inset-0 bg-gradient-to-r ${template.color} rounded-xl opacity-10 group-hover:opacity-20 transition-all duration-300 blur-sm group-hover:blur-md`} />
@@ -146,6 +207,7 @@ const ChecklistSelector: React.FC<ChecklistSelectorProps> = ({ onChecklistClick 
         </motion.div>
       ))}
     </div>
+    </>
   );
 };
 

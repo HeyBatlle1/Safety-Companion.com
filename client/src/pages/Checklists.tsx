@@ -8,8 +8,12 @@ const Checklists: React.FC = () => {
   const navigate = useNavigate();
 
   const handleChecklistClick = (templateId: string) => {
-
-    navigate(`/checklist/${templateId}`);
+    if (templateId.startsWith('enterprise-')) {
+      const actualId = templateId.replace('enterprise-', '');
+      navigate(`/checklist-enterprise/${actualId}`);
+    } else {
+      navigate(`/checklist/${templateId}`);
+    }
   };
 
   return (
