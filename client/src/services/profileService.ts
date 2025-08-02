@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
-import { Database } from '../types/database';
+// Use the centralized Supabase client to avoid conflicts
+import { supabase } from './supabase';
 import { 
   UserProfile, 
   Company, 
@@ -12,41 +12,6 @@ import {
 } from '../types/profile';
 import { handleSupabaseError } from '../utils/errorHandler';
 import { showToast } from '../components/common/ToastContainer';
-
-// Get environment variables from .env file
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-// Validate the environment variables
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing Supabase configuration. Please check your .env file.');
-}
-
-// Create a single Supabase client for interacting with your database
-const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true
-  },
-  global: {
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    fetch: (url, options) => {
-      return fetch(url, {
-        ...options,
-        timeout: 30000 // 30 second timeout
-      });
-    }
-  },
-  realtime: {
-    autoSubscribe: false // Turn off by default to save resources
-  }
-});
-
-// Export for use in other files
-export { supabase };
 
 // Auth helper functions
 export const getCurrentUser = async () => {

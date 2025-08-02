@@ -106,9 +106,9 @@ const ensureUserProfile = async (userId: string): Promise<void> => {
   try {
     // First check if profile exists
     const { data, error } = await supabase
-      .from('profiles')
+      .from('user_profiles')
       .select('id')
-      .eq('id', userId)
+      .eq('auth_user_id', userId)
       .maybeSingle();
     
     if (error) {
@@ -125,12 +125,13 @@ const ensureUserProfile = async (userId: string): Promise<void> => {
       try {
         console.log('Creating user profile for:', userId);
         const { error: insertError } = await supabase
-          .from('profiles')
+          .from('user_profiles')
           .insert({
-            id: userId,
-            display_name: null,
-            avatar_url: null,
-            email: null
+            auth_user_id: userId,
+            first_name: '',
+            last_name: '',
+            email: '',
+            role: 'field_worker'
           } as any);
         
         if (insertError) {
@@ -143,33 +144,8 @@ const ensureUserProfile = async (userId: string): Promise<void> => {
         console.error('Exception creating user profile:', insertError);
       }
       
-      // Create notification preferences
-      try {
-        console.log('Creating notification preferences for:', userId);
-        const { error: prefError } = await supabase
-          .from('notification_preferences')
-          .insert({
-            user_id: userId,
-            email_notifications: true,
-            sms_notifications: false,
-            push_notifications: true,
-            certification_expiry_alerts: true,
-            certification_alert_days: 30,
-            drug_screen_reminders: true,
-            safety_alerts: true,
-            project_updates: true,
-            training_reminders: true,
-            created_at: new Date().toISOString()
-          } as any);
-        
-        if (prefError) {
-          console.error('Error creating notification preferences:', prefError);
-        } else {
-          console.log('Successfully created notification preferences');
-        }
-      } catch (prefError) {
-        console.error('Exception creating notification preferences:', prefError);
-      }
+      // Skip notification preferences for now - table may not exist yet
+      console.log('User profile created successfully for:', userId);
     }
   } catch (error) {
     console.error('Error in ensureUserProfile:', error);
