@@ -46,6 +46,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Set up auth state listener
   useEffect(() => {
+    // Check initial auth state
+    const checkInitialAuth = async () => {
+      try {
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        if (currentUser) {
+          setUser(currentUser);
+          sessionStorage.setItem('supabase-auth-user', JSON.stringify(currentUser));
+        } else {
+          sessionStorage.removeItem('supabase-auth-user');
+          setUser(null);
+        }
+      } catch (error) {
+        sessionStorage.removeItem('supabase-auth-user');
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkInitialAuth();
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
 
