@@ -101,7 +101,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ value, onChange, onSend, disabled
           setRecordingTime(prev => prev + 1);
         }, 1000);
       } catch (error) {
-        console.error('Error accessing microphone:', error);
+        
         alert('Unable to access microphone. Please check your permissions.');
       }
     }
@@ -170,7 +170,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ value, onChange, onSend, disabled
       // Stop camera
       stream.getTracks().forEach(track => track.stop());
     } catch (error) {
-      console.error('Error capturing image:', error);
+      
       alert('Unable to access camera. Please check permissions.');
     }
   };

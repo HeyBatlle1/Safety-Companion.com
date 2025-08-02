@@ -23,7 +23,7 @@ export const getChatResponse = async (message: string): Promise<string> => {
     
     // Validate API key
     if (!API_KEY || API_KEY.length < 10) {
-      console.error('Invalid or missing Gemini API key');
+      
       return "I'm unable to process your request due to a configuration issue. Please contact support.";
     }
     
@@ -71,14 +71,14 @@ If the question isn't related to safety, politely redirect to safety topics. For
               }
             });
           } catch (historyError) {
-            console.warn('Failed to save chat response to history:', historyError);
+            
             // Continue even if saving to history fails
           }
           
           return text;
         } catch (error) {
           lastError = error;
-          console.warn(`Gemini attempt ${attempts + 1} failed:`, error);
+          
           attempts++;
           
           // Wait with exponential backoff before retry
@@ -89,18 +89,18 @@ If the question isn't related to safety, politely redirect to safety topics. For
         }
       }
       
-      console.error('All Gemini model attempts failed:', lastError);
+      
       
       // Provide a fallback response
       return "I'm currently having trouble processing your request. This could be due to high demand or a temporary issue with my language processing capabilities. Could you please try again with a simpler request, or try again in a few moments?";
     } catch (modelError) {
-      console.error('Gemini model error:', modelError);
+      
       
       // Provide a fallback response
       return "I'm currently having trouble processing your request. This could be due to high demand or a temporary issue with my language processing capabilities. Could you please try again with a simpler request, or try again in a few moments?";
     }
   } catch (error) {
-    console.error('Unexpected error in getChatResponse:', error);
+    
     return "I apologize, but I'm experiencing an unexpected technical difficulty. Please try again in a few moments.";
   }
 };
@@ -134,7 +134,7 @@ export const checkGeminiAvailability = async (): Promise<boolean> => {
     const result = await model.generateContent("Hello");
     return result.response.text().length > 0;
   } catch (error) {
-    console.error('Error checking Gemini availability:', error);
+    
     return false;
   }
 };

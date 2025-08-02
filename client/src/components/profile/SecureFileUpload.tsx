@@ -135,7 +135,7 @@ const SecureFileUpload: React.FC<SecureFileUploadProps> = ({
         });
 
       } catch (error) {
-        console.error('Upload error:', error);
+        
         setUploads(prev => prev.map((u, idx) => 
           idx === uploadIndex ? { 
             ...u, 

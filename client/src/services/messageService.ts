@@ -31,7 +31,7 @@ export const saveMessage = async (message: Omit<Message, 'id'>): Promise<Message
       attachments: data.attachments || undefined
     };
   } catch (error) {
-    console.error('Error saving message to Supabase:', error);
+    
     
     // If Supabase fails, create a message with a local ID
     return {
@@ -68,7 +68,7 @@ export const getChatHistory = async (limit = 50): Promise<Message[]> => {
       attachments: msg.attachments || undefined
     }));
   } catch (error) {
-    console.error('Error fetching chat history from Supabase:', error);
+    
     return [];
   }
 };
@@ -91,7 +91,7 @@ export const clearChatHistory = async (): Promise<boolean> => {
     
     return true;
   } catch (error) {
-    console.error('Error clearing chat history from Supabase:', error);
+    
     return false;
   }
 };
@@ -115,7 +115,7 @@ export const getMessageById = async (messageId: string): Promise<Message | null>
       attachments: data.attachments || undefined
     };
   } catch (error) {
-    console.error('Error fetching message by ID:', error);
+    
     return null;
   }
 };
@@ -134,7 +134,7 @@ export const updateMessage = async (messageId: string, updates: Partial<Message>
     if (error) throw error;
     return true;
   } catch (error) {
-    console.error('Error updating message:', error);
+    
     return false;
   }
 };
@@ -150,7 +150,7 @@ export const deleteMessage = async (messageId: string): Promise<boolean> => {
     if (error) throw error;
     return true;
   } catch (error) {
-    console.error('Error deleting message:', error);
+    
     return false;
   }
 };

@@ -55,7 +55,7 @@ const Drawings: React.FC = () => {
       const drawingsData = await getAllDrawings();
       setDrawings(drawingsData);
     } catch (error) {
-      console.error('Error loading drawings:', error);
+      
       showToast('Failed to load drawings', 'error');
     } finally {
       setLoading(false);
@@ -71,7 +71,7 @@ const Drawings: React.FC = () => {
       setVersions(versionsData);
       setAnnotations(annotationsData);
     } catch (error) {
-      console.error('Error loading drawing data:', error);
+      
       showToast('Failed to load drawing data', 'error');
     }
   };
@@ -100,7 +100,7 @@ const Drawings: React.FC = () => {
       setShowUploadModal(false);
       loadDrawings();
     } catch (error) {
-      console.error('Error uploading drawing:', error);
+      
       showToast('Failed to upload drawing', 'error');
     }
   };
@@ -129,7 +129,7 @@ const Drawings: React.FC = () => {
       loadDrawingData(selectedDrawing.id);
       showToast('Annotation added', 'success');
     } catch (error) {
-      console.error('Error adding annotation:', error);
+      
       showToast('Failed to add annotation', 'error');
     }
   };
@@ -171,7 +171,7 @@ const Drawings: React.FC = () => {
       await exportDrawingWithAnnotations(selectedDrawing.id);
       showToast('Drawing exported successfully', 'success');
     } catch (error) {
-      console.error('Error exporting drawing:', error);
+      
       showToast('Failed to export drawing', 'error');
     }
   };
@@ -187,7 +187,7 @@ const Drawings: React.FC = () => {
         showToast('ProCore sync failed', 'error');
       }
     } catch (error) {
-      console.error('Error syncing with ProCore:', error);
+      
       showToast('ProCore sync error', 'error');
     }
   };

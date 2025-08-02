@@ -18,7 +18,7 @@ const TopBar: React.FC<TopBarProps> = ({ onDatabaseStatusChange }) => {
       await signOut();
       setShowUserMenu(false);
     } catch (error) {
-      console.error('Error signing out:', error);
+      
     }
   };
 

@@ -97,7 +97,7 @@ const DatabaseStatusChecker: React.FC<DatabaseStatusCheckerProps> = ({ onStatusC
         }
       }
     } catch (error) {
-      console.error('Error checking database status:', error);
+      
       setConnectionStatus('error');
       setSchemaStatus('unknown');
       setMessage('Error checking database status');

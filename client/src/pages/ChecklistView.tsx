@@ -8,7 +8,7 @@ const ChecklistView: React.FC = () => {
 
   // Validate templateId
   if (!templateId || !checklistData[templateId]) {
-    console.error('Invalid templateId:', templateId);
+    
     return <Navigate to="/checklists" replace />;
   }
 

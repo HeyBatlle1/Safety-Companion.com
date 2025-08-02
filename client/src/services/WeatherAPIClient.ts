@@ -32,7 +32,7 @@ export class WeatherAPIClient {
         alerts: [] // Open-meteo doesn't provide alerts in free tier
       };
     } catch (error) {
-      console.error('Error fetching weather data:', error);
+      
       throw new Error('Failed to fetch weather data');
     }
   }
@@ -58,7 +58,7 @@ export class WeatherAPIClient {
         conditions: this.getConditionText(hourly.weather_code[index])
       }));
     } catch (error) {
-      console.error('Error fetching forecast data:', error);
+      
       throw new Error('Failed to fetch forecast data');
     }
   }

@@ -38,7 +38,7 @@ const Videos = () => {
         setChannelInfo(channelData);
         setWatchedVideoIds(watchedIds);
       } catch (error) {
-        console.error('Error loading video data:', error);
+        
       } finally {
         setLoading(false);
         setStatsLoading(false);

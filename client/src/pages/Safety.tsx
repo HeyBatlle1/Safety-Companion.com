@@ -30,7 +30,7 @@ const Safety = () => {
         const existingReports = await getAllReports();
         setReports(existingReports);
       } catch (error) {
-        console.error('Error initializing Safety page:', error);
+        
         setError('Failed to load safety reports. Using local storage instead.');
         
         // Try to get reports from localStorage as a fallback
@@ -40,7 +40,7 @@ const Safety = () => {
             setReports(JSON.parse(reportsJSON));
           }
         } catch (localError) {
-          console.error('Failed to load from localStorage:', localError);
+          
         }
       } finally {
         setLoading(false);
@@ -85,7 +85,7 @@ const Safety = () => {
 
       return newReport;
     } catch (error) {
-      console.error('Error submitting report:', error);
+      
       setError('Failed to submit report. Please try again.');
       throw error;
     }
@@ -101,7 +101,7 @@ const Safety = () => {
         setError('Could not delete the report. Please try again.');
       }
     } catch (error) {
-      console.error('Error deleting report:', error);
+      
       setError('Failed to delete report. Please try again.');
     }
   };

@@ -18,7 +18,7 @@ export const getAllReports = async (): Promise<SafetyReport[]> => {
       .order('created_at', { ascending: false });
       
     if (error) {
-      console.error('Supabase error:', error.message);
+      
       throw error;
     }
     
@@ -40,7 +40,7 @@ export const getAllReports = async (): Promise<SafetyReport[]> => {
       lastUpdated: report.updated_at || undefined
     }));
   } catch (error) {
-    console.error('Error retrieving safety reports:', error);
+    
     
     // Always return reports from localStorage if Supabase fails
     return getLocalReports();
@@ -58,7 +58,7 @@ const getLocalReports = (): SafetyReport[] => {
     }
     return JSON.parse(reportsJSON);
   } catch (localError) {
-    console.error('Error accessing localStorage:', localError);
+    
     return [];
   }
 };
@@ -73,7 +73,7 @@ export const getReportById = async (id: string): Promise<SafetyReport | undefine
       .single();
       
     if (error) {
-      console.error('Supabase error:', error.message);
+      
       throw error;
     }
     
@@ -91,14 +91,14 @@ export const getReportById = async (id: string): Promise<SafetyReport | undefine
       lastUpdated: data.updated_at || undefined
     };
   } catch (error) {
-    console.error('Error retrieving report by ID:', error);
+    
     
     // Fallback to localStorage if Supabase fails
     try {
       const reports = getLocalReports();
       return reports.find(report => report.id === id);
     } catch (localError) {
-      console.error('Error retrieving from localStorage:', localError);
+      
       return undefined;
     }
   }
@@ -129,7 +129,7 @@ export const addReport = async (reportData: Omit<SafetyReport, 'id' | 'submitted
       .single();
       
     if (error) {
-      console.error('Supabase insertion error:', error.message);
+      
       throw error;
     }
     
@@ -144,7 +144,7 @@ export const addReport = async (reportData: Omit<SafetyReport, 'id' | 'submitted
       location: data.location || undefined
     };
   } catch (error) {
-    console.error('Error adding safety report to Supabase:', error);
+    
     
     // Fallback to localStorage
     return addLocalReport(reportData);
@@ -195,7 +195,7 @@ export const updateReport = async (id: string, updatedData: Partial<SafetyReport
       .single();
       
     if (error) {
-      console.error('Supabase update error:', error.message);
+      
       throw error;
     }
     
@@ -211,7 +211,7 @@ export const updateReport = async (id: string, updatedData: Partial<SafetyReport
       lastUpdated: data.updated_at || undefined
     };
   } catch (error) {
-    console.error('Error updating safety report in Supabase:', error);
+    
     
     // Fallback to localStorage if Supabase fails
     const reports = getLocalReports();
@@ -244,7 +244,7 @@ export const deleteReport = async (id: string): Promise<boolean> => {
       .eq('id', id);
       
     if (error) {
-      console.error('Supabase deletion error:', error.message);
+      
       throw error;
     }
     
@@ -253,7 +253,7 @@ export const deleteReport = async (id: string): Promise<boolean> => {
     
     return true;
   } catch (error) {
-    console.error('Error deleting safety report from Supabase:', error);
+    
     
     // Fallback to localStorage if Supabase fails
     return removeLocalReport(id);
@@ -274,7 +274,7 @@ const removeLocalReport = (id: string): boolean => {
     localStorage.setItem('safety-companion-reports', JSON.stringify(filteredReports));
     return true;
   } catch (localError) {
-    console.error('Error deleting report from localStorage:', localError);
+    
     return false;
   }
 };

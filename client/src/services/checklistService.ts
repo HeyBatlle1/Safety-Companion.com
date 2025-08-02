@@ -47,7 +47,7 @@ export const saveChecklistResponse = async (
       timestamp: data.created_at
     };
   } catch (error) {
-    console.error('Error saving checklist to Supabase:', error);
+    
     throw error;
   }
 };
@@ -78,7 +78,7 @@ export const getChecklistResponseHistory = async (templateId: string): Promise<C
       timestamp: item.created_at
     }));
   } catch (error) {
-    console.error('Error getting checklist history:', error);
+    
     throw error;
   }
 };

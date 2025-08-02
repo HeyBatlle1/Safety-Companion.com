@@ -193,7 +193,7 @@ const CityMap: React.FC = () => {
       const locations = await getMapLocations();
       setSavedLocations(locations);
     } catch (error) {
-      console.error('Error loading saved locations:', error);
+      
     }
   };
 
@@ -225,7 +225,7 @@ const CityMap: React.FC = () => {
         }
       }
     } catch (error) {
-      console.error('Error saving location:', error);
+      
       showToast('Failed to save location', 'error');
     }
   };
@@ -291,7 +291,7 @@ const CityMap: React.FC = () => {
       }
     } catch (error) {
       setSearchError('Could not calculate a route to this destination');
-      console.error('Route calculation error:', error);
+      
     } finally {
       setIsCalculating(false);
     }
@@ -354,7 +354,7 @@ const CityMap: React.FC = () => {
           showToast('Location found', 'success');
         },
         (error) => {
-          console.error('Geolocation error:', error);
+          
           showToast('Unable to get your location', 'error');
         }
       );
@@ -387,7 +387,7 @@ const CityMap: React.FC = () => {
       
       showToast(`Found ${places.length} nearby ${type}s`, 'success');
     } catch (error) {
-      console.error('Nearby search error:', error);
+      
       showToast('Failed to search nearby places', 'error');
     }
   };

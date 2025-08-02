@@ -51,7 +51,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ onSubmit, onSuccess }) => {
         setSuccess(false);
       }, 3000);
     } catch (error) {
-      console.error('Error submitting report:', error);
+      
       setError(error instanceof Error ? error.message : 'Failed to submit report. Please try again.');
     } finally {
       setLoading(false);
@@ -106,7 +106,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ onSubmit, onSuccess }) => {
       stream.getTracks().forEach(track => track.stop());
       
     } catch (error) {
-      console.error('Error capturing image:', error);
+      
       alert('Unable to access camera. Please check your permissions.');
     }
   };
@@ -119,7 +119,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ onSubmit, onSuccess }) => {
           setLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
         },
         (error) => {
-          console.error('Error getting location:', error);
+          
           setError('Unable to detect your location. Please enter it manually.');
         }
       );

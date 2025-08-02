@@ -45,7 +45,7 @@ const Signup: React.FC = () => {
       showToast('Account created! Please check your email to verify your account.', 'success');
       navigate('/login');
     } catch (error: any) {
-      console.error('Signup error:', error);
+      
       showToast(error.message || 'Failed to create account', 'error');
     } finally {
       setLoading(false);

@@ -19,7 +19,7 @@ export class SafetyConnector {
 
   private validateConfiguration(): boolean {
     if (!API_KEY || API_KEY.length < 10) {
-      console.error('Invalid or missing Gemini API key');
+      
       return false;
     }
     return true;
@@ -28,7 +28,7 @@ export class SafetyConnector {
   async generateContent(prompt: string): Promise<{ response: { text: () => string } }> {
     try {
       if (!this.initialized) {
-        console.error('SafetyConnector not properly initialized due to missing API key');
+        
         return this.getFallbackResponse('Configuration error: API service unavailable.');
       }
       
@@ -70,7 +70,7 @@ export class SafetyConnector {
                 }
               });
             } catch (historyError) {
-              console.warn('Failed to save safety assessment to history:', historyError);
+              
               // Continue even if history saving fails
             }
           }
@@ -82,7 +82,7 @@ export class SafetyConnector {
           };
         } catch (error) {
           lastError = error;
-          console.warn(`Attempt ${attempts + 1} failed:`, error);
+          
           attempts++;
           
           // Wait before retry with exponential backoff
@@ -93,10 +93,10 @@ export class SafetyConnector {
         }
       }
       
-      console.error('All attempts to generate content failed:', lastError);
+      
       return this.getFallbackResponse('Unable to generate safety assessment after multiple attempts.');
     } catch (error) {
-      console.error('Unexpected error generating content:', error);
+      
       return this.getFallbackResponse('An unexpected error occurred while analyzing safety data.');
     }
   }

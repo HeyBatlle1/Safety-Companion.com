@@ -42,7 +42,7 @@ export const saveAnalysisToHistory = async (
           .select();
           
         if (error) {
-          console.error('Supabase error saving history:', error);
+          
           // Fall back to localStorage below
         } else if (data && data.length > 0) {
           return {
@@ -56,7 +56,7 @@ export const saveAnalysisToHistory = async (
           };
         }
       } catch (error) {
-        console.error('Error saving analysis to Supabase:', error);
+        
         // Fall back to localStorage
       }
     }
@@ -79,7 +79,7 @@ export const saveAnalysisToHistory = async (
     
     return localRecord;
   } catch (error) {
-    console.error('Error saving analysis to history:', error);
+    
     // Return the original record instead of throwing to prevent breaking the app flow
     return {
       id: `local_fallback_${Date.now()}`,
@@ -100,7 +100,7 @@ const getLocalAnalysisHistory = (): AnalysisRecord[] => {
     const historyJson = localStorage.getItem('analysis_history');
     return historyJson ? JSON.parse(historyJson) : [];
   } catch (error) {
-    console.error('Error reading analysis history from localStorage:', error);
+    
     return [];
   }
 };
@@ -131,7 +131,7 @@ export const getAnalysisHistory = async (
         const { data, error } = await query;
         
         if (error) {
-          console.error('Supabase error fetching history:', error);
+          
           // Fall back to localStorage below
         } else if (data) {
           return data.map(item => ({
@@ -145,7 +145,7 @@ export const getAnalysisHistory = async (
           }));
         }
       } catch (error) {
-        console.error('Error fetching analysis history from Supabase:', error);
+        
         // Fall back to localStorage
       }
     }
@@ -161,7 +161,7 @@ export const getAnalysisHistory = async (
     // Apply limit
     return records.slice(0, limit);
   } catch (error) {
-    console.error('Error getting analysis history:', error);
+    
     return [];
   }
 };
@@ -182,7 +182,7 @@ export const deleteAnalysisRecord = async (id: string): Promise<boolean> => {
           .eq('user_id', user.id);
           
         if (error) {
-          console.error('Supabase error deleting record:', error);
+          
           // Fall back to localStorage below
         } else {
           // Also remove from localStorage if exists
@@ -190,7 +190,7 @@ export const deleteAnalysisRecord = async (id: string): Promise<boolean> => {
           return true;
         }
       } catch (error) {
-        console.error('Error deleting analysis record from Supabase:', error);
+        
         // Fall back to localStorage
       }
     }
@@ -198,7 +198,7 @@ export const deleteAnalysisRecord = async (id: string): Promise<boolean> => {
     // Delete from localStorage
     return removeLocalRecord(id);
   } catch (error) {
-    console.error('Error deleting analysis record:', error);
+    
     return false;
   }
 };
@@ -216,7 +216,7 @@ const removeLocalRecord = (id: string): boolean => {
     localStorage.setItem('analysis_history', JSON.stringify(filteredRecords));
     return true;
   } catch (error) {
-    console.error('Error removing record from localStorage:', error);
+    
     return false;
   }
 };
@@ -242,11 +242,11 @@ export const clearAnalysisHistory = async (type?: AnalysisRecord['type']): Promi
         const { error } = await query;
         
         if (error) {
-          console.error('Supabase error clearing history:', error);
+          
           // Continue to clear localStorage even if Supabase fails
         }
       } catch (error) {
-        console.error('Error clearing analysis history from Supabase:', error);
+        
         // Continue to clear localStorage even if Supabase fails
       }
     }
@@ -262,7 +262,7 @@ export const clearAnalysisHistory = async (type?: AnalysisRecord['type']): Promi
     
     return true;
   } catch (error) {
-    console.error('Error clearing analysis history:', error);
+    
     return false;
   }
 };

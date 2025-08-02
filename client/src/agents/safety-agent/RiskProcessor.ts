@@ -70,7 +70,7 @@ Focus exclusively on workplace safety considerations, particularly those relevan
       const jsonStr = jsonMatch ? jsonMatch[1] : response;
       return JSON.parse(jsonStr);
     } catch (error) {
-      console.error('Error parsing AI response:', error);
+      
       throw new Error('Failed to parse risk assessment response');
     }
   }
@@ -112,7 +112,7 @@ Focus on glass handling, fall protection, and public safety considerations.`;
       const jsonStr = jsonMatch ? jsonMatch[1] : response;
       return JSON.parse(jsonStr);
     } catch (error) {
-      console.error('Error parsing safety report response:', error);
+      
       throw new Error('Failed to parse safety report response');
     }
   }

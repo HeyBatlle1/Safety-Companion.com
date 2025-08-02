@@ -34,7 +34,7 @@ export class SafetyAgent {
       try {
         response = await this.safetyConnector.generateContent(prompt);
       } catch (aiError) {
-        console.error('AI generation error:', aiError);
+        
         return this.getFallbackAssessment();
       }
       
@@ -43,7 +43,7 @@ export class SafetyAgent {
       try {
         initialAssessment = this.riskProcessor.parseResponse(response.response.text());
       } catch (parseError) {
-        console.error('Error parsing AI response:', parseError);
+        
         return this.getFallbackAssessment();
       }
 
@@ -61,7 +61,7 @@ export class SafetyAgent {
           }
         });
       } catch (historyError) {
-        console.warn('Failed to save risk assessment to history:', historyError);
+        
       }
 
       // Enhance with multi-agent assessment
@@ -71,12 +71,12 @@ export class SafetyAgent {
       try {
         await this.dbHandler.saveRiskAssessment(siteId, enhancedAssessment);
       } catch (dbError) {
-        console.warn('Failed to save assessment to database:', dbError);
+        
       }
       
       return enhancedAssessment;
     } catch (error) {
-      console.error('Error generating risk assessment:', error);
+      
       return this.getFallbackAssessment();
     }
   }
@@ -91,7 +91,7 @@ export class SafetyAgent {
       });
 
       if (multiAgentResult.error) {
-        console.warn('Multi-agent assessment failed, using initial assessment:', multiAgentResult.message);
+        
         return initialAssessment;
       }
 
@@ -118,7 +118,7 @@ export class SafetyAgent {
         ]
       };
     } catch (error) {
-      console.warn('Error getting enhanced assessment, using initial assessment:', error);
+      
       return initialAssessment;
     }
   }
@@ -169,7 +169,7 @@ export class SafetyAgent {
     try {
       return await this.dbHandler.getRecentAssessments(siteId);
     } catch (error) {
-      console.error('Error getting recent assessments:', error);
+      
       return [];
     }
   }
@@ -182,7 +182,7 @@ export class SafetyAgent {
       try {
         response = await this.safetyConnector.generateContent(prompt);
       } catch (aiError) {
-        console.error('AI analysis error:', aiError);
+        
         return this.getFallbackReportAnalysis(report);
       }
       
@@ -200,17 +200,17 @@ export class SafetyAgent {
           }
         });
       } catch (historyError) {
-        console.warn('Failed to save safety report analysis to history:', historyError);
+        
       }
       
       try {
         return this.riskProcessor.parseSafetyReportResponse(response.response.text());
       } catch (parseError) {
-        console.error('Error parsing safety report response:', parseError);
+        
         return this.getFallbackReportAnalysis(report);
       }
     } catch (error) {
-      console.error('Error analyzing safety report:', error);
+      
       return this.getFallbackReportAnalysis(report);
     }
   }

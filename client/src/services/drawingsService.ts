@@ -137,13 +137,13 @@ export const getAllDrawings = async (projectId?: string): Promise<Drawing[]> => 
     const { data, error } = await query;
     
     if (error) {
-      console.error('Error fetching drawings:', error);
+      
       return mockDrawings;
     }
     
     return data || mockDrawings;
   } catch (error) {
-    console.error('Error in getAllDrawings:', error);
+    
     return mockDrawings;
   }
 };
@@ -157,13 +157,13 @@ export const getDrawingById = async (drawingId: string): Promise<Drawing | null>
       .single();
 
     if (error) {
-      console.error('Error fetching drawing:', error);
+      
       return mockDrawings.find(d => d.id === drawingId) || null;
     }
 
     return data;
   } catch (error) {
-    console.error('Error in getDrawingById:', error);
+    
     return mockDrawings.find(d => d.id === drawingId) || null;
   }
 };
@@ -193,13 +193,13 @@ export const uploadDrawing = async (
       .single();
 
     if (error) {
-      console.error('Error uploading drawing:', error);
+      
       throw error;
     }
 
     return data;
   } catch (error) {
-    console.error('Error in uploadDrawing:', error);
+    
     throw error;
   }
 };
@@ -220,13 +220,13 @@ export const updateDrawing = async (
       .single();
 
     if (error) {
-      console.error('Error updating drawing:', error);
+      
       throw error;
     }
 
     return data;
   } catch (error) {
-    console.error('Error in updateDrawing:', error);
+    
     throw error;
   }
 };
@@ -241,13 +241,13 @@ export const getDrawingVersions = async (drawingId: string): Promise<DrawingVers
       .order('version_number', { ascending: false });
 
     if (error) {
-      console.error('Error fetching versions:', error);
+      
       return mockVersions.filter(v => v.drawing_id === drawingId);
     }
 
     return data || mockVersions.filter(v => v.drawing_id === drawingId);
   } catch (error) {
-    console.error('Error in getDrawingVersions:', error);
+    
     return mockVersions.filter(v => v.drawing_id === drawingId);
   }
 };
@@ -288,13 +288,13 @@ export const createNewVersion = async (
       .single();
 
     if (error) {
-      console.error('Error creating version:', error);
+      
       throw error;
     }
 
     return data;
   } catch (error) {
-    console.error('Error in createNewVersion:', error);
+    
     throw error;
   }
 };
@@ -314,13 +314,13 @@ export const getDrawingAnnotations = async (drawingId: string, versionId?: strin
     const { data, error } = await query.order('created_at', { ascending: true });
 
     if (error) {
-      console.error('Error fetching annotations:', error);
+      
       return mockAnnotations.filter(a => a.drawing_id === drawingId);
     }
 
     return data || mockAnnotations.filter(a => a.drawing_id === drawingId);
   } catch (error) {
-    console.error('Error in getDrawingAnnotations:', error);
+    
     return mockAnnotations.filter(a => a.drawing_id === drawingId);
   }
 };
@@ -344,13 +344,13 @@ export const addAnnotation = async (
       .single();
 
     if (error) {
-      console.error('Error adding annotation:', error);
+      
       throw error;
     }
 
     return data;
   } catch (error) {
-    console.error('Error in addAnnotation:', error);
+    
     throw error;
   }
 };
@@ -371,13 +371,13 @@ export const updateAnnotation = async (
       .single();
 
     if (error) {
-      console.error('Error updating annotation:', error);
+      
       throw error;
     }
 
     return data;
   } catch (error) {
-    console.error('Error in updateAnnotation:', error);
+    
     throw error;
   }
 };
@@ -403,7 +403,7 @@ export const trackDrawingActivity = async (
       .from('drawing_collaborations')
       .insert([activityData]);
   } catch (error) {
-    console.error('Error tracking activity:', error);
+    
   }
 };
 
@@ -420,13 +420,13 @@ export const getDrawingActivity = async (drawingId: string): Promise<DrawingColl
       .limit(20);
 
     if (error) {
-      console.error('Error fetching activity:', error);
+      
       return [];
     }
 
     return data || [];
   } catch (error) {
-    console.error('Error in getDrawingActivity:', error);
+    
     return [];
   }
 };
@@ -446,13 +446,13 @@ export const getDrawingFolders = async (projectId?: string): Promise<DrawingFold
     const { data, error } = await query;
 
     if (error) {
-      console.error('Error fetching folders:', error);
+      
       return [];
     }
 
     return data || [];
   } catch (error) {
-    console.error('Error in getDrawingFolders:', error);
+    
     return [];
   }
 };
@@ -475,7 +475,7 @@ export const syncWithProCore = async (drawingId: string): Promise<boolean> => {
 
     return true;
   } catch (error) {
-    console.error('Error syncing with ProCore:', error);
+    
     return false;
   }
 };
@@ -489,13 +489,13 @@ export const getProCoreSyncStatus = async (drawingId: string): Promise<ProCoreSy
       .single();
 
     if (error) {
-      console.error('Error fetching sync status:', error);
+      
       return null;
     }
 
     return data;
   } catch (error) {
-    console.error('Error in getProCoreSyncStatus:', error);
+    
     return null;
   }
 };

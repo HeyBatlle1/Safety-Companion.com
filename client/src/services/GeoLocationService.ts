@@ -46,7 +46,7 @@ export class GeoLocationService {
         notes: 'Active construction zone'
       };
     } catch (error) {
-      console.error('Error fetching site information:', error);
+      
       throw new Error('Failed to fetch site information');
     }
   }
@@ -64,7 +64,7 @@ export class GeoLocationService {
       const { lat, lng } = response.results[0].geometry.location;
       return { lat: lat(), lng: lng() };
     } catch (error) {
-      console.error('Geocoding error:', error);
+      
       throw new Error('Failed to geocode address');
     }
   }
@@ -83,7 +83,7 @@ export class GeoLocationService {
       
       return response.results[0].formatted_address;
     } catch (error) {
-      console.error('Reverse geocoding error:', error);
+      
       throw new Error('Failed to reverse geocode location');
     }
   }

@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { 
@@ -16,6 +16,9 @@ import { z } from "zod";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import { pool } from "./db";
+import { body, validationResult } from "express-validator";
+import { logError } from "./utils/logger";
+// TypeScript session types are declared in server/types/session.d.ts
 
 // Session middleware for authentication
 const PgSession = connectPgSimple(session);
@@ -27,7 +30,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       pool: pool,
       tableName: 'user_sessions'
     }),
-    secret: process.env.SESSION_SECRET || 'development-secret-change-in-production',
+    secret: process.env.SESSION_SECRET || (process.env.NODE_ENV === 'production' 
+      ? (() => { throw new Error('SESSION_SECRET environment variable is required in production'); })()
+      : 'development-secret-change-in-production'),
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -37,18 +42,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  // Authentication middleware
-  const requireAuth = (req: any, res: any, next: any) => {
+  // Authentication middleware with proper typing
+  const requireAuth = (req: Request, res: Response, next: NextFunction) => {
     if (!req.session.userId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     next();
   };
 
+  // Validation error handler
+  const handleValidationErrors = (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: 'Validation error', details: errors.array() });
+    }
+    next();
+  };
+
   // ==================== AUTHENTICATION ROUTES ====================
   
-  // Sign up
-  app.post("/api/auth/signup", async (req, res) => {
+  // Sign up with input validation
+  app.post("/api/auth/signup", 
+    [
+      body('email').isEmail().normalizeEmail(),
+      body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
+      body('name').trim().notEmpty().escape(),
+      body('role').isIn(['field_worker', 'supervisor', 'project_manager', 'safety_manager', 'admin'])
+    ],
+    handleValidationErrors,
+    async (req, res) => {
     try {
       const userData = insertUserSchema.parse(req.body);
       const user = await storage.createUser(userData);
@@ -59,16 +81,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.status(201).json({ user: userWithoutPassword });
     } catch (error) {
-      console.error('Signup error:', error);
+      logError(error, 'signup');
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: 'Validation error', details: error.errors });
       }
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(500).json({ error: 'An error occurred during signup' });
     }
   });
 
-  // Sign in
-  app.post("/api/auth/signin", async (req, res) => {
+  // Sign in with input validation
+  app.post("/api/auth/signin", 
+    [
+      body('email').isEmail().normalizeEmail(),
+      body('password').notEmpty()
+    ],
+    handleValidationErrors,
+    async (req, res) => {
     try {
       const { email, password } = req.body;
       if (!email || !password) {
@@ -85,7 +113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ user: userWithoutPassword });
     } catch (error) {
-      console.error('Signin error:', error);
+      logError(error, 'auth');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -111,7 +139,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { password, ...userWithoutPassword } = user;
       res.json({ user: userWithoutPassword });
     } catch (error) {
-      console.error('Get user error:', error);
+      logError(error, 'auth');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -130,7 +158,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { password, ...userWithoutPassword } = user;
       res.json({ user: userWithoutPassword });
     } catch (error) {
-      console.error('Update profile error:', error);
+      logError(error, 'auth');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -143,7 +171,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const preferences = await storage.getUserNotificationPreferences(req.session.userId);
       res.json({ preferences });
     } catch (error) {
-      console.error('Get notification preferences error:', error);
+      logError(error, 'auth');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -155,7 +183,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const preferences = await storage.updateNotificationPreferences(req.session.userId, updates);
       res.json({ preferences });
     } catch (error) {
-      console.error('Update notification preferences error:', error);
+      logError(error, 'auth');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -169,13 +197,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const history = await storage.getAnalysisHistory(req.session.userId, limit);
       res.json({ history });
     } catch (error) {
-      console.error('Get analysis history error:', error);
+      logError(error, 'auth');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
 
-  // Create analysis history entry
-  app.post("/api/analysis-history", requireAuth, async (req, res) => {
+  // Create analysis history entry with validation
+  app.post("/api/analysis-history", 
+    requireAuth,
+    [
+      body('checklistType').trim().notEmpty().escape(),
+      body('responses').isObject(),
+      body('riskLevel').isIn(['low', 'moderate', 'high', 'critical']),
+      body('siteLocation').optional().trim().escape()
+    ],
+    handleValidationErrors,
+    async (req, res) => {
     try {
       const analysisData = insertAnalysisHistorySchema.parse({
         ...req.body,
@@ -184,7 +221,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const analysis = await storage.createAnalysisHistory(analysisData);
       res.status(201).json({ analysis });
     } catch (error) {
-      console.error('Create analysis history error:', error);
+      logError(error, 'auth');
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: 'Validation error', details: error.errors });
       }
@@ -201,7 +238,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const assessments = await storage.getRiskAssessments(siteId);
       res.json({ assessments });
     } catch (error) {
-      console.error('Get risk assessments error:', error);
+      logError(error, 'auth');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -213,7 +250,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const assessment = await storage.createRiskAssessment(assessmentData);
       res.status(201).json({ assessment });
     } catch (error) {
-      console.error('Create risk assessment error:', error);
+      logError(error, 'auth');
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: 'Validation error', details: error.errors });
       }
@@ -230,7 +267,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const reports = await storage.getSafetyReports(userId);
       res.json({ reports });
     } catch (error) {
-      console.error('Get safety reports error:', error);
+      logError(error, 'auth');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -245,7 +282,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const report = await storage.createSafetyReport(reportData);
       res.status(201).json({ report });
     } catch (error) {
-      console.error('Create safety report error:', error);
+      logError(error, 'auth');
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: 'Validation error', details: error.errors });
       }
@@ -264,7 +301,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json({ report });
     } catch (error) {
-      console.error('Update safety report error:', error);
+      logError(error, 'auth');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -278,7 +315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const messages = await storage.getChatMessages(req.session.userId, limit);
       res.json({ messages });
     } catch (error) {
-      console.error('Get chat messages error:', error);
+      logError(error, 'auth');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -293,7 +330,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const message = await storage.createChatMessage(messageData);
       res.status(201).json({ message });
     } catch (error) {
-      console.error('Create chat message error:', error);
+      logError(error, 'auth');
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: 'Validation error', details: error.errors });
       }
@@ -309,7 +346,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const watchedVideos = await storage.getWatchedVideos(req.session.userId);
       res.json({ watchedVideos });
     } catch (error) {
-      console.error('Get watched videos error:', error);
+      logError(error, 'auth');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -325,7 +362,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const watchedVideo = await storage.markVideoWatched(req.session.userId, videoId);
       res.status(201).json({ watchedVideo });
     } catch (error) {
-      console.error('Mark video watched error:', error);
+      logError(error, 'auth');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -338,7 +375,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const companies = await storage.getCompanies();
       res.json({ companies });
     } catch (error) {
-      console.error('Get companies error:', error);
+      logError(error, 'auth');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -350,7 +387,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const company = await storage.createCompany(companyData);
       res.status(201).json({ company });
     } catch (error) {
-      console.error('Create company error:', error);
+      logError(error, 'auth');
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: 'Validation error', details: error.errors });
       }
@@ -366,7 +403,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const projects = await storage.getProjects();
       res.json({ projects });
     } catch (error) {
-      console.error('Get projects error:', error);
+      logError(error, 'auth');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -377,7 +414,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const projects = await storage.getUserProjects(req.session.userId);
       res.json({ projects });
     } catch (error) {
-      console.error('Get user projects error:', error);
+      logError(error, 'auth');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -389,7 +426,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const project = await storage.createProject(projectData);
       res.status(201).json({ project });
     } catch (error) {
-      console.error('Create project error:', error);
+      logError(error, 'auth');
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: 'Validation error', details: error.errors });
       }
@@ -420,7 +457,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       for (const table of requiredTables) {
         try {
-          await db.execute(`SELECT 1 FROM ${table} LIMIT 1`);
+          await pool.query(`SELECT 1 FROM ${table} LIMIT 1`);
         } catch (error) {
           results.missingTables.push(table);
           if (fix) {
@@ -443,8 +480,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       results.message = message;
       res.json(results);
     } catch (error) {
-      console.error('Database schema fix error:', error);
-      res.status(500).json({ error: 'Internal server error', details: error.message });
+      logError(error, 'auth');
+      res.status(500).json({ error: 'Database schema check failed' });
     }
   });
 

@@ -30,7 +30,7 @@ export class TaskScheduleManager {
 
       return data.map(this.mapTaskFromDB);
     } catch (error) {
-      console.error('Error fetching scheduled tasks:', error);
+      
       
       // Return mock data for development
       return this.getMockTasks(siteId, date);

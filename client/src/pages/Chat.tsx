@@ -55,7 +55,7 @@ const Chat = () => {
         }
         setIsHistoryLoaded(true);
       } catch (error) {
-        console.error('Error loading chat history:', error);
+        
         // Set default welcome message on error
         setMessages([{
           id: '1',
@@ -121,7 +121,7 @@ const Chat = () => {
     try {
       await saveMessage(userMessage);
     } catch (error) {
-      console.error('Error saving message:', error);
+      
       // Continue even if saving fails
     }
 
@@ -158,20 +158,20 @@ const Chat = () => {
           }
         });
       } catch (historyError) {
-        console.warn('Failed to save chat response to history:', historyError);
+        
       }
 
       // Save bot message to Supabase
       try {
         await saveMessage(botMessage);
       } catch (error) {
-        console.error('Error saving bot message:', error);
+        
         // Continue even if saving fails
       }
 
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
-      console.error('Chat error:', error);
+      
       setError(error instanceof Error ? error.message : 'Unknown error occurred');
       
       const errorMessage: Message = {
@@ -261,7 +261,7 @@ const Chat = () => {
           setRecordingTime(prev => prev + 1);
         }, 1000);
       } catch (error) {
-        console.error('Error accessing microphone:', error);
+        
         showToast('Unable to access microphone. Please check your permissions.', 'error');
       }
     }
@@ -333,7 +333,7 @@ const Chat = () => {
       
       showToast('Image captured successfully', 'success');
     } catch (error) {
-      console.error('Error capturing image:', error);
+      
       showToast('Unable to access camera. Please check permissions.', 'error');
     }
   };
@@ -350,7 +350,7 @@ const Chat = () => {
         }]);
         showToast('Chat history cleared successfully', 'success');
       } catch (error) {
-        console.error('Error clearing chat history:', error);
+        
         showToast('Failed to clear chat history', 'error');
       }
     }
@@ -470,7 +470,7 @@ const Chat = () => {
                         title: 'Safety Companion Chat',
                         text: 'Check out my safety conversation',
                         url: window.location.href
-                      }).catch(err => console.error('Error sharing:', err));
+                      }).catch(err => {});
                     } else {
                       showToast('Sharing not supported on this device', 'warning');
                     }

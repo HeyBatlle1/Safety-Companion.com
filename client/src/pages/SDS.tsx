@@ -60,7 +60,7 @@ const SDS = () => {
       };
       setMessages(prev => [...prev, botMessage]);
     } catch (error) {
-      console.error('SDS chat error:', error);
+      
       setError(error instanceof Error ? error.message : 'Unknown error occurred');
       
       const errorMessage: Message = {

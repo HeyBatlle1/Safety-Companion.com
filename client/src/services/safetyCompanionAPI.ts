@@ -31,7 +31,7 @@ interface SafetyAnalysis {
 }
 
 class SafetyCompanionAPIService {
-  private baseURL = 'https://safety-companion.up.railway.app';
+  private baseURL = import.meta.env.VITE_SAFETY_COMPANION_API_URL || 'https://safety-companion.up.railway.app';
 
   // Map checklist context to NAICS codes
   private getNAICSCode(checklistType: string, workType?: string): string {
@@ -70,7 +70,7 @@ class SafetyCompanionAPIService {
 
       return await response.json();
     } catch (error) {
-      console.error('Failed to fetch risk profile:', error);
+      // Silently fail and use local analysis
       return null;
     }
   }
@@ -85,7 +85,7 @@ class SafetyCompanionAPIService {
         return this.localIntelligentAnalysis(checklistData);
       }
     } catch (error) {
-      console.error('Analysis error:', error);
+      // Fallback to local analysis on error
       return this.localIntelligentAnalysis(checklistData);
     }
   }

@@ -25,7 +25,7 @@ export const useMSDS = (searchTerm: string) => {
       setData(enhancedCompounds);
     } catch (err) {
       setError('Failed to fetch chemical data');
-      console.error('MSDS search error:', err);
+      
     } finally {
       setLoading(false);
     }

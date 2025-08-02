@@ -48,16 +48,16 @@ export function log(level: LogLevel, message: string, context?: Record<string, a
 
   switch (level) {
     case LogLevel.ERROR:
-      console.error(logEntry);
+      
       break;
     case LogLevel.WARN:
-      console.warn(logEntry);
+      
       break;
     case LogLevel.INFO:
       console.info(logEntry);
       break;
     case LogLevel.DEBUG:
-      console.debug(logEntry);
+      
       break;
   }
   

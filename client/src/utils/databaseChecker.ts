@@ -42,20 +42,20 @@ export async function checkDatabaseSchema(): Promise<{
         tableError = schemaResult.error;
       }
     } catch (error) {
-      console.error('Error querying tables:', error);
+      
       // Try alternate approach for checking tables
       try {
         const result = await supabase.rpc('get_tables');
         tableData = result.data?.map((t: string) => ({ table_name: t }));
         tableError = result.error;
       } catch (rpcError) {
-        console.error('Error with RPC get_tables:', rpcError);
+        
         tableError = rpcError;
       }
     }
     
     if (tableError) {
-      console.error('Error checking tables:', tableError);
+      
       return {
         success: false,
         missingTables: requiredTables,
@@ -91,7 +91,7 @@ export async function checkDatabaseSchema(): Promise<{
           .eq('table_name', table);
           
         if (columnError) {
-          console.error(`Error checking columns for ${table}:`, columnError);
+          
           continue;
         }
         
@@ -104,7 +104,7 @@ export async function checkDatabaseSchema(): Promise<{
           }
         }
       } catch (error) {
-        console.error(`Error checking columns for ${table}:`, error);
+        
       }
     }
     
@@ -120,7 +120,7 @@ export async function checkDatabaseSchema(): Promise<{
       message
     };
   } catch (error) {
-    console.error('Error checking database schema:', error);
+    
     return {
       success: false,
       missingTables: [],
@@ -188,7 +188,7 @@ export async function checkDatabaseConnection(): Promise<{
     
     return { connected, authenticated, message };
   } catch (error) {
-    console.error('Error checking database connection:', error);
+    
     return {
       connected: false,
       authenticated: false,

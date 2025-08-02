@@ -125,7 +125,7 @@ const ChecklistForm = () => {
         }
       }));
     } catch (error) {
-      console.error('Error uploading images:', error);
+      
       showToast('Failed to upload images. Please try again.', 'error');
     }
   };
@@ -222,11 +222,11 @@ Format your response professionally with clear sections and actionable insights.
           responses
         );
       } catch (saveError) {
-        console.error('Error saving to database:', saveError);
+        
         showToast('Analysis completed! (Database save pending - check connection)', 'warning');
       }
     } catch (error) {
-      console.error('Error processing checklist:', error);
+      
       setError(error instanceof Error ? error.message : 'Failed to process checklist');
       showToast('Error processing checklist', 'error');
     } finally {
@@ -369,7 +369,7 @@ Format your response professionally with clear sections and actionable insights.
         await navigatorShareFallback();
       }
     } catch (error) {
-      console.error('Error sharing checklist:', error);
+      
       setShareSuccess(false);
       showToast('Failed to share checklist. Data copied to clipboard instead.', 'warning');
     }
@@ -389,7 +389,7 @@ Progress: ${Math.round(calculateProgress())}% complete
       setShareSuccess(true);
       showToast('Checklist data copied to clipboard!', 'success');
     } catch (clipboardError) {
-      console.error('Clipboard fallback failed:', clipboardError);
+      
       setShareSuccess(false);
       throw new Error('Could not share or copy to clipboard.');
     }
@@ -455,7 +455,7 @@ Progress: ${Math.round(calculateProgress())}% complete
       // Stop camera
       stream.getTracks().forEach(track => track.stop());
     } catch (error) {
-      console.error('Error capturing image:', error);
+      
       showToast('Unable to access camera. Please check permissions.', 'error');
     }
   };

@@ -48,7 +48,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, isWatched, onWatchStatusCh
       }
     } catch (err) {
       setError("Error updating watch status");
-      console.error("Error toggling watch status:", err);
+      
     } finally {
       setIsUpdating(false);
     }

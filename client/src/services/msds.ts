@@ -23,7 +23,7 @@ export const enhanceCompoundData = async (compound: PubChemCompound): Promise<Pu
       disposal: [...new Set([...compound.disposal, ...extractSection(aiResponse, 'disposal')])]
     };
   } catch (error) {
-    console.error('Error enhancing compound data:', error);
+    
     return compound;
   }
 };

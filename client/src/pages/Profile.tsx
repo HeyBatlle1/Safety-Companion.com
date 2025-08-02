@@ -77,7 +77,7 @@ const Profile: React.FC = () => {
         setEditForm(profileData);
       }
     } catch (error) {
-      console.error('Error loading profile data:', error);
+      
       showToast('Failed to load profile data', 'error');
     } finally {
       setLoading(false);
@@ -88,7 +88,7 @@ const Profile: React.FC = () => {
     try {
       await logout();
     } catch (error) {
-      console.error('Failed to log out:', error);
+      
       showToast('Failed to sign out', 'error');
     }
   };
@@ -102,7 +102,7 @@ const Profile: React.FC = () => {
         showToast('Profile updated successfully', 'success');
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
+      
       showToast('Failed to update profile', 'error');
     }
   };

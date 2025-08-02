@@ -38,7 +38,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isFirst, isLast }) =
         setTimeout(() => setIsCopied(false), 2000);
       })
       .catch(err => {
-        console.error('Failed to copy text: ', err);
+        
         showToast('Failed to copy message', 'error');
       });
   };
@@ -49,7 +49,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isFirst, isLast }) =
         title: 'Safety Companion Chat',
         text: message.text
       }).catch(err => {
-        console.error('Error sharing: ', err);
+        
       });
     } else {
       copyToClipboard();

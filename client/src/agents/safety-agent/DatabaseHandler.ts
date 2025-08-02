@@ -142,7 +142,7 @@ export class DatabaseHandler {
       const recentKeys = existingKeys.slice(-10);
       localStorage.setItem(keysForSiteKey, JSON.stringify(recentKeys));
     } catch (e) {
-      console.error('Failed to save to localStorage:', e);
+      
     }
   }
 
@@ -159,7 +159,7 @@ export class DatabaseHandler {
             const data = JSON.parse(item);
             return data.assessment;
           } catch (e) {
-            console.error(`Error parsing localStorage item for key ${key}:`, e);
+            
             return null;
           }
         })
@@ -170,7 +170,7 @@ export class DatabaseHandler {
           return dateB.getTime() - dateA.getTime();
         });
     } catch (e) {
-      console.error('Failed to retrieve from localStorage:', e);
+      
       return [];
     }
   }
@@ -184,13 +184,13 @@ export class DatabaseHandler {
         .gte('created_at', '2000-01-01');
         
       if (error) {
-        console.error('Error clearing DB assessments:', error);
+        
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error('Error clearing assessments:', error);
+      
       return false;
     }
   }

@@ -53,7 +53,7 @@ const AnalysisHistoryViewer: React.FC<AnalysisHistoryViewerProps> = ({
       const history = await getAnalysisHistory(historyType, limit);
       setRecords(history);
     } catch (error) {
-      console.error('Error loading analysis history:', error);
+      
       showToast('Failed to load analysis history', 'error');
     } finally {
       setLoading(false);
@@ -70,7 +70,7 @@ const AnalysisHistoryViewer: React.FC<AnalysisHistoryViewerProps> = ({
         showToast('Failed to delete record', 'error');
       }
     } catch (error) {
-      console.error('Error deleting record:', error);
+      
       showToast('Error deleting record', 'error');
     }
   };
@@ -92,7 +92,7 @@ const AnalysisHistoryViewer: React.FC<AnalysisHistoryViewerProps> = ({
         showToast('Failed to clear history', 'error');
       }
     } catch (error) {
-      console.error('Error clearing history:', error);
+      
       showToast('Error clearing history', 'error');
     } finally {
       setIsDeleting(false);
@@ -107,7 +107,7 @@ const AnalysisHistoryViewer: React.FC<AnalysisHistoryViewerProps> = ({
         showToast('Copied to clipboard', 'success');
       })
       .catch(err => {
-        console.error('Failed to copy:', err);
+        
         showToast('Failed to copy to clipboard', 'error');
       });
   };

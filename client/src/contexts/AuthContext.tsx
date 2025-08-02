@@ -29,7 +29,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
-    console.log(`[${type.toUpperCase()}] ${message}`);
+    
   };
 
   // Initialize auth state

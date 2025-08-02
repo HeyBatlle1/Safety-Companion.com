@@ -33,7 +33,7 @@ export function useApi<T>(
       setData(result);
     } catch (err) {
       setError(getErrorMessage(err));
-      console.error('API error:', err);
+      
     } finally {
       setLoading(false);
     }
@@ -75,7 +75,7 @@ export function usePaginatedApi<T>(
       setTotal(result.total);
     } catch (err) {
       setError(getErrorMessage(err));
-      console.error('Paginated API error:', err);
+      
     } finally {
       setLoading(false);
     }
@@ -109,7 +109,7 @@ export function useMutation<T, P = any>(
       } catch (err) {
         const errorMsg = getErrorMessage(err);
         setError(errorMsg);
-        console.error('Mutation error:', err);
+        
         return null;
       } finally {
         setLoading(false);

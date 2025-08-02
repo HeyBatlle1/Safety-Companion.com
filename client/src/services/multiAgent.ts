@@ -29,7 +29,7 @@ export async function triggerBoltSafetyAssessment(data: MultiAgentAssessmentData
     
     return response.data;
   } catch (error) {
-    console.error('Error triggering Bolt multi-agent assessment:', error);
+    
     
     return {
       error: true,

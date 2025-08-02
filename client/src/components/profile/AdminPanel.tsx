@@ -48,7 +48,7 @@ const AdminPanel: React.FC = () => {
         setExpiryAlerts(getMockExpiryAlerts());
       }
     } catch (error) {
-      console.error('Error loading admin data:', error);
+      
       showToast('Failed to load admin data', 'error');
     } finally {
       setLoading(false);
@@ -99,7 +99,7 @@ const AdminPanel: React.FC = () => {
       showToast('User role updated successfully', 'success');
       loadData(); // Refresh data
     } catch (error) {
-      console.error('Error updating user role:', error);
+      
       showToast('Failed to update user role', 'error');
     }
   };

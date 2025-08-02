@@ -20,7 +20,7 @@ export const usePubChem = (searchTerm: string) => {
       setData(results);
     } catch (err) {
       setError('Failed to fetch chemical data');
-      console.error('PubChem search error:', err);
+      
     } finally {
       setLoading(false);
     }

@@ -17,7 +17,7 @@ const WeatherWidget = () => {
         setWeather(data);
       } catch (err) {
         setError('Unable to load weather data');
-        console.error('Weather fetch error:', err);
+        
       } finally {
         setLoading(false);
       }

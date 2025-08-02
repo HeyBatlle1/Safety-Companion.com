@@ -22,7 +22,7 @@ export function useLocalStorage<T>(
       const item = window.localStorage.getItem(key);
       return item ? JSON.parse(item) : initialValue;
     } catch (error) {
-      console.error(`Error reading localStorage key "${key}":`, error);
+      
       return initialValue;
     }
   });
@@ -36,7 +36,7 @@ export function useLocalStorage<T>(
     try {
       window.localStorage.setItem(key, JSON.stringify(storedValue));
     } catch (error) {
-      console.error(`Error setting localStorage key "${key}":`, error);
+      
     }
   }, [key, storedValue]);
   
@@ -59,7 +59,7 @@ export function useLocalStorageValue<T>(key: string, initialValue: T): T {
     const item = window.localStorage.getItem(key);
     return item ? JSON.parse(item) : initialValue;
   } catch (error) {
-    console.error(`Error reading localStorage key "${key}":`, error);
+    
     return initialValue;
   }
 }
@@ -76,7 +76,7 @@ export function getFromLocalStorage<T>(key: string, defaultValue: T): T {
     const item = window.localStorage.getItem(key);
     return item ? JSON.parse(item) : defaultValue;
   } catch (error) {
-    console.error(`Error reading localStorage key "${key}":`, error);
+    
     return defaultValue;
   }
 }
@@ -93,7 +93,7 @@ export function saveToLocalStorage<T>(key: string, value: T): boolean {
     window.localStorage.setItem(key, JSON.stringify(value));
     return true;
   } catch (error) {
-    console.error(`Error setting localStorage key "${key}":`, error);
+    
     return false;
   }
 }
@@ -110,7 +110,7 @@ export function removeFromLocalStorage(key: string): boolean {
     window.localStorage.removeItem(key);
     return true;
   } catch (error) {
-    console.error(`Error removing localStorage key "${key}":`, error);
+    
     return false;
   }
 }

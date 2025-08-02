@@ -56,7 +56,7 @@ export const errorMessages = {
 // Log errors for debugging purposes
 export const logError = (error: unknown, context?: string): void => {
   if (process.env.NODE_ENV !== 'production') {
-    console.error(`Error${context ? ` in ${context}` : ''}:`, error);
+    
   }
   
   // In a production app, you might want to send errors to a monitoring service

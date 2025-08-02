@@ -65,13 +65,13 @@ Format your response in a clear, professional manner with proper sections and bu
         }
       });
     } catch (historyError) {
-      console.warn('Failed to save SDS analysis to history:', historyError);
+      
     }
     
     return text;
     
   } catch (error) {
-    console.error('Error getting MSDS response:', error);
+    
     return "I apologize, but I'm experiencing technical difficulties processing your chemical safety inquiry. Please try again in a few moments, or contact your safety supervisor for immediate assistance.";
   }
 };
@@ -79,14 +79,14 @@ Format your response in a clear, professional manner with proper sections and bu
 // Function to get stored analyses for context
 export const getStoredAnalyses = (): any[] => {
   // This function is deprecated - use getAnalysisHistory from history/analysisHistory.ts instead
-  console.warn('getStoredAnalyses is deprecated, use getAnalysisHistory instead');
+  
   return [];
 };
 
 // Function to clear stored analyses
 export const clearStoredAnalyses = (): void => {
   // This function is deprecated - use clearAnalysisHistory from history/analysisHistory.ts instead
-  console.warn('clearStoredAnalyses is deprecated, use clearAnalysisHistory instead');
+  
 };
 
 // Get information about the MSDS model being used

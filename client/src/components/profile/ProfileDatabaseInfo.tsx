@@ -43,7 +43,7 @@ const ProfileDatabaseInfo: React.FC<ProfileDatabaseInfoProps> = ({ className = '
         setSchemaStatus(schema);
       }
     } catch (error) {
-      console.error('Error loading database status:', error);
+      
     } finally {
       setLoading(false);
     }

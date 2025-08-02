@@ -25,12 +25,12 @@ export const searchCompounds = async (query: string): Promise<PubChemCompound[]>
         const details = await fetchCompoundDetails(compound.id.id.cid);
         compounds.push(details);
       } catch (error) {
-        console.error(`Error fetching details for compound ${compound.id.id.cid}:`, error);
+        
       }
     }
     return compounds;
   } catch (error) {
-    console.error('Error searching compounds:', error);
+    
     return [];
   }
 };
@@ -55,7 +55,7 @@ const fetchCompoundDetails = async (cid: number): Promise<PubChemCompound> => {
       disposal: Array.isArray(ghs.disposal) ? ghs.disposal : []
     };
   } catch (error) {
-    console.error('Error fetching compound details:', error);
+    
     return {
       name: 'Error fetching compound',
       formula: 'Unknown',

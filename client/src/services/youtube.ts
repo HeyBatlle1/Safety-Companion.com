@@ -37,7 +37,7 @@ export const fetchPlaylistVideos = async (): Promise<YouTubeVideo[]> => {
       publishedAt: new Date(item.snippet.publishedAt).toLocaleDateString(),
     }));
   } catch (error) {
-    console.error('YouTube API error - returning empty array');
+    
     return [];
   }
 };

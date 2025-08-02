@@ -85,7 +85,7 @@ export function getErrorMessage(error: unknown): string {
  */
 export function logError(error: unknown, context?: string): void {
   if (process.env.NODE_ENV !== 'production') {
-    console.error(`Error${context ? ` in ${context}:` : ':'}`, error);
+    
   }
   
   // In production, you might want to send errors to a monitoring service

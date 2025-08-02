@@ -113,7 +113,7 @@ const WeatherObservationCenter = () => {
         setWeatherData(transformedData);
         setLoading(false);
       } catch (error) {
-        console.error('Failed to fetch weather data:', error);
+        
         // Fallback to mock data for demo
         setWeatherData({
           current: {

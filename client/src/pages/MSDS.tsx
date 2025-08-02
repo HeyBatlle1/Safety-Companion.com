@@ -61,7 +61,7 @@ const MSDS = () => {
       };
       setMessages(prev => [...prev, botMessage]);
     } catch (error) {
-      console.error('Error getting response:', error);
+      
       setError(error instanceof Error ? error.message : 'Unknown error occurred');
       
       const errorMessage: Message = {

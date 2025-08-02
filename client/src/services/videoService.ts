@@ -24,13 +24,13 @@ export const getWatchedVideos = async (): Promise<string[]> => {
       .eq('user_id', user.id);
       
     if (error) {
-      console.error('Error fetching watched videos:', error);
+      
       return getLocalWatchedVideos();
     }
     
     return data.map(item => item.video_id);
   } catch (error) {
-    console.error('Error in getWatchedVideos:', error);
+    
     return getLocalWatchedVideos();
   }
 };
@@ -60,13 +60,13 @@ export const markVideoAsWatched = async (videoId: string): Promise<boolean> => {
       .merge(); // Update the watched_at timestamp if record already exists
       
     if (error) {
-      console.error('Error marking video as watched:', error);
+      
       return markLocalVideoAsWatched(videoId);
     }
     
     return true;
   } catch (error) {
-    console.error('Error in markVideoAsWatched:', error);
+    
     return markLocalVideoAsWatched(videoId);
   }
 };
@@ -92,13 +92,13 @@ export const markVideoAsUnwatched = async (videoId: string): Promise<boolean> =>
       .eq('video_id', videoId);
       
     if (error) {
-      console.error('Error marking video as unwatched:', error);
+      
       return markLocalVideoAsUnwatched(videoId);
     }
     
     return true;
   } catch (error) {
-    console.error('Error in markVideoAsUnwatched:', error);
+    
     return markLocalVideoAsUnwatched(videoId);
   }
 };
@@ -111,7 +111,7 @@ const getLocalWatchedVideos = (): string[] => {
     const watchedVideos = localStorage.getItem(LOCAL_STORAGE_KEY);
     return watchedVideos ? JSON.parse(watchedVideos) : [];
   } catch (error) {
-    console.error('Error getting local watched videos:', error);
+    
     return [];
   }
 };
@@ -125,7 +125,7 @@ const markLocalVideoAsWatched = (videoId: string): boolean => {
     }
     return true;
   } catch (error) {
-    console.error('Error marking local video as watched:', error);
+    
     return false;
   }
 };
@@ -137,7 +137,7 @@ const markLocalVideoAsUnwatched = (videoId: string): boolean => {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(watchedVideos));
     return true;
   } catch (error) {
-    console.error('Error marking local video as unwatched:', error);
+    
     return false;
   }
 };

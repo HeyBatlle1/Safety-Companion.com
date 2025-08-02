@@ -18,12 +18,12 @@ export const getCurrentUser = async () => {
   try {
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error) {
-      console.error('Error getting current user:', error);
+      
       return null;
     }
     return user;
   } catch (error) {
-    console.error('Unexpected error in getCurrentUser:', error);
+    
     return null;
   }
 };
@@ -46,7 +46,7 @@ export const signIn = async (email: string, password: string) => {
     
     return data.user;
   } catch (error) {
-    console.error('Sign in error:', error);
+    
     throw error;
   }
 };
@@ -70,7 +70,7 @@ export const signUp = async (email: string, password: string) => {
 
     return data.user;
   } catch (error) {
-    console.error('Signup error:', error);
+    
     throw error;
   }
 };
@@ -80,7 +80,7 @@ export const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
   } catch (error) {
-    console.error('Sign out error:', error);
+    
     throw error;
   }
 };
@@ -99,7 +99,7 @@ const ensureUserProfile = async (userId: string): Promise<void> => {
       if (error.code === 'PGRST116') {
         console.info('User profile not found, creating new profile');
       } else {
-        console.error('Error checking user profile:', error);
+        
         return;
       }
     }
@@ -175,7 +175,7 @@ export const checkSupabaseConnection = async (): Promise<boolean> => {
     
     return !error;
   } catch (error) {
-    console.error('Supabase connection check error:', error);
+    
     return false;
   }
 };
@@ -202,7 +202,7 @@ export const getSupabaseStatus = async (): Promise<{
           tables = data.map(t => t.table_name);
         }
       } catch (error) {
-        console.warn('Could not fetch table list:', error);
+        
       }
     }
     
@@ -212,7 +212,7 @@ export const getSupabaseStatus = async (): Promise<{
       tables
     };
   } catch (error) {
-    console.error('Error getting Supabase status:', error);
+    
     return {
       connected: false,
       authenticated: false,
@@ -237,7 +237,7 @@ export const getUserProfile = async (userId?: string): Promise<UserProfile | nul
 
     if (error) {
       if (error.code === 'PGRST116') {
-        console.log('User profile not found, creating new profile');
+        
         await ensureUserProfile(targetUserId);
         
         // Try to fetch again after creating
@@ -248,20 +248,20 @@ export const getUserProfile = async (userId?: string): Promise<UserProfile | nul
           .single();
         
         if (newError) {
-          console.error('Error fetching newly created profile:', newError);
+          
           return null;
         }
         
         return newData;
       } else {
-        console.error('Error fetching user profile:', error);
+        
         return null;
       }
     }
 
     return data;
   } catch (error) {
-    console.error('Error in getUserProfile:', error);
+    
     return null;
   }
 };
@@ -283,7 +283,7 @@ export const updateUserProfile = async (updates: Partial<UserProfile>): Promise<
     if (error) throw error;
     return data;
   } catch (error) {
-    console.error('Error updating user profile:', error);
+    
     throw error;
   }
 };
@@ -301,7 +301,7 @@ export const assignUserRole = async (userId: string, role: string): Promise<bool
     if (error) throw error;
     return true;
   } catch (error) {
-    console.error('Error assigning user role:', error);
+    
     return false;
   }
 };
@@ -316,7 +316,7 @@ export const getCompanies = async (): Promise<Company[]> => {
 
     if (error) {
       if (error.code === '42P01') {
-        console.log('Companies table does not exist, returning empty array');
+        
         return [];
       }
       throw error;
@@ -324,7 +324,7 @@ export const getCompanies = async (): Promise<Company[]> => {
 
     return data || [];
   } catch (error) {
-    console.error('Error fetching companies:', error);
+    
     return [];
   }
 };
@@ -344,7 +344,7 @@ export const createCompany = async (company: Omit<Company, 'id' | 'created_at' |
     if (error) throw error;
     return data;
   } catch (error) {
-    console.error('Error creating company:', error);
+    
     throw error;
   }
 };
@@ -418,7 +418,7 @@ export const getUserDrugScreens = async (): Promise<DrugScreen[]> => {
 
     if (error) {
       if (error.code === '42P01') {
-        console.log('Drug screens table does not exist, returning empty array');
+        
         return [];
       }
       throw error;
@@ -426,7 +426,7 @@ export const getUserDrugScreens = async (): Promise<DrugScreen[]> => {
 
     return data || [];
   } catch (error) {
-    console.error('Error fetching drug screens:', error);
+    
     return [];
   }
 };
@@ -445,7 +445,7 @@ export const getUserCertifications = async (): Promise<UserCertification[]> => {
 
     if (error) {
       if (error.code === '42P01') {
-        console.log('User certifications table does not exist, returning empty array');
+        
         return [];
       }
       throw error;
@@ -453,7 +453,7 @@ export const getUserCertifications = async (): Promise<UserCertification[]> => {
 
     return data || [];
   } catch (error) {
-    console.error('Error fetching user certifications:', error);
+    
     return [];
   }
 };
@@ -473,7 +473,7 @@ export const getNotificationPreferences = async (): Promise<NotificationPreferen
 
     if (error) {
       if (error.code === 'PGRST116') {
-        console.log('Notification preferences not found, creating defaults');
+        
         // Create default preferences
         const defaultPrefs = {
           user_id: user.id,
@@ -496,20 +496,20 @@ export const getNotificationPreferences = async (): Promise<NotificationPreferen
           .single();
 
         if (insertError) {
-          console.error('Error creating default notification preferences:', insertError);
+          
           return null;
         }
 
         return newData;
       } else {
-        console.error('Error fetching notification preferences:', error);
+        
         return null;
       }
     }
 
     return data;
   } catch (error) {
-    console.error('Error in getNotificationPreferences:', error);
+    
     return null;
   }
 };
@@ -532,7 +532,7 @@ export const updateNotificationPreferences = async (preferences: Partial<Notific
     if (error) throw error;
     return data;
   } catch (error) {
-    console.error('Error updating notification preferences:', error);
+    
     throw error;
   }
 };
@@ -557,7 +557,7 @@ export const getTeamMembers = async (): Promise<UserProfile[]> => {
 
     if (error) {
       if (error.code === '42P01') {
-        console.log('User profiles table does not exist, returning empty array');
+        
         return [];
       }
       throw error;
@@ -565,7 +565,7 @@ export const getTeamMembers = async (): Promise<UserProfile[]> => {
 
     return data || [];
   } catch (error) {
-    console.error('Error fetching team members:', error);
+    
     return [];
   }
 };
@@ -590,7 +590,7 @@ export const hasPermission = async (requiredRole: string): Promise<boolean> => {
 
     return userLevel >= requiredLevel;
   } catch (error) {
-    console.error('Error checking permissions:', error);
+    
     return false;
   }
 };

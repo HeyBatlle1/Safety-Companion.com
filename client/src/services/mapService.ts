@@ -48,7 +48,7 @@ export const saveMapLocation = async (location: Omit<MapLocation, 'id' | 'user_i
     if (error) throw error;
     return data;
   } catch (error) {
-    console.error('Error saving map location:', error);
+    
     throw error;
   }
 };
@@ -70,7 +70,7 @@ export const getMapLocations = async (): Promise<MapLocation[]> => {
     if (error) throw error;
     return data || [];
   } catch (error) {
-    console.error('Error fetching map locations:', error);
+    
     return [];
   }
 };
@@ -94,7 +94,7 @@ export const updateMapLocation = async (
     if (error) throw error;
     return data;
   } catch (error) {
-    console.error('Error updating map location:', error);
+    
     throw error;
   }
 };
@@ -110,7 +110,7 @@ export const deleteMapLocation = async (id: string): Promise<boolean> => {
     if (error) throw error;
     return true;
   } catch (error) {
-    console.error('Error deleting map location:', error);
+    
     return false;
   }
 };
@@ -135,7 +135,7 @@ export const saveMapRoute = async (route: Omit<MapRoute, 'id' | 'user_id' | 'cre
     if (error) throw error;
     return data;
   } catch (error) {
-    console.error('Error saving map route:', error);
+    
     throw error;
   }
 };
@@ -157,7 +157,7 @@ export const getMapRoutes = async (): Promise<MapRoute[]> => {
     if (error) throw error;
     return data || [];
   } catch (error) {
-    console.error('Error fetching map routes:', error);
+    
     return [];
   }
 };
@@ -173,7 +173,7 @@ export const deleteMapRoute = async (id: string): Promise<boolean> => {
     if (error) throw error;
     return true;
   } catch (error) {
-    console.error('Error deleting map route:', error);
+    
     return false;
   }
 };
@@ -196,7 +196,7 @@ export const searchMapLocations = async (query: string): Promise<MapLocation[]> 
     if (error) throw error;
     return data || [];
   } catch (error) {
-    console.error('Error searching map locations:', error);
+    
     return [];
   }
 };
@@ -229,7 +229,7 @@ export const getLocationsNearby = async (
 
     return filtered;
   } catch (error) {
-    console.error('Error fetching nearby locations:', error);
+    
     return [];
   }
 };
