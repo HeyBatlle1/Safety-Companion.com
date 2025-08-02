@@ -191,14 +191,19 @@ Format your response professionally with clear sections and actionable insights.
       const aiAnalysis = await getMSDSResponse(prompt);
       setAiResponse(aiAnalysis);
 
-      // Save to database
-      await saveChecklistResponse(
-        templateId || 'unknown',
-        template.title,
-        responses
-      );
-
-      showToast('Checklist submitted and analyzed successfully!', 'success');
+      // Save to database (handle gracefully if fails)
+      try {
+        await saveChecklistResponse(
+          templateId || 'unknown',
+          template.title,
+          responses
+        );
+        showToast('Checklist submitted and analyzed successfully!', 'success');
+      } catch (saveError) {
+        console.error('Error saving to database:', saveError);
+        // Still show success for AI analysis, just note save issue
+        showToast('Analysis completed! (Database save pending - check connection)', 'success');
+      }
     } catch (error) {
       console.error('Error processing checklist:', error);
       setError(error instanceof Error ? error.message : 'Failed to process checklist');

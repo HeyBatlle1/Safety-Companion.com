@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, User, Map, MessageCircle, Layout, FileText, Wrench, Clock, ClipboardCheck } from 'lucide-react';
+import { Home, User, Map, MessageCircle, Layout, FileText, Wrench, Clock, ClipboardCheck, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const BottomNav = () => {
@@ -12,6 +12,7 @@ const BottomNav = () => {
     { icon: Map, label: 'Maps', path: '/maps' },
     { icon: MessageCircle, label: 'Chat', path: '/chat' },
     { icon: ClipboardCheck, label: 'Checklists', path: '/checklists' },
+    { icon: Users, label: 'Profiles', path: '/profiles' },
     { icon: Layout, label: 'Drawings', path: '/drawings' },
     { icon: FileText, label: 'SDS', path: '/sds' },
     { icon: Clock, label: 'History', path: '/history' },

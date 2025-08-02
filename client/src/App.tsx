@@ -11,6 +11,7 @@ import Drawings from './pages/Drawings';
 import SDS from './pages/SDS';
 import Checklists from './pages/Checklists';
 import ChecklistView from './pages/ChecklistView';
+import Profiles from './pages/Profiles';
 import ToastContainer from './components/common/ToastContainer';
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
           <Route path="/sds" element={<SDS />} />
           <Route path="/checklists" element={<Checklists />} />
           <Route path="/checklist/:templateId" element={<ChecklistView />} />
+          <Route path="/profiles" element={<Profiles />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AppLayout>
