@@ -461,7 +461,7 @@ export const getDrawingFolders = async (projectId?: string): Promise<DrawingFold
 export const syncWithProCore = async (drawingId: string): Promise<boolean> => {
   try {
     // Mock ProCore sync - in real implementation, this would call ProCore API
-    console.log('Syncing with ProCore:', drawingId);
+
     
     const syncData = {
       drawing_id: drawingId,
@@ -504,10 +504,10 @@ export const getProCoreSyncStatus = async (drawingId: string): Promise<ProCoreSy
 export const exportDrawingWithAnnotations = async (drawingId: string): Promise<string> => {
   try {
     // Mock export - in real implementation, this would generate PDF with annotations
-    console.log('Exporting drawing with annotations:', drawingId);
+
     return 'mock-export-url.pdf';
   } catch (error) {
-    console.error('Error exporting drawing:', error);
+
     throw error;
   }
 };

@@ -8,7 +8,7 @@ const Checklists: React.FC = () => {
   const navigate = useNavigate();
 
   const handleChecklistClick = (templateId: string) => {
-    console.log('Navigating to checklist:', templateId);
+
     navigate(`/checklist/${templateId}`);
   };
 

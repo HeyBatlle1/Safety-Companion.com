@@ -8,7 +8,7 @@ export const getAllReports = async (): Promise<SafetyReport[]> => {
     
     if (!user) {
       // Handle unauthenticated users gracefully - return empty array instead of throwing
-      console.log('User not authenticated, using local storage for safety reports');
+
       return getLocalReports();
     }
     

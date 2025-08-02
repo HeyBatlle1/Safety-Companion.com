@@ -34,7 +34,7 @@ export class DataCollector {
         recentIncidents: incidents
       };
     } catch (error) {
-      console.error('Error collecting site data:', error);
+
       throw new Error('Failed to collect site data');
     }
   }
@@ -51,7 +51,7 @@ export class DataCollector {
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error('Error fetching relevant incidents:', error);
+
       return [];
     }
   }

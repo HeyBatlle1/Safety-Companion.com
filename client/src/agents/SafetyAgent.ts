@@ -60,7 +60,7 @@ export class SafetyAgent {
         recentIncidents: incidents
       };
     } catch (error) {
-      console.error('Error collecting site data:', error);
+
       throw new Error('Failed to collect site data');
     }
   }
@@ -77,7 +77,7 @@ export class SafetyAgent {
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error('Error fetching relevant incidents:', error);
+
       return [];
     }
   }
@@ -121,7 +121,7 @@ Format your response as a structured JSON object.`;
       
       return this.parseResponse(response.text());
     } catch (error) {
-      console.error('Error generating risk assessment:', error);
+
       throw new Error('Failed to generate risk assessment');
     }
   }
@@ -134,7 +134,7 @@ Format your response as a structured JSON object.`;
       
       return JSON.parse(jsonStr);
     } catch (error) {
-      console.error('Error parsing AI response:', error);
+
       throw new Error('Failed to parse risk assessment response');
     }
   }

@@ -33,7 +33,7 @@ function App() {
     );
   }
 
-  console.log('App render - user:', user ? 'logged in' : 'not logged in');
+
 
   return (
     <div className="min-h-screen bg-slate-900">

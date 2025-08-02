@@ -107,7 +107,7 @@ const ensureUserProfile = async (userId: string): Promise<void> => {
     // If profile doesn't exist, create it
     if (!data) {
       try {
-        console.log('Creating user profile for:', userId);
+
         const { error: insertError } = await supabase
           .from('profiles')
           .insert([{
@@ -118,18 +118,18 @@ const ensureUserProfile = async (userId: string): Promise<void> => {
           }]);
         
         if (insertError) {
-          console.error('Error creating user profile:', insertError);
+
           showToast('Error creating user profile', 'error');
         } else {
-          console.log('Successfully created user profile');
+
         }
       } catch (insertError) {
-        console.error('Exception creating user profile:', insertError);
+
       }
       
       // Create notification preferences
       try {
-        console.log('Creating notification preferences for:', userId);
+
         const { error: prefError } = await supabase
           .from('notification_preferences')
           .insert([{
@@ -147,16 +147,16 @@ const ensureUserProfile = async (userId: string): Promise<void> => {
           }]);
         
         if (prefError) {
-          console.error('Error creating notification preferences:', prefError);
+
         } else {
-          console.log('Successfully created notification preferences');
+
         }
       } catch (prefError) {
-        console.error('Exception creating notification preferences:', prefError);
+
       }
     }
   } catch (error) {
-    console.error('Error in ensureUserProfile:', error);
+
   }
 };
 
@@ -374,7 +374,6 @@ export const getUserProjects = async (): Promise<Project[]> => {
 
     if (error) {
       if (error.code === '42P01') {
-        console.log('Project tables do not exist, returning empty array');
         return [];
       }
       throw error;
@@ -382,7 +381,7 @@ export const getUserProjects = async (): Promise<Project[]> => {
 
     return data?.map(item => item.project).filter(Boolean) || [];
   } catch (error) {
-    console.error('Error fetching user projects:', error);
+
     return [];
   }
 };
@@ -400,7 +399,7 @@ export const assignUserToProject = async (userId: string, projectId: string): Pr
     if (error) throw error;
     return true;
   } catch (error) {
-    console.error('Error assigning user to project:', error);
+
     return false;
   }
 };

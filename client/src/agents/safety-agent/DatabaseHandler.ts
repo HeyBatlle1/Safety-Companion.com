@@ -7,7 +7,7 @@ export class DatabaseHandler {
     try {
       // Validate inputs
       if (!siteId || !assessment) {
-        console.error('Invalid inputs for saveRiskAssessment');
+
         throw new Error('Invalid risk assessment data');
       }
 
@@ -24,7 +24,6 @@ export class DatabaseHandler {
           .select('*', { count: 'exact', head: true });
         
         if (countError && countError.code === '42P01') {
-          console.error('risk_assessments table does not exist:', countError);
           showToast('Database table missing, using local storage instead', 'warning');
           this.saveToLocalStorage(site_id, assessment);
           return;
@@ -40,18 +39,18 @@ export class DatabaseHandler {
           });
 
         if (error) {
-          console.error('Database error saving assessment:', error);
+
           showToast('Error saving to database, using local storage instead', 'warning');
           this.saveToLocalStorage(site_id, assessment);
         } else {
-          console.log('Risk assessment saved to database successfully');
+
         }
       } catch (dbError) {
-        console.error('Exception saving risk assessment to DB:', dbError);
+
         this.saveToLocalStorage(site_id, assessment);
       }
     } catch (error) {
-      console.error('Error saving risk assessment:', error);
+
       
       // Use localStorage as fallback
       if (siteId) {
@@ -64,7 +63,7 @@ export class DatabaseHandler {
     try {
       // Validate input
       if (!siteId) {
-        console.error('Invalid siteId for getRecentAssessments');
+
         return this.getFromLocalStorage(siteId);
       }
 
@@ -78,7 +77,7 @@ export class DatabaseHandler {
           .select('*', { count: 'exact', head: true });
         
         if (countError && countError.code === '42P01') {
-          console.error('risk_assessments table does not exist:', countError);
+
           return this.getFromLocalStorage(site_id);
         }
         
@@ -91,7 +90,7 @@ export class DatabaseHandler {
           .limit(10);
 
         if (error) {
-          console.error('Database error fetching assessments:', error);
+
           return this.getFromLocalStorage(site_id);
         }
 
@@ -109,18 +108,18 @@ export class DatabaseHandler {
             // Otherwise parse from string
             return JSON.parse(row.assessment) as RiskAssessment;
           } catch (e) {
-            console.error('Error parsing assessment:', e);
+
             return null;
           }
         }).filter(Boolean) as RiskAssessment[];
         
         return assessments;
       } catch (dbError) {
-        console.error('Exception fetching assessments from DB:', dbError);
+
         return this.getFromLocalStorage(site_id);
       }
     } catch (error) {
-      console.error('Error fetching recent assessments:', error);
+
       return this.getFromLocalStorage(siteId);
     }
   }
@@ -153,7 +152,7 @@ export class DatabaseHandler {
       const keys = JSON.parse(localStorage.getItem(keysForSiteKey) || '[]');
       
       return keys
-        .map(key => {
+        .map((key: string) => {
           try {
             const item = localStorage.getItem(key);
             if (!item) return null;
@@ -165,7 +164,7 @@ export class DatabaseHandler {
           }
         })
         .filter(Boolean)
-        .sort((a, b) => {
+        .sort((a: any, b: any) => {
           const dateA = new Date(a.createdAt || 0);
           const dateB = new Date(b.createdAt || 0);
           return dateB.getTime() - dateA.getTime();

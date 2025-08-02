@@ -13,7 +13,7 @@ export interface MultiAgentAssessmentData {
 
 export async function triggerBoltSafetyAssessment(data: MultiAgentAssessmentData) {
   try {
-    console.log('Triggering Bolt multi-agent safety assessment...');
+
     
     const response = await axios.post(
       BOLT_MULTI_AGENT_URL,

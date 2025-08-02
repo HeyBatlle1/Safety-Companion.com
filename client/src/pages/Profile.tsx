@@ -38,7 +38,7 @@ import ProfileDatabaseInfo from '../components/profile/ProfileDatabaseInfo';
 const Profile: React.FC = () => {
   // Mock user for now - auth removed
   const user = { id: 'test-user', email: 'user@example.com' };
-  const logout = async () => { console.log('Logout called'); };
+  const logout = async () => { };
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [certifications, setCertifications] = useState<UserCertification[]>([]);
   const [drugScreens, setDrugScreens] = useState<DrugScreen[]>([]);

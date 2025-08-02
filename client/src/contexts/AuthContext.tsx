@@ -48,7 +48,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id);
+
         const newUser = session?.user ?? null;
         setUser(newUser);
         
@@ -70,7 +70,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             showToast('Successfully signed out', 'success');
             break;
           case 'TOKEN_REFRESHED':
-            console.log('Auth token refreshed');
+
             break;
         }
       }
@@ -84,7 +84,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await authSignIn(email, password);
       // The auth state change listener will handle setting the user
     } catch (error: any) {
-      console.error('Sign in error:', error);
+
       showToast(error.message || 'Failed to sign in', 'error');
       throw error;
     }
@@ -95,7 +95,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await authSignUp(email, password, role);
       showToast('Account created successfully! Please check your email to verify your account.', 'success');
     } catch (error: any) {
-      console.error('Sign up error:', error);
+
       showToast(error.message || 'Failed to create account', 'error');
       throw error;
     }
@@ -107,7 +107,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await authSignOut();
       // The auth state change listener will handle clearing the user
     } catch (error: any) {
-      console.error('Sign out error:', error);
+
       showToast(error.message || 'Failed to sign out', 'error');
       throw error;
     } finally {
@@ -119,13 +119,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const { data: { user }, error } = await supabase.auth.getUser();
       if (error) {
-        console.error('Error refreshing user:', error);
+
         setUser(null);
       } else {
         setUser(user);
       }
     } catch (error) {
-      console.error('Error refreshing user:', error);
+
       setUser(null);
     }
   };
