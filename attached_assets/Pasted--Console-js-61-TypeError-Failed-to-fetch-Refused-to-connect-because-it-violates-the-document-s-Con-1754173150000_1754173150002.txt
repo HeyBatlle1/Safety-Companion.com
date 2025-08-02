@@ -1,0 +1,41 @@
+
+Console.js:61 TypeError: Failed to fetch. Refused to connect because it violates the document's Content Security Policy.
+    at window.fetch (Network.js:219:37)
+    at helpers.ts:105:23
+    at _handleRequest2 (fetch.ts:184:20)
+    at _request (fetch.ts:157:22)
+    at GoTrueClient.ts:1479:22
+    at SupabaseAuthClient._useSession (GoTrueClient.ts:1318:20)
+    at async SupabaseAuthClient._getUser (GoTrueClient.ts:1468:14)
+    at async GoTrueClient.ts:1452:14
+Network.js:219 Uncaught (in promise) TypeError: Failed to fetch. Refused to connect because it violates the document's Content Security Policy.
+    at window.fetch (Network.js:219:37)
+    at helpers.ts:105:23
+    at _handleRequest2 (fetch.ts:184:20)
+    at _request (fetch.ts:157:22)
+    at GoTrueClient.ts:1479:22
+    at SupabaseAuthClient._useSession (GoTrueClient.ts:1318:20)
+    at async SupabaseAuthClient._getUser (GoTrueClient.ts:1468:14)
+    at async GoTrueClient.ts:1452:14
+Network.js:219 Refused to connect to 'https://fbjjqwfcmzrpmytieajp.supabase.co/auth/v1/user' because it violates the following Content Security Policy directive: "connect-src 'self' https://api.open-meteo.com https://pubchem.ncbi.nlm.nih.gov https://safety-companion.up.railway.app".
+Network.js:219 Fetch API cannot load https://fbjjqwfcmzrpmytieajp.supabase.co/auth/v1/user. Refused to connect because it violates the document's Content Security Policy.
+Console.js:61 TypeError: Failed to fetch. Refused to connect because it violates the document's Content Security Policy.
+    at window.fetch (Network.js:219:37)
+    at helpers.ts:105:23
+    at _handleRequest2 (fetch.ts:184:20)
+    at _request (fetch.ts:157:22)
+    at GoTrueClient.ts:1479:22
+    at SupabaseAuthClient._useSession (GoTrueClient.ts:1318:20)
+    at async SupabaseAuthClient._getUser (GoTrueClient.ts:1468:14)
+    at async GoTrueClient.ts:1452:14
+Network.js:219 Uncaught (in promise) TypeError: Failed to fetch. Refused to connect because it violates the document's Content Security Policy.
+    at window.fetch (Network.js:219:37)
+    at helpers.ts:105:23
+    at _handleRequest2 (fetch.ts:184:20)
+    at _request (fetch.ts:157:22)
+    at GoTrueClient.ts:1479:22
+    at SupabaseAuthClient._useSession (GoTrueClient.ts:1318:20)
+    at async SupabaseAuthClient._getUser (GoTrueClient.ts:1468:14)
+    at async GoTrueClient.ts:1452:14
+﻿
+
