@@ -1,0 +1,134 @@
+# Safety Companion Enterprise Codebase Audit - Claude Opus
+
+You are conducting a **comprehensive production-ready audit** of an enterprise Safety Companion platform serving 100+ users. This is the final quality assurance before deployment. Be ruthlessly thorough.
+
+## Audit Scope: Complete Repository Analysis
+
+**Repository:** `safety-companion-api`
+**Target:** Production deployment on Railway
+**Stakes:** Enterprise construction safety platform with zero tolerance for failures
+
+## Critical Audit Tasks
+
+### 1. Code Quality & Bug Detection
+**Scan EVERY file for:**
+- [ ] **Syntax errors** - Python, JavaScript, JSON, YAML
+- [ ] **Import errors** - Missing modules, circular imports, unused imports
+- [ ] **Logic bugs** - Infinite loops, off-by-one errors, null pointer exceptions
+- [ ] **Type errors** - Inconsistent data types, missing type hints
+- [ ] **Exception handling** - Unhandled exceptions, overly broad try/catch blocks
+- [ ] **Performance issues** - N+1 queries, memory leaks, inefficient algorithms
+
+### 2. Security Vulnerabilities
+**Enterprise security scan:**
+- [ ] **Hardcoded secrets** - API keys, passwords, tokens in code
+- [ ] **SQL injection** - Unsafe database queries
+- [ ] **XSS vulnerabilities** - Unescaped user input
+- [ ] **CORS misconfigurations** - Overly permissive origins
+- [ ] **Authentication flaws** - Weak session management
+- [ ] **Data exposure** - Sensitive data in logs or responses
+
+### 3. Dead Code Elimination
+**Identify and flag for removal:**
+- [ ] **Unused functions** - Functions never called
+- [ ] **Dead variables** - Variables assigned but never used
+- [ ] **Commented code blocks** - Old code that should be deleted
+- [ ] **Unused imports** - Libraries imported but not used
+- [ ] **Deprecated patterns** - Old code patterns that should be modernized
+- [ ] **Test artifacts** - Debug prints, temporary variables, test data
+
+### 4. Bolt.new Cleanup
+**Scan for development artifacts:**
+- [ ] **TODO comments** - Unfinished implementation notes
+- [ ] **Console.log statements** - Debug outputs left in production code
+- [ ] **Placeholder data** - Hardcoded test values
+- [ ] **Development URLs** - Localhost references in production code
+- [ ] **Temporary files** - .tmp, .bak, backup files
+- [ ] **IDE artifacts** - .vscode, .idea, editor-specific files
+
+### 5. Configuration & Dependencies
+**Production readiness check:**
+- [ ] **requirements.txt** - Outdated dependencies, security vulnerabilities
+- [ ] **Environment variables** - Missing required configs, insecure defaults
+- [ ] **Database connections** - Connection pooling, timeout settings
+- [ ] **API configurations** - Rate limiting, error handling
+- [ ] **Deployment configs** - Railway settings, Docker configurations
+
+### 6. Documentation & Maintenance
+**Code maintainability:**
+- [ ] **Missing docstrings** - Undocumented functions and classes
+- [ ] **Unclear variable names** - Variables like `temp`, `data`, `x`
+- [ ] **Magic numbers** - Hardcoded values without explanation
+- [ ] **Complex functions** - Functions doing too many things
+- [ ] **Inconsistent naming** - CamelCase mixed with snake_case
+
+## Output Format Required
+
+```markdown
+# Safety Companion Codebase Audit Report
+
+## Executive Summary
+- Total files scanned: X
+- Critical issues found: X
+- Security vulnerabilities: X
+- Dead code instances: X
+- Overall production readiness: [READY/NEEDS WORK/BLOCKED]
+
+## Critical Issues (Fix Immediately)
+### Security Vulnerabilities
+- File: `filename.py`, Line: X - Issue description
+- Severity: CRITICAL/HIGH/MEDIUM
+
+### Bugs & Logic Errors
+- File: `filename.py`, Line: X - Bug description
+- Impact: BREAKING/DEGRADED/MINOR
+
+## Dead Code for Removal
+### Files to Delete Entirely
+- `filename.py` - Reason for deletion
+
+### Code Blocks to Remove
+- File: `filename.py`, Lines: X-Y - Dead code description
+
+### Cleanup Tasks
+- Remove unused imports in `filename.py`
+- Delete commented code blocks in `filename.py`
+
+## Performance & Optimization
+### Database Issues
+- Inefficient queries in `filename.py`
+- Missing indexes suggested
+
+### API Performance
+- Slow endpoints identified
+- Caching opportunities
+
+## Production Deployment Blockers
+- [ ] Issue 1 - Must fix before deployment
+- [ ] Issue 2 - Must fix before deployment
+
+## Recommended Actions
+1. **Immediate fixes** (before git push)
+2. **Short-term improvements** (next sprint)
+3. **Long-term technical debt** (future roadmap)
+
+## Updated File Structure
+[Provide clean, final file structure after cleanup]
+```
+
+## Audit Standards
+
+**Code Quality Threshold:** Enterprise production standards
+**Security Level:** Zero tolerance for vulnerabilities
+**Performance Requirement:** Sub-100ms response times
+**Maintainability:** Code must be readable by any developer
+
+## Special Focus Areas
+
+1. **FastAPI endpoints** - Security, performance, error handling
+2. **Supabase integration** - Query efficiency, connection management
+3. **Gemini AI integration** - Error handling, rate limiting
+4. **Railway deployment** - Configuration correctness
+5. **CORS settings** - Security implications for enterprise users
+
+This audit determines if the Safety Companion platform is ready for production deployment serving 100+ enterprise construction users. **Be thorough, be critical, be specific.**
