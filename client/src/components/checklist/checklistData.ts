@@ -2851,5 +2851,268 @@ export const checklistData: ChecklistData = {
         ]
       }
     ]
+  },
+  'job-hazard-analysis': {
+    title: 'Intelligent Job Hazard Safety Analysis (JHSA)',
+    description: 'AI-powered JHSA with OSHA compliance verification and real-time safety analysis',
+    aiContext: 'Advanced Job Hazard Safety Analysis using real OSHA data and AI-driven risk assessment. Focuses on fall protection, electrical hazards, and excavation safety with regulatory compliance verification.',
+    sections: [
+      {
+        title: 'Fall Protection - Elevated Work',
+        description: 'Critical fall protection assessment for work at height',
+        items: [
+          {
+            id: 'jha-1',
+            question: 'Work Height Assessment',
+            options: ['Enter work height in feet'],
+            notes: true,
+            critical: true,
+            images: true,
+            aiWeight: 10,
+            riskCategory: 'fall_protection',
+            complianceStandard: 'OSHA 1926.501'
+          },
+          {
+            id: 'jha-2', 
+            question: 'Surface Conditions and Stability',
+            options: ['Describe walking surface stability, material, weather exposure'],
+            notes: true,
+            critical: true,
+            images: true,
+            aiWeight: 9,
+            riskCategory: 'fall_protection',
+            complianceStandard: 'OSHA 1926.502'
+          },
+          {
+            id: 'jha-3',
+            question: 'Fall Protection Equipment Present',
+            options: [
+              'Personal fall arrest systems with harnesses',
+              'Guardrail systems installed',
+              'Safety nets positioned below work area',
+              'Scaffolding with proper guardrails',
+              'Boom lifts with fall protection',
+              'No fall protection equipment',
+              'Inadequate fall protection'
+            ],
+            critical: true,
+            images: true,
+            aiWeight: 10,
+            riskCategory: 'fall_protection',
+            complianceStandard: 'OSHA 1926.502'
+          },
+          {
+            id: 'jha-4',
+            question: 'Weather Conditions Impact',
+            options: [
+              'Calm conditions (0-10 mph wind)',
+              'Light wind (11-15 mph)',
+              'Moderate wind (16-20 mph)',
+              'Strong wind (21-25 mph) - operations restricted',
+              'High wind (above 25 mph) - work suspended',
+              'Precipitation present',
+              'Poor visibility conditions'
+            ],
+            critical: true,
+            aiWeight: 8,
+            riskCategory: 'weather_hazards',
+            complianceStandard: 'OSHA 1926.95'
+          }
+        ]
+      },
+      {
+        title: 'Electrical Hazards - Power Tools & Systems',
+        description: 'Electrical safety assessment for construction operations',
+        items: [
+          {
+            id: 'jha-5',
+            question: 'Power Source and Voltage Details',
+            options: ['Describe voltage, amperage, and power supply type'],
+            notes: true,
+            critical: true,
+            aiWeight: 9,
+            riskCategory: 'electrical_hazards',
+            complianceStandard: 'OSHA 1926.95'
+          },
+          {
+            id: 'jha-6',
+            question: 'Moisture and Wet Conditions Assessment',
+            options: ['Describe any wet conditions, humidity, water sources'],
+            notes: true,
+            critical: true,
+            images: true,
+            aiWeight: 9,
+            riskCategory: 'electrical_hazards',
+            complianceStandard: 'OSHA 1926.416'
+          },
+          {
+            id: 'jha-7',
+            question: 'GFCI Protection Status',
+            options: [
+              'Yes - GFCI protected circuits',
+              'Yes - Portable GFCI devices',
+              'No - No GFCI protection',
+              'Unknown - Protection status unclear',
+              'Temporary power without GFCI'
+            ],
+            critical: true,
+            aiWeight: 10,
+            riskCategory: 'electrical_hazards',
+            complianceStandard: 'OSHA 1926.416'
+          },
+          {
+            id: 'jha-8',
+            question: 'Electrical Tool and Cord Condition',
+            options: ['Describe cord integrity, housing damage, recent inspection dates'],
+            notes: true,
+            critical: true,
+            images: true,
+            deadline: true,
+            aiWeight: 8,
+            riskCategory: 'electrical_hazards',
+            complianceStandard: 'OSHA 1926.417'
+          }
+        ]
+      },
+      {
+        title: 'Excavation & Trench Safety',
+        description: 'Comprehensive excavation and trench safety evaluation',
+        items: [
+          {
+            id: 'jha-9',
+            question: 'Soil Classification and Type',
+            options: [
+              'Type A - Cohesive soil (clay, silty clay)',
+              'Type B - Cohesive soil with moderate stability',
+              'Type C - Granular soil (sand, gravel)',
+              'Rock - Solid rock formation',
+              'Unknown - Soil type not determined',
+              'Mixed soil conditions'
+            ],
+            critical: true,
+            notes: true,
+            aiWeight: 10,
+            riskCategory: 'excavation_safety',
+            complianceStandard: 'OSHA 1926.650'
+          },
+          {
+            id: 'jha-10',
+            question: 'Excavation Depth Measurement',
+            options: ['Enter excavation depth in feet'],
+            notes: true,
+            critical: true,
+            images: true,
+            aiWeight: 10,
+            riskCategory: 'excavation_safety',
+            complianceStandard: 'OSHA 1926.651'
+          },
+          {
+            id: 'jha-11',
+            question: 'Water Conditions and Drainage',
+            options: ['Describe groundwater, surface water, drainage systems'],
+            notes: true,
+            critical: true,
+            images: true,
+            aiWeight: 8,
+            riskCategory: 'excavation_safety',
+            complianceStandard: 'OSHA 1926.651'
+          },
+          {
+            id: 'jha-12',
+            question: 'Adjacent Loads and Structures',
+            options: ['Describe nearby equipment, materials, structures, traffic'],
+            notes: true,
+            critical: true,
+            images: true,
+            aiWeight: 9,
+            riskCategory: 'excavation_safety',
+            complianceStandard: 'OSHA 1926.651'
+          }
+        ]
+      },
+      {
+        title: 'Equipment Safety and Inspection',
+        description: 'Critical equipment safety verification',
+        items: [
+          {
+            id: 'jha-13',
+            question: 'Equipment Certification Status',
+            options: [
+              'All equipment current certifications',
+              'Some equipment pending inspection',
+              'Equipment overdue for certification',
+              'New equipment requiring initial inspection',
+              'Equipment with known deficiencies',
+              'Certification status unknown'
+            ],
+            critical: true,
+            notes: true,
+            deadline: true,
+            aiWeight: 9,
+            riskCategory: 'equipment_safety',
+            complianceStandard: 'OSHA 1926.95'
+          },
+          {
+            id: 'jha-14',
+            question: 'Personal Protective Equipment Verification',
+            options: [
+              'Hard hats with current certification',
+              'Cut-resistant gloves (Level A5)',
+              'Safety harnesses with shock absorbers',
+              'Steel-toed boots with slip resistance',
+              'High-visibility clothing available',
+              'Eye protection with side shields',
+              'PPE incomplete or inadequate'
+            ],
+            critical: true,
+            images: true,
+            aiWeight: 9,
+            riskCategory: 'ppe_compliance',
+            complianceStandard: 'OSHA 1926.95'
+          }
+        ]
+      },
+      {
+        title: 'Emergency Preparedness',
+        description: 'Emergency response readiness assessment',
+        items: [
+          {
+            id: 'jha-15',
+            question: 'Emergency Response Equipment Status',
+            options: [
+              'First aid kits stocked and accessible',
+              'Emergency descent devices ready',
+              'Rescue equipment on standby',
+              'Emergency communication devices functional',
+              'Evacuation routes clearly marked',
+              'Emergency equipment needs attention'
+            ],
+            critical: true,
+            images: true,
+            aiWeight: 8,
+            riskCategory: 'emergency_preparedness',
+            complianceStandard: 'OSHA 1926.95'
+          },
+          {
+            id: 'jha-16',
+            question: 'Emergency Response Plan Implementation',
+            options: [
+              'All personnel briefed on emergency procedures',
+              'Rescue team on standby',
+              'Emergency contacts verified and posted',
+              'Hospital/medical facilities identified',
+              'Emergency plan requires updates',
+              'No emergency plan in place'
+            ],
+            critical: true,
+            notes: true,
+            deadline: true,
+            aiWeight: 9,
+            riskCategory: 'emergency_preparedness',
+            complianceStandard: 'OSHA 1926.95'
+          }
+        ]
+      }
+    ]
   }
 };
