@@ -108,7 +108,7 @@ const ensureUserProfile = async (userId: string): Promise<void> => {
     const { data, error } = await supabase
       .from('user_profiles')
       .select('id')
-      .eq('auth_user_id', userId)
+      .eq('id', userId)
       .maybeSingle();
     
     if (error) {
@@ -127,11 +127,10 @@ const ensureUserProfile = async (userId: string): Promise<void> => {
         const { error: insertError } = await supabase
           .from('user_profiles')
           .insert({
-            auth_user_id: userId,
-            first_name: '',
-            last_name: '',
-            email: '',
-            role: 'field_worker'
+            id: userId,
+            display_name: null,
+            avatar_url: null,
+            email: null
           } as any);
         
         if (insertError) {
