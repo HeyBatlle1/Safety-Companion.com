@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, HardHat, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Shield } from 'lucide-react';
 import ModernSkyscraper from '../components/graphics/ModernSkyscraper';
 import WaveBackground from '../components/graphics/WaveBackground';
+import WeatherObservationCenter from '../components/weather/WeatherObservationCenter';
 
 const Home = () => {
   const [animationPhase, setAnimationPhase] = useState(0);
@@ -114,54 +115,24 @@ const Home = () => {
           </motion.p>
         </div>
 
-        {/* Safety Feature Cards */}
+        {/* Weather Observation Center */}
         <motion.div 
-          className="grid grid-cols-2 gap-4 md:gap-6"
+          className="w-full max-w-4xl mx-auto"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
         >
-          {[
-            { icon: Shield, title: "PPE Monitoring", color: "from-green-400 to-emerald-500" },
-            { icon: HardHat, title: "Safety Alerts", color: "from-yellow-400 to-orange-500" },
-            { icon: AlertTriangle, title: "Risk Assessment", color: "from-red-400 to-pink-500" },
-            { icon: CheckCircle, title: "Compliance Check", color: "from-blue-400 to-cyan-500" }
-          ].map((feature, index) => (
-            <motion.div
-              key={feature.title}
-              className="bg-gray-800/60 backdrop-blur-sm border border-gray-700 rounded-xl p-6 text-center hover:bg-gray-700/60 transition-colors"
-              whileHover={{ 
-                scale: 1.05,
-                boxShadow: "0 20px 40px rgba(0, 0, 0, 0.3)"
-              }}
-              whileTap={{ scale: 0.95 }}
-              initial={{ opacity: 0, rotateY: -90 }}
-              animate={{ opacity: 1, rotateY: 0 }}
-              transition={{ 
-                delay: 0.8 + index * 0.1, 
-                type: "spring",
-                stiffness: 200 
-              }}
-            >
-              <motion.div
-                className={`w-12 h-12 mx-auto mb-3 rounded-lg bg-gradient-to-r ${feature.color} flex items-center justify-center`}
-                animate={{
-                  rotate: [0, 5, -5, 0],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  delay: index * 0.5,
-                  ease: "easeInOut"
-                }}
-              >
-                <feature.icon className="w-6 h-6 text-white" />
-              </motion.div>
-              <h3 className="text-white font-semibold text-sm">
-                {feature.title}
-              </h3>
-            </motion.div>
-          ))}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ 
+              delay: 0.8, 
+              type: "spring",
+              stiffness: 200 
+            }}
+          >
+            <WeatherObservationCenter />
+          </motion.div>
         </motion.div>
 
         {/* Call to Action */}
