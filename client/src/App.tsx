@@ -1,5 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from './contexts/AuthContext';
 import AppLayout from './layouts/AppLayout';
 import PrivateRoute from './components/auth/PrivateRoute';
 import Login from './pages/Login';
@@ -18,6 +19,20 @@ import Profiles from './pages/Profiles';
 import ToastContainer from './components/common/ToastContainer';
 
 function App() {
+  const { loading } = useAuth();
+
+  // Show loading screen while auth is initializing
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-300">Loading Safety Companion...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-900">
       <Routes>

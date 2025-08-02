@@ -67,7 +67,7 @@ export const signIn = async (email: string, password: string) => {
   }
 };
 
-export const signUp = async (email: string, password: string) => {
+export const signUp = async (email: string, password: string, role: string = 'field_worker') => {
   try {
     // Create auth user
     const { data, error: signUpError } = await supabase.auth.signUp({
@@ -81,8 +81,8 @@ export const signUp = async (email: string, password: string) => {
     if (signUpError) throw signUpError;
     if (!data.user) throw new Error('Failed to create user');
 
-    // Ensure user profile exists in database
-    await ensureUserProfile(data.user.id);
+    // Ensure user profile exists in database with selected role
+    await ensureUserProfile(data.user.id, role, email);
 
     return data.user;
   } catch (error) {
@@ -102,7 +102,7 @@ export const signOut = async () => {
 };
 
 // Helper function to ensure user profile exists
-const ensureUserProfile = async (userId: string): Promise<void> => {
+const ensureUserProfile = async (userId: string, role: string = 'field_worker', email?: string): Promise<void> => {
   try {
     // First check if profile exists
     const { data, error } = await supabase
@@ -123,28 +123,29 @@ const ensureUserProfile = async (userId: string): Promise<void> => {
     // If profile doesn't exist, create it
     if (!data) {
       try {
-        console.log('Creating user profile for:', userId);
+        console.log('Creating user profile for:', userId, 'with role:', role);
         const { error: insertError } = await supabase
           .from('user_profiles')
           .insert({
             id: userId,
             display_name: null,
             avatar_url: null,
-            email: null
+            email: email || null,
+            role: role,
+            is_active: true
           } as any);
         
         if (insertError) {
           console.error('Error creating user profile:', insertError);
           showToast('Error creating user profile', 'error');
         } else {
-          console.log('Successfully created user profile');
+          console.log('Successfully created user profile with role:', role);
         }
       } catch (insertError) {
         console.error('Exception creating user profile:', insertError);
       }
       
-      // Skip notification preferences for now - table may not exist yet
-      console.log('User profile created successfully for:', userId);
+      console.log('User profile created successfully for:', userId, 'Role:', role);
     }
   } catch (error) {
     console.error('Error in ensureUserProfile:', error);

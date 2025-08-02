@@ -7,18 +7,25 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, role?: string) => Promise<void>;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Default context value to prevent undefined errors
+const defaultAuthContext: AuthContextType = {
+  user: null,
+  loading: true,
+  signIn: async () => { throw new Error('Auth context not initialized'); },
+  signUp: async () => { throw new Error('Auth context not initialized'); },
+  signOut: async () => { throw new Error('Auth context not initialized'); },
+  refreshUser: async () => { throw new Error('Auth context not initialized'); }
+};
+
+const AuthContext = createContext<AuthContextType>(defaultAuthContext);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
   return context;
 };
 
@@ -91,10 +98,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, role: string = 'field_worker') => {
     try {
       setLoading(true);
-      await authSignUp(email, password);
+      await authSignUp(email, password, role);
       showToast('Account created successfully! Please check your email to verify your account.', 'success');
     } catch (error: any) {
       console.error('Sign up error:', error);

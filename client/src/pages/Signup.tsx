@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { UserPlus, Mail, Lock, Shield } from 'lucide-react';
+import { UserPlus, Mail, Lock, Shield, Users } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { showToast } from '../components/common/ToastContainer';
 
@@ -9,6 +9,7 @@ const Signup: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [role, setRole] = useState('field_worker');
   const [loading, setLoading] = useState(false);
   const { user, signUp } = useAuth();
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ const Signup: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !password || !confirmPassword) {
+    if (!email || !password || !confirmPassword || !role) {
       showToast('Please fill in all fields', 'error');
       return;
     }
@@ -40,7 +41,7 @@ const Signup: React.FC = () => {
 
     setLoading(true);
     try {
-      await signUp(email, password);
+      await signUp(email, password, role);
       showToast('Account created! Please check your email to verify your account.', 'success');
       navigate('/login');
     } catch (error: any) {
@@ -128,6 +129,37 @@ const Signup: React.FC = () => {
                   required
                 />
               </div>
+            </div>
+
+            <div>
+              <label htmlFor="role" className="block text-sm font-medium text-gray-300 mb-2">
+                Your Role
+              </label>
+              <div className="relative">
+                <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <select
+                  id="role"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-colors appearance-none"
+                  required
+                >
+                  <option value="field_worker">Field Worker</option>
+                  <option value="supervisor">Supervisor/Foreman</option>
+                  <option value="project_manager">Project Manager</option>
+                  <option value="safety_manager">Safety Manager</option>
+                  <option value="admin">Administrator</option>
+                </select>
+                {/* Custom dropdown arrow */}
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+              <p className="text-xs text-gray-400 mt-1">
+                Select your role in the organization
+              </p>
             </div>
 
             <motion.button
