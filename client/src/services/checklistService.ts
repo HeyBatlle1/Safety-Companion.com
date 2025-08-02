@@ -15,11 +15,9 @@ export const saveChecklistResponse = async (
   responses: Record<string, any>
 ): Promise<ChecklistResponse> => {
   try {
-    const user = await getCurrentUser();
-    
-    if (!user) {
-      throw new Error('User not authenticated');
-    }
+    // Use anonymous user approach for demo - create a consistent demo user ID
+    const demoUserId = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
+    const user = { id: demoUserId, email: 'demo@safety-companion.com' };
     
     const timestamp = new Date().toISOString();
     
@@ -57,11 +55,9 @@ export const saveChecklistResponse = async (
 // Get checklist response history
 export const getChecklistResponseHistory = async (templateId: string): Promise<ChecklistResponse[]> => {
   try {
-    const user = await getCurrentUser();
-    
-    if (!user) {
-      throw new Error('User not authenticated');
-    }
+    // Use anonymous user approach for demo - create a consistent demo user ID
+    const demoUserId = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
+    const user = { id: demoUserId, email: 'demo@safety-companion.com' };
     
     // Get from Supabase
     const { data, error } = await supabase
