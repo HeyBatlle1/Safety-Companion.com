@@ -1,6 +1,6 @@
 # Overview
 
-This is a comprehensive Safety Companion application built as a full-stack web platform for construction and workplace safety management. The application provides AI-powered safety assistance, real-time chat support, SDS (Safety Data Sheet) analysis, safety reporting, video training resources, interactive maps, and project management tools. It serves as a digital safety companion for field workers, project managers, and safety administrators in construction and industrial environments.
+This is a comprehensive Safety Companion application built as a full-stack web platform for construction and workplace safety management. The application provides AI-powered safety assistance, real-time chat support, SDS (Safety Data Sheet) analysis, safety reporting, video training resources, interactive maps, and project management tools. The homepage features stunning animated building graphics that serve as the visual centerpiece. It serves as a digital safety companion for field workers, project managers, and safety administrators in construction and industrial environments.
 
 # User Preferences
 
@@ -47,7 +47,7 @@ Preferred communication style: Simple, everyday language.
 - **Maps Integration**: Google Maps API for location services and route planning
 - **Video Platform**: YouTube Data API for safety training video content
 - **Weather Data**: Open-Meteo API for real-time weather information affecting site safety
-- **News Feed**: NewsData.io API for construction industry news and safety updates
+- **Building Animations**: Framer Motion powered interactive building graphics as homepage centerpiece
 - **Chemical Data**: PubChem API for Safety Data Sheet information and chemical analysis
 - **UI Framework**: Radix UI and shadcn/ui for accessible component primitives
 - **Development Tools**: Replit integration for cloud-based development environment
