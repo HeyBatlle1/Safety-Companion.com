@@ -51,7 +51,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         // Create a timeout promise
         const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Auth check timeout')), 3000); // 3 second timeout
+          setTimeout(() => reject(new Error('Auth check timeout')), 1000); // 1 second timeout for faster fallback
         });
 
         // Race between auth check and timeout
@@ -67,7 +67,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setUser(null);
         }
       } catch (error) {
-        // On timeout or error, fallback to sessionStorage if available
+        // On timeout or error, fallback to sessionStorage or offline mode
         const stored = sessionStorage.getItem('supabase-auth-user');
         if (stored) {
           try {
@@ -77,7 +77,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setUser(null);
           }
         } else {
-          sessionStorage.removeItem('supabase-auth-user');
+          // Set user to null to allow app to load in offline mode
           setUser(null);
         }
       } finally {
