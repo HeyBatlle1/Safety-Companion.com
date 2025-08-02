@@ -34,81 +34,50 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [initialized, setInitialized] = useState(false);
-
-  // Initialize auth state and set up listener
-  useEffect(() => {
-    if (initialized) return; // Prevent multiple initializations
-
-    // Get initial session
-    const initializeAuth = async () => {
-      try {
-        console.log('Initializing authentication...');
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) {
-          console.error('Error getting session:', error);
-          setUser(null);
-        } else {
-          console.log('Session initialized:', session?.user ? 'User logged in' : 'No active session');
-          setUser(session?.user ?? null);
-        }
-      } catch (error) {
-        console.error('Error initializing auth:', error);
-        setUser(null);
-      } finally {
-        console.log('Auth initialization complete, setting loading to false');
-        setLoading(false);
-        setInitialized(true);
-      }
-    };
-
-    // Force loading to false after 2 seconds to prevent infinite loops
-    const timeoutId = setTimeout(() => {
-      console.log('Auth initialization timeout - forcing loading to false');
-      setLoading(false);
-      setInitialized(true);
-    }, 2000);
-
-    initializeAuth().then(() => {
-      clearTimeout(timeoutId);
-    });
-
-    // Listen for auth changes (only if not already initialized)
-    if (!initialized) {
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(
-        async (event, session) => {
-          console.log('Auth state changed:', event, session?.user?.id);
-          
-          // Update user state
-          setUser(session?.user ?? null);
-          
-          // Handle auth events
-          switch (event) {
-            case 'SIGNED_IN':
-              showToast('Successfully signed in', 'success');
-              break;
-            case 'SIGNED_OUT':
-              showToast('Successfully signed out', 'success');
-              setUser(null);
-              break;
-            case 'TOKEN_REFRESHED':
-              console.log('Auth token refreshed');
-              break;
-            case 'INITIAL_SESSION':
-              console.log('Initial session loaded');
-              break;
-          }
-        }
-      );
-
-      return () => {
-        subscription.unsubscribe();
-      };
+  // Initialize user state from sessionStorage if available
+  const [user, setUser] = useState<User | null>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = sessionStorage.getItem('supabase-auth-user');
+      return stored ? JSON.parse(stored) : null;
     }
+    return null;
+  });
+  const [loading, setLoading] = useState(true);
 
-  }, [initialized]);
+  // Set up auth state listener
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id);
+        const newUser = session?.user ?? null;
+        setUser(newUser);
+        
+        // Persist to sessionStorage
+        if (newUser) {
+          sessionStorage.setItem('supabase-auth-user', JSON.stringify(newUser));
+        } else {
+          sessionStorage.removeItem('supabase-auth-user');
+        }
+        
+        setLoading(false);
+
+        // Handle auth events
+        switch (event) {
+          case 'SIGNED_IN':
+            showToast('Successfully signed in', 'success');
+            break;
+          case 'SIGNED_OUT':
+            showToast('Successfully signed out', 'success');
+            break;
+          case 'TOKEN_REFRESHED':
+            console.log('Auth token refreshed');
+            break;
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const signIn = async (email: string, password: string) => {
     try {

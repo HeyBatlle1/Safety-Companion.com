@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import AppLayout from './layouts/AppLayout';
@@ -20,37 +20,20 @@ import ToastContainer from './components/common/ToastContainer';
 
 function App() {
   const { loading, user } = useAuth();
-  const [forceRender, setForceRender] = useState(false);
 
-  // Auto-force render after 3 seconds to bypass loading loops
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setForceRender(true);
-      console.log('Force rendering app to bypass loading loop');
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Show loading screen only if truly loading and not forced
-  if (loading && !forceRender) {
-    console.log('App in loading state, user:', user ? 'present' : 'null');
+  // Show loading screen while auth is initializing
+  if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-300">Loading Safety Companion...</p>
-          <button 
-            onClick={() => setForceRender(true)} 
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
-          >
-            Skip loading
-          </button>
         </div>
       </div>
     );
   }
 
-  console.log('App render - loading:', loading, 'user:', user ? 'logged in' : 'not logged in', 'forceRender:', forceRender);
+  console.log('App render - user:', user ? 'logged in' : 'not logged in');
 
   return (
     <div className="min-h-screen bg-slate-900">
