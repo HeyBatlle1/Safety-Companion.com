@@ -36,9 +36,12 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
   // Initialize auth state and set up listener
   useEffect(() => {
+    if (initialized) return; // Prevent multiple initializations
+
     // Get initial session
     const initializeAuth = async () => {
       try {
@@ -57,51 +60,55 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } finally {
         console.log('Auth initialization complete, setting loading to false');
         setLoading(false);
+        setInitialized(true);
       }
     };
 
-    // Add a timeout to ensure loading state doesn't persist indefinitely
+    // Force loading to false after 2 seconds to prevent infinite loops
     const timeoutId = setTimeout(() => {
       console.log('Auth initialization timeout - forcing loading to false');
       setLoading(false);
-    }, 5000);
+      setInitialized(true);
+    }, 2000);
 
     initializeAuth().then(() => {
       clearTimeout(timeoutId);
     });
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id);
-        
-        // Only update user state, don't touch loading here to avoid conflicts
-        setUser(session?.user ?? null);
-        
-        // Handle auth events (but don't set loading here)
-        switch (event) {
-          case 'SIGNED_IN':
-            showToast('Successfully signed in', 'success');
-            break;
-          case 'SIGNED_OUT':
-            showToast('Successfully signed out', 'success');
-            setUser(null); // Ensure user is cleared on signout
-            break;
-          case 'TOKEN_REFRESHED':
-            console.log('Auth token refreshed');
-            break;
-          case 'INITIAL_SESSION':
-            // This is just the initial session check, don't do anything special
-            console.log('Initial session loaded');
-            break;
+    // Listen for auth changes (only if not already initialized)
+    if (!initialized) {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          console.log('Auth state changed:', event, session?.user?.id);
+          
+          // Update user state
+          setUser(session?.user ?? null);
+          
+          // Handle auth events
+          switch (event) {
+            case 'SIGNED_IN':
+              showToast('Successfully signed in', 'success');
+              break;
+            case 'SIGNED_OUT':
+              showToast('Successfully signed out', 'success');
+              setUser(null);
+              break;
+            case 'TOKEN_REFRESHED':
+              console.log('Auth token refreshed');
+              break;
+            case 'INITIAL_SESSION':
+              console.log('Initial session loaded');
+              break;
+          }
         }
-      }
-    );
+      );
 
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
+
+  }, [initialized]);
 
   const signIn = async (email: string, password: string) => {
     try {
