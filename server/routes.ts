@@ -15,6 +15,7 @@ import {
 import { z } from "zod";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
+import { pool } from "./db";
 
 // Session middleware for authentication
 const PgSession = connectPgSimple(session);
@@ -23,7 +24,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Configure session middleware
   app.use(session({
     store: new PgSession({
-      pool: require("./db").pool,
+      pool: pool,
       tableName: 'user_sessions'
     }),
     secret: process.env.SESSION_SECRET || 'development-secret-change-in-production',
@@ -393,6 +394,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Validation error', details: error.errors });
       }
       res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // ==================== DATABASE SCHEMA FIX (replaces Supabase Edge Function) ====================
+  app.post("/api/db-schema-fix", requireAuth, async (req, res) => {
+    try {
+      const { fix = false } = req.body;
+      
+      const results = {
+        checkTime: new Date().toISOString(),
+        missingTables: [],
+        missingColumns: [],
+        fixedTables: [],
+        fixedColumns: [],
+        errors: []
+      };
+
+      // Check if all required tables exist by trying to query them
+      const requiredTables = [
+        'users', 'notification_preferences', 'analysis_history', 
+        'risk_assessments', 'safety_reports', 'chat_messages', 
+        'watched_videos', 'companies', 'projects', 'user_project_assignments'
+      ];
+
+      for (const table of requiredTables) {
+        try {
+          await db.execute(`SELECT 1 FROM ${table} LIMIT 1`);
+        } catch (error) {
+          results.missingTables.push(table);
+          if (fix) {
+            // Tables are already created via Drizzle schema
+            results.errors.push(`Table ${table} missing but would be created by schema migration`);
+          }
+        }
+      }
+
+      let message = 'Database schema check completed.';
+      if (results.missingTables.length > 0 || results.missingColumns.length > 0) {
+        message += ` Issues found: ${results.missingTables.length} missing tables, ${results.missingColumns.length} missing columns.`;
+        if (fix) {
+          message += ' Run `npm run db:push` to fix schema issues.';
+        }
+      } else {
+        message += ' No issues found.';
+      }
+
+      results.message = message;
+      res.json(results);
+    } catch (error) {
+      console.error('Database schema fix error:', error);
+      res.status(500).json({ error: 'Internal server error', details: error.message });
     }
   });
 
