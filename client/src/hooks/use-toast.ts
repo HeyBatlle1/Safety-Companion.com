@@ -1,69 +1,26 @@
-import { useState, useCallback } from 'react';
+import * as React from "react"
 
-export interface Toast {
-  id: string;
-  title: string;
-  description?: string;
-  variant?: 'default' | 'destructive' | 'success';
-  duration?: number;
+type ToastProps = {
+  title?: string
+  description?: string
+  variant?: "default" | "destructive"
 }
 
-const toasts: Toast[] = [];
-const listeners: Array<(toasts: Toast[]) => void> = [];
+export const useToast = () => {
+  const toast = React.useCallback((props: ToastProps) => {
+    // Simple console logging for now - you can integrate with a proper toast system later
+    const type = props.variant === "destructive" ? "error" : "info"
+    console.log(`[${type.toUpperCase()}] ${props.title}: ${props.description}`)
+    
+    // You can also integrate with your existing ToastContainer here
+    // For now, we'll just use browser notifications if available
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification(props.title || "Notification", {
+        body: props.description,
+        icon: "/favicon.ico"
+      })
+    }
+  }, [])
 
-let toastId = 0;
-
-function addToast(toast: Omit<Toast, 'id'>) {
-  const id = (++toastId).toString();
-  const newToast = { ...toast, id };
-  toasts.push(newToast);
-  
-  listeners.forEach(listener => listener([...toasts]));
-  
-  // Auto remove after duration
-  const duration = toast.duration ?? 5000;
-  if (duration > 0) {
-    setTimeout(() => {
-      removeToast(id);
-    }, duration);
-  }
-  
-  return id;
-}
-
-function removeToast(id: string) {
-  const index = toasts.findIndex(toast => toast.id === id);
-  if (index > -1) {
-    toasts.splice(index, 1);
-    listeners.forEach(listener => listener([...toasts]));
-  }
-}
-
-export function useToast() {
-  const [toastList, setToastList] = useState<Toast[]>([...toasts]);
-  
-  const subscribe = useCallback((listener: (toasts: Toast[]) => void) => {
-    listeners.push(listener);
-    return () => {
-      const index = listeners.indexOf(listener);
-      if (index > -1) {
-        listeners.splice(index, 1);
-      }
-    };
-  }, []);
-  
-  const toast = useCallback((props: Omit<Toast, 'id'>) => {
-    return addToast(props);
-  }, []);
-  
-  const dismiss = useCallback((id: string) => {
-    removeToast(id);
-  }, []);
-  
-  return {
-    toast,
-    dismiss,
-    toasts: toastList,
-    subscribe
-  };
+  return { toast }
 }

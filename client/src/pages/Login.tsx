@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { LogIn, Mail, Lock, Shield } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { showToast } from '../components/common/ToastContainer';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Loader2, Shield, Users, HardHat, ClipboardCheck, Crown } from 'lucide-react';
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [signInData, setSignInData] = useState({ email: '', password: '' });
+  const [signUpData, setSignUpData] = useState({ email: '', password: '', confirmPassword: '', role: '' });
   const [loading, setLoading] = useState(false);
-  const { user, signIn } = useAuth();
+  const { user, signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -21,119 +25,190 @@ const Login: React.FC = () => {
     }
   }, [user, navigate, location]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !password) {
-      showToast('Please fill in all fields', 'error');
+    if (!signInData.email || !signInData.password) {
       return;
     }
 
     setLoading(true);
     try {
-      await signIn(email, password);
+      await signIn(signInData.email, signInData.password);
       const from = (location.state as any)?.from?.pathname || '/';
       navigate(from, { replace: true });
     } catch (error: any) {
-      console.error('Login error:', error);
-      showToast(error.message || 'Failed to sign in', 'error');
+      // Error handling is done in the auth context
     } finally {
       setLoading(false);
     }
   };
 
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!signUpData.email || !signUpData.password || !signUpData.confirmPassword || !signUpData.role) {
+      return;
+    }
+
+    if (signUpData.password !== signUpData.confirmPassword) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await signUp(signUpData.email, signUpData.password, signUpData.role);
+    } catch (error: any) {
+      // Error handling is done in the auth context
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const roleOptions = [
+    { value: 'field_worker', label: 'Field Worker', icon: HardHat, description: 'Front-line safety operations' },
+    { value: 'supervisor', label: 'Supervisor', icon: Users, description: 'Team and site oversight' },
+    { value: 'project_manager', label: 'Project Manager', icon: ClipboardCheck, description: 'Project coordination and management' },
+    { value: 'safety_manager', label: 'Safety Manager', icon: Shield, description: 'Safety program leadership' },
+    { value: 'admin', label: 'Administrator', icon: Crown, description: 'Full system administration' },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
-      >
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-blue-500/20 rounded-xl p-8 shadow-2xl">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="inline-flex items-center justify-center w-16 h-16 bg-blue-500/20 rounded-full mb-4"
-            >
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <Card className="bg-slate-800/95 border-blue-500/20 shadow-2xl">
+          <CardHeader className="text-center pb-6">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-500/20 rounded-full mb-4 mx-auto">
               <Shield className="w-8 h-8 text-blue-400" />
-            </motion.div>
-            <h1 className="text-2xl font-bold text-white mb-2">Safety Companion</h1>
-            <p className="text-gray-400">Sign in to your account</p>
-          </div>
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-colors"
-                  placeholder="Enter your email"
-                  required
-                />
-              </div>
             </div>
+            <CardTitle className="text-2xl font-bold text-white">Safety Companion</CardTitle>
+            <CardDescription className="text-slate-400">
+              Enterprise Safety Management Platform
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent>
+            <Tabs defaultValue="signin" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="signin">Sign In</TabsTrigger>
+                <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="signin" className="space-y-4">
+                <form onSubmit={handleSignIn} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-email">Email</Label>
+                    <Input
+                      id="signin-email"
+                      type="email"
+                      value={signInData.email}
+                      onChange={(e) => setSignInData({ ...signInData, email: e.target.value })}
+                      className="bg-slate-700/50 border-slate-600 text-white"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-password">Password</Label>
+                    <Input
+                      id="signin-password"
+                      type="password"
+                      value={signInData.password}
+                      onChange={(e) => setSignInData({ ...signInData, password: e.target.value })}
+                      className="bg-slate-700/50 border-slate-600 text-white"
+                      required
+                    />
+                  </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-colors"
-                  placeholder="Enter your password"
-                  required
-                />
-              </div>
-            </div>
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                  >
+                    {loading ? (
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    ) : null}
+                    Sign In
+                  </Button>
+                </form>
+              </TabsContent>
+              
+              <TabsContent value="signup" className="space-y-4">
+                <form onSubmit={handleSignUp} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">Email</Label>
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      value={signUpData.email}
+                      onChange={(e) => setSignUpData({ ...signUpData, email: e.target.value })}
+                      className="bg-slate-700/50 border-slate-600 text-white"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">Password</Label>
+                    <Input
+                      id="signup-password"
+                      type="password"
+                      value={signUpData.password}
+                      onChange={(e) => setSignUpData({ ...signUpData, password: e.target.value })}
+                      className="bg-slate-700/50 border-slate-600 text-white"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm-password">Confirm Password</Label>
+                    <Input
+                      id="confirm-password"
+                      type="password"
+                      value={signUpData.confirmPassword}
+                      onChange={(e) => setSignUpData({ ...signUpData, confirmPassword: e.target.value })}
+                      className="bg-slate-700/50 border-slate-600 text-white"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="role">Role</Label>
+                    <Select value={signUpData.role} onValueChange={(value) => setSignUpData({ ...signUpData, role: value })}>
+                      <SelectTrigger className="bg-slate-700/50 border-slate-600 text-white">
+                        <SelectValue placeholder="Select your role" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-600">
+                        {roleOptions.map((role) => (
+                          <SelectItem key={role.value} value={role.value} className="text-white">
+                            <div className="flex items-center space-x-2">
+                              <role.icon className="w-4 h-4" />
+                              <div>
+                                <div className="font-medium">{role.label}</div>
+                                <div className="text-xs text-slate-400">{role.description}</div>
+                              </div>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-            <motion.button
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 rounded-lg font-medium hover:from-blue-600 hover:to-cyan-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-            >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  <LogIn className="w-5 h-5 mr-2" />
-                  Sign In
-                </>
-              )}
-            </motion.button>
-          </form>
-
-          {/* Footer */}
-          <div className="mt-6 text-center">
-            <p className="text-gray-400">
-              Don't have an account?{' '}
-              <Link 
-                to="/signup" 
-                className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
-              >
-                Sign up
-              </Link>
-            </p>
-          </div>
-        </div>
-      </motion.div>
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                  >
+                    {loading ? (
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    ) : null}
+                    Create Account
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

@@ -1,31 +1,22 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
-import { supabase, signIn as authSignIn, signUp as authSignUp, signOut as authSignOut } from '../services/supabase';
-import { showToast } from '../components/common/ToastContainer';
+import { supabase } from '@/services/supabase';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, role?: string) => Promise<void>;
+  signUp: (email: string, password: string, role: string) => Promise<void>;
   signOut: () => Promise<void>;
-  refreshUser: () => Promise<void>;
 }
 
-// Default context value to prevent undefined errors
-const defaultAuthContext: AuthContextType = {
-  user: null,
-  loading: true,
-  signIn: async () => { throw new Error('Auth context not initialized'); },
-  signUp: async () => { throw new Error('Auth context not initialized'); },
-  signOut: async () => { throw new Error('Auth context not initialized'); },
-  refreshUser: async () => { throw new Error('Auth context not initialized'); }
-};
-
-const AuthContext = createContext<AuthContextType>(defaultAuthContext);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
   return context;
 };
 
@@ -34,121 +25,113 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  // Initialize user state from sessionStorage if available
-  const [user, setUser] = useState<User | null>(() => {
-    if (typeof window !== 'undefined') {
-      const stored = sessionStorage.getItem('supabase-auth-user');
-      return stored ? JSON.parse(stored) : null;
-    }
-    return null;
-  });
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Set up auth state listener
-  useEffect(() => {
-    // Check initial auth state with timeout
-    const checkInitialAuth = async () => {
-      try {
-        // Create a timeout promise
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Auth check timeout')), 1000); // 1 second timeout for faster fallback
-        });
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    console.log(`[${type.toUpperCase()}] ${message}`);
+  };
 
-        // Race between auth check and timeout
-        const authPromise = supabase.auth.getUser();
+  // Initialize auth state
+  useEffect(() => {
+    let isMounted = true;
+
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
         
-        const { data: { user: currentUser } } = await Promise.race([authPromise, timeoutPromise]) as any;
-        
-        if (currentUser) {
-          setUser(currentUser);
-          sessionStorage.setItem('supabase-auth-user', JSON.stringify(currentUser));
-        } else {
-          sessionStorage.removeItem('supabase-auth-user');
-          setUser(null);
+        if (isMounted) {
+          setUser(session?.user ?? null);
         }
       } catch (error) {
-        // On timeout or error, fallback to sessionStorage or offline mode
-        const stored = sessionStorage.getItem('supabase-auth-user');
-        if (stored) {
-          try {
-            setUser(JSON.parse(stored));
-          } catch {
-            sessionStorage.removeItem('supabase-auth-user');
-            setUser(null);
-          }
-        } else {
-          // Set user to null to allow app to load in offline mode
+        if (isMounted) {
           setUser(null);
         }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
-    checkInitialAuth();
-
+    // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
+        if (!isMounted) return;
 
-        const newUser = session?.user ?? null;
-        setUser(newUser);
-        
-        // Persist to sessionStorage
-        if (newUser) {
-          sessionStorage.setItem('supabase-auth-user', JSON.stringify(newUser));
-        } else {
-          sessionStorage.removeItem('supabase-auth-user');
-        }
-        
+        setUser(session?.user ?? null);
         setLoading(false);
 
-        // Handle auth events
-        switch (event) {
-          case 'SIGNED_IN':
-            showToast('Successfully signed in', 'success');
-            break;
-          case 'SIGNED_OUT':
-            showToast('Successfully signed out', 'success');
-            break;
-          case 'TOKEN_REFRESHED':
-
-            break;
+        if (event === 'SIGNED_IN') {
+          showToast('Successfully signed in');
+        } else if (event === 'SIGNED_OUT') {
+          showToast('Successfully signed out');
         }
       }
     );
 
-    return () => subscription.unsubscribe();
+    // Initialize with a fallback timeout
+    const fallbackTimeout = setTimeout(() => {
+      if (isMounted && loading) {
+        setLoading(false);
+      }
+    }, 5000);
+
+    initializeAuth();
+
+    return () => {
+      isMounted = false;
+      clearTimeout(fallbackTimeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
     try {
-      await authSignIn(email, password);
-      // The auth state change listener will handle setting the user
-    } catch (error: any) {
+      setLoading(true);
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
+      if (error) throw error;
+    } catch (error: any) {
       showToast(error.message || 'Failed to sign in', 'error');
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
-  const signUp = async (email: string, password: string, role: string = 'field_worker') => {
+  const signUp = async (email: string, password: string, role: string) => {
     try {
-      await authSignUp(email, password, role);
-      showToast('Account created successfully! Please check your email to verify your account.', 'success');
-    } catch (error: any) {
+      setLoading(true);
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            role: role,
+          },
+        },
+      });
 
-      showToast(error.message || 'Failed to create account', 'error');
+      if (error) throw error;
+      showToast('Account created successfully! Please check your email to verify your account.');
+    } catch (error: any) {
+      showToast(error.message || 'Failed to sign up', 'error');
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
   const signOut = async () => {
     try {
       setLoading(true);
-      await authSignOut();
-      // The auth state change listener will handle clearing the user
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
     } catch (error: any) {
-
       showToast(error.message || 'Failed to sign out', 'error');
       throw error;
     } finally {
@@ -156,28 +139,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const refreshUser = async () => {
-    try {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (error) {
-
-        setUser(null);
-      } else {
-        setUser(user);
-      }
-    } catch (error) {
-
-      setUser(null);
-    }
-  };
-
-  const value: AuthContextType = {
+  const value = {
     user,
     loading,
     signIn,
     signUp,
     signOut,
-    refreshUser
   };
 
   return (
