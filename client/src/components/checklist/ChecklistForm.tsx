@@ -185,7 +185,7 @@ const ChecklistForm = () => {
         setRiskProfile(oshaRiskProfile);
 
         // Perform intelligent analysis with real OSHA data
-        const intelligentAnalysis = await safetyCompanionAPI.analyzeChecklist(checklistData, oshaRiskProfile);
+        const intelligentAnalysis = await safetyCompanionAPI.analyzeChecklist(checklistData, oshaRiskProfile || undefined);
         setSafetyAnalysis(intelligentAnalysis);
 
         if (oshaRiskProfile) {
@@ -703,35 +703,75 @@ Progress: ${Math.round(calculateProgress())}% complete
                             </motion.button>
                           </div>
 
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                            {item.options.map((option, optionIndex) => (
-                              <motion.button
-                                key={optionIndex}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={(e) => {
+                          {/* Enhanced Input System */}
+                          <div className="mb-4">
+                            {item.inputType === 'select' && item.options.length > 0 ? (
+                              // Dropdown select for multiple choice questions
+                              <select
+                                value={responses[item.id]?.value || ''}
+                                onChange={(e) => {
                                   e.stopPropagation();
-                                  handleResponse(item.id, option);
+                                  handleResponse(item.id, e.target.value);
                                 }}
-                                className={`p-4 rounded-xl border transition-all duration-300 ${
-                                  responses[item.id]?.value === option
-                                    ? 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border-blue-400 shadow-lg'
-                                    : 'border-blue-500/20 hover:border-blue-400/60 hover:bg-slate-600/30'
-                                }`}
+                                className="w-full p-4 rounded-xl bg-slate-700/50 border border-blue-500/20 text-white focus:outline-none focus:border-blue-400/60 focus:ring-2 focus:ring-blue-400/20 transition-all"
+                                required={item.required}
                               >
-                                <div className="flex items-center space-x-3">
-                                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                                    responses[item.id]?.value === option
-                                      ? 'border-blue-400 bg-blue-400'
-                                      : 'border-gray-400'
-                                  }`}>
-                                    {responses[item.id]?.value === option && (
-                                      <Check className="w-3 h-3 text-white" />
-                                    )}
-                                  </div>
-                                  <span className="text-white font-medium">{option}</span>
-                                </div>
-                              </motion.button>
-                            ))}
+                                <option value="">Select an option...</option>
+                                {item.options.map((option, optionIndex) => (
+                                  <option key={optionIndex} value={option} className="bg-slate-800 text-white">
+                                    {option}
+                                  </option>
+                                ))}
+                              </select>
+                            ) : item.inputType === 'textarea' ? (
+                              // Text area for detailed responses
+                              <textarea
+                                value={responses[item.id]?.value || ''}
+                                onChange={(e) => {
+                                  e.stopPropagation();
+                                  handleResponse(item.id, e.target.value);
+                                }}
+                                placeholder={item.placeholder || 'Enter detailed response...'}
+                                className="w-full h-32 p-4 rounded-xl bg-slate-700/50 border border-blue-500/20 text-white placeholder-gray-400 focus:outline-none focus:border-blue-400/60 focus:ring-2 focus:ring-blue-400/20 transition-all resize-none"
+                                required={item.required}
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            ) : item.inputType === 'number' ? (
+                              // Number input for measurements, quantities
+                              <input
+                                type="number"
+                                value={responses[item.id]?.value || ''}
+                                onChange={(e) => {
+                                  e.stopPropagation();
+                                  handleResponse(item.id, e.target.value);
+                                }}
+                                placeholder={item.placeholder || 'Enter number...'}
+                                className="w-full p-4 rounded-xl bg-slate-700/50 border border-blue-500/20 text-white placeholder-gray-400 focus:outline-none focus:border-blue-400/60 focus:ring-2 focus:ring-blue-400/20 transition-all"
+                                required={item.required}
+                                onClick={(e) => e.stopPropagation()}
+                                step="0.1"
+                              />
+                            ) : (
+                              // Default text input
+                              <input
+                                type={item.inputType || 'text'}
+                                value={responses[item.id]?.value || ''}
+                                onChange={(e) => {
+                                  e.stopPropagation();
+                                  handleResponse(item.id, e.target.value);
+                                }}
+                                placeholder={item.placeholder || 'Enter response...'}
+                                className="w-full p-4 rounded-xl bg-slate-700/50 border border-blue-500/20 text-white placeholder-gray-400 focus:outline-none focus:border-blue-400/60 focus:ring-2 focus:ring-blue-400/20 transition-all"
+                                required={item.required}
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            )}
+                            {item.required && !responses[item.id]?.value && (
+                              <p className="text-red-400 text-sm mt-2 flex items-center">
+                                <AlertTriangle className="w-4 h-4 mr-1" />
+                                This field is required
+                              </p>
+                            )}
                           </div>
 
                           <AnimatePresence>
@@ -755,66 +795,125 @@ Progress: ${Math.round(calculateProgress())}% complete
                                   </div>
                                 )}
 
-                                {item.images && (
-                                  <div className="space-y-3">
+                                {/* Enhanced File and Image Upload System */}
+                                {(item.images || item.files) && (
+                                  <div className="space-y-4">
                                     <div className="flex items-center space-x-2">
-                                      <Camera className="w-5 h-5 text-gray-400" />
-                                      <span className="text-gray-400 font-medium">Attachments</span>
+                                      <Upload className="w-5 h-5 text-gray-400" />
+                                      <span className="text-gray-400 font-medium">
+                                        {item.files ? 'Files & Blueprints' : 'Images'}
+                                      </span>
                                     </div>
-                                    <div className="grid grid-cols-4 gap-3">
-                                      {responses[item.id]?.images?.map((image, index) => (
-                                        <div key={index} className="relative group">
-                                          <img
-                                            src={image}
-                                            alt={`Attachment ${index + 1}`}
-                                            className="w-full h-24 object-cover rounded-lg"
-                                          />
-                                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all rounded-lg">
+                                    
+                                    {/* Display uploaded files/images */}
+                                    {responses[item.id]?.images && responses[item.id].images.length > 0 && (
+                                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                        {responses[item.id].images.map((image, index) => (
+                                          <div key={index} className="relative group">
+                                            <img
+                                              src={image}
+                                              alt={`Attachment ${index + 1}`}
+                                              className="w-full h-20 object-cover rounded-lg border border-blue-500/20"
+                                            />
                                             <motion.button
                                               whileTap={{ scale: 0.9 }}
                                               onClick={(e) => {
                                                 e.stopPropagation();
+                                                const newImages = responses[item.id]?.images?.filter((_, i) => i !== index);
                                                 setResponses(prev => ({
                                                   ...prev,
                                                   [item.id]: {
                                                     ...prev[item.id],
-                                                    images: prev[item.id]?.images?.filter((_, i) => i !== index) || []
+                                                    images: newImages
                                                   }
-                                                }))
+                                                }));
                                               }}
-                                              className="p-2 bg-red-500 rounded-full text-white hover:bg-red-600 transition-colors"
+                                              className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                                             >
-                                              <X className="w-4 h-4" />
+                                              <X className="w-4 h-4 text-white" />
                                             </motion.button>
                                           </div>
-                                        </div>
-                                      ))}
-                                      <div className="flex flex-col gap-2">
-                                        <label
-                                          className="w-full h-12 flex items-center justify-center border-2 border-dashed border-blue-500/30 rounded-lg cursor-pointer hover:border-blue-400/60 hover:bg-blue-500/10 transition-all"
-                                          onClick={(e) => e.stopPropagation()}
-                                        >
+                                        ))}
+                                      </div>
+                                    )}
+
+                                    {/* Upload controls */}
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                      {/* File upload for documents/blueprints */}
+                                      {item.files && (
+                                        <>
+                                          <input
+                                            type="file"
+                                            accept=".pdf,.dwg,.jpg,.jpeg,.png,.gif,.bmp,.tiff,.doc,.docx,.xls,.xlsx"
+                                            multiple
+                                            onChange={(e) => {
+                                              e.stopPropagation();
+                                              if (e.target.files) handleImageUpload(item.id, e.target.files);
+                                            }}
+                                            className="hidden"
+                                            id={`file-${item.id}`}
+                                          />
+                                          <motion.button
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              document.getElementById(`file-${item.id}`)?.click();
+                                            }}
+                                            className="h-12 flex items-center justify-center space-x-2 border-2 border-dashed border-green-500/30 rounded-lg hover:border-green-400/60 hover:bg-green-500/10 transition-all"
+                                          >
+                                            <Upload className="w-5 h-5 text-green-400" />
+                                            <span className="text-green-400 text-sm font-medium">Blueprints/Docs</span>
+                                          </motion.button>
+                                        </>
+                                      )}
+                                      
+                                      {/* Image upload */}
+                                      {item.images && (
+                                        <>
                                           <input
                                             type="file"
                                             accept="image/*"
                                             multiple
+                                            onChange={(e) => {
+                                              e.stopPropagation();
+                                              if (e.target.files) handleImageUpload(item.id, e.target.files);
+                                            }}
                                             className="hidden"
-                                            onChange={(e) => e.target.files && handleImageUpload(item.id, e.target.files)}
+                                            id={`image-${item.id}`}
                                           />
-                                          <Plus className="w-5 h-5 text-blue-400" />
-                                        </label>
-                                        <motion.button
-                                          whileTap={{ scale: 0.95 }}
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleCaptureImage(item.id);
-                                          }}
-                                          className="h-12 flex items-center justify-center border-2 border-dashed border-blue-500/30 rounded-lg hover:border-blue-400/60 hover:bg-blue-500/10 transition-all"
-                                        >
-                                          <Camera className="w-5 h-5 text-blue-400" />
-                                        </motion.button>
-                                      </div>
+                                          <motion.button
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              document.getElementById(`image-${item.id}`)?.click();
+                                            }}
+                                            className="h-12 flex items-center justify-center space-x-2 border-2 border-dashed border-blue-500/30 rounded-lg hover:border-blue-400/60 hover:bg-blue-500/10 transition-all"
+                                          >
+                                            <Upload className="w-5 h-5 text-blue-400" />
+                                            <span className="text-blue-400 text-sm font-medium">Upload Images</span>
+                                          </motion.button>
+                                          
+                                          {/* Camera capture */}
+                                          <motion.button
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleCaptureImage(item.id);
+                                            }}
+                                            className="h-12 flex items-center justify-center space-x-2 border-2 border-dashed border-purple-500/30 rounded-lg hover:border-purple-400/60 hover:bg-purple-500/10 transition-all"
+                                          >
+                                            <Camera className="w-5 h-5 text-purple-400" />
+                                            <span className="text-purple-400 text-sm font-medium">Take Photo</span>
+                                          </motion.button>
+                                        </>
+                                      )}
                                     </div>
+                                    
+                                    {item.files && (
+                                      <p className="text-gray-400 text-xs">
+                                        Supported: PDF, DWG, Images, Documents (Max 10MB each)
+                                      </p>
+                                    )}
                                   </div>
                                 )}
 
