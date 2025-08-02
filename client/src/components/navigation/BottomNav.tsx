@@ -12,7 +12,6 @@ const BottomNav = () => {
     { icon: Map, label: 'Maps', path: '/maps' },
     { icon: MessageCircle, label: 'Chat', path: '/chat' },
     { icon: ClipboardCheck, label: 'Checklists', path: '/checklists' },
-    { icon: Users, label: 'Profiles', path: '/profiles' },
     { icon: Layout, label: 'Drawings', path: '/drawings' },
     { icon: FileText, label: 'SDS', path: '/sds' },
     { icon: Clock, label: 'History', path: '/history' },
@@ -25,6 +24,7 @@ const BottomNav = () => {
       path: '/videos' 
     },
     { icon: User, label: 'Profile', path: '/profile' },
+    { icon: Users, label: 'Profiles', path: '/profiles' },
   ];
 
   return (

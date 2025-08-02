@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Filter, Plus, Users, Shield, MapPin } from 'lucide-react';
+import { Search, Filter, Plus, Users, Shield, MapPin, Building2, Award, Clock } from 'lucide-react';
 import ProfileCard from '@/components/profile/ProfileCard';
 import LoadingState, { ProfileCardSkeleton } from '@/components/profile/LoadingState';
 import { useToast } from '../hooks/use-toast';
@@ -179,7 +179,7 @@ const Profiles: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+    <div className="min-h-screen bg-slate-900 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <motion.div
@@ -187,88 +187,133 @@ const Profiles: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
-                <Users className="w-8 h-8 mr-3 text-blue-600" />
-                Team Profiles
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent flex items-center">
+                <Users className="w-8 h-8 mr-3 text-blue-400" />
+                Enterprise Team Management
               </h1>
-              <p className="text-gray-600 dark:text-gray-300 mt-2">
-                Manage your company's 175-person workforce with enterprise-grade security
+              <p className="text-gray-300 mt-2 text-lg">
+                Secure workforce management for 175+ construction professionals
               </p>
+              <div className="flex items-center space-x-4 mt-2 text-sm text-gray-400">
+                <div className="flex items-center">
+                  <Building2 className="w-4 h-4 mr-1" />
+                  <span>Safety Companion Demo Company</span>
+                </div>
+                <div className="flex items-center">
+                  <Shield className="w-4 h-4 mr-1" />
+                  <span>Enterprise Security</span>
+                </div>
+              </div>
             </div>
             
-            <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <motion.button 
+              whileTap={{ scale: 0.95 }}
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
               <Plus className="w-4 h-4 mr-2" />
               Add Employee
-            </button>
+            </motion.button>
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-              <div className="flex items-center">
-                <Users className="w-5 h-5 text-blue-600 mr-2" />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-slate-800/60 backdrop-blur-sm rounded-xl p-6 border border-blue-500/20 shadow-lg"
+            >
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Employees</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
+                  <p className="text-sm text-gray-300 mb-1">Total Workforce</p>
+                  <p className="text-3xl font-bold text-white">{stats.total}</p>
+                  <p className="text-xs text-green-400 mt-1">↗ Enterprise Scale</p>
+                </div>
+                <div className="p-3 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-xl">
+                  <Users className="w-6 h-6 text-blue-400" />
                 </div>
               </div>
-            </div>
+            </motion.div>
             
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-              <div className="flex items-center">
-                <div className="w-3 h-3 bg-green-500 rounded-full mr-2" />
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-slate-800/60 backdrop-blur-sm rounded-xl p-6 border border-blue-500/20 shadow-lg"
+            >
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Active</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.active}</p>
+                  <p className="text-sm text-gray-300 mb-1">Active Workers</p>
+                  <p className="text-3xl font-bold text-white">{stats.active}</p>
+                  <p className="text-xs text-green-400 mt-1">↗ {Math.round((stats.active/stats.total)*100)}% Active</p>
+                </div>
+                <div className="p-3 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl">
+                  <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse" />
                 </div>
               </div>
-            </div>
+            </motion.div>
             
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-              <div className="flex items-center">
-                <Shield className="w-5 h-5 text-red-600 mr-2" />
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-slate-800/60 backdrop-blur-sm rounded-xl p-6 border border-blue-500/20 shadow-lg"
+            >
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Admins</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.admins}</p>
+                  <p className="text-sm text-gray-300 mb-1">Safety Officers</p>
+                  <p className="text-3xl font-bold text-white">{stats.admins}</p>
+                  <p className="text-xs text-orange-400 mt-1">Security Level</p>
+                </div>
+                <div className="p-3 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-xl">
+                  <Shield className="w-6 h-6 text-orange-400" />
                 </div>
               </div>
-            </div>
+            </motion.div>
             
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-              <div className="flex items-center">
-                <MapPin className="w-5 h-5 text-purple-600 mr-2" />
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="bg-slate-800/60 backdrop-blur-sm rounded-xl p-6 border border-blue-500/20 shadow-lg"
+            >
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Managers</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.managers}</p>
+                  <p className="text-sm text-gray-300 mb-1">Management</p>
+                  <p className="text-3xl font-bold text-white">{stats.managers}</p>
+                  <p className="text-xs text-purple-400 mt-1">Leadership Team</p>
+                </div>
+                <div className="p-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl">
+                  <Award className="w-6 h-6 text-purple-400" />
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
 
           {/* Search and Filters */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-            <div className="flex flex-col md:flex-row gap-4">
+          <div className="bg-slate-800/60 backdrop-blur-sm rounded-xl p-6 border border-blue-500/20 shadow-lg mb-8">
+            <div className="flex flex-col lg:flex-row gap-4">
               {/* Search */}
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search by name, email, or employee ID..."
+                  placeholder="Search employees by name, email, or ID..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-12 pr-4 py-3 bg-slate-700/50 border border-blue-500/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-blue-400/60 focus:ring-2 focus:ring-blue-400/20 transition-all"
                 />
               </div>
 
               {/* Role Filter */}
-              <div className="flex items-center space-x-2">
-                <Filter className="w-4 h-4 text-gray-400" />
+              <div className="flex items-center space-x-3">
+                <Filter className="w-5 h-5 text-gray-400" />
                 <select
                   value={roleFilter}
                   onChange={(e) => setRoleFilter(e.target.value)}
-                  className="px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="px-4 py-3 bg-slate-700/50 border border-blue-500/20 rounded-xl text-white focus:outline-none focus:border-blue-400/60 focus:ring-2 focus:ring-blue-400/20 transition-all"
                 >
                   <option value="all">All Roles</option>
                   {uniqueRoles.map(role => (
@@ -283,13 +328,26 @@ const Profiles: React.FC = () => {
               <select
                 value={departmentFilter}
                 onChange={(e) => setDepartmentFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="px-4 py-3 bg-slate-700/50 border border-blue-500/20 rounded-xl text-white focus:outline-none focus:border-blue-400/60 focus:ring-2 focus:ring-blue-400/20 transition-all"
               >
                 <option value="all">All Departments</option>
                 {uniqueDepartments.map((dept, index) => (
                   <option key={dept || `dept-${index}`} value={dept || ''}>{dept}</option>
                 ))}
               </select>
+            </div>
+            
+            {/* Quick Filter Chips */}
+            <div className="flex flex-wrap gap-2 mt-4">
+              <button className="px-3 py-1 text-xs bg-blue-500/20 text-blue-300 rounded-full hover:bg-blue-500/30 transition-colors">
+                Active Only
+              </button>
+              <button className="px-3 py-1 text-xs bg-green-500/20 text-green-300 rounded-full hover:bg-green-500/30 transition-colors">
+                Recent Hires
+              </button>
+              <button className="px-3 py-1 text-xs bg-orange-500/20 text-orange-300 rounded-full hover:bg-orange-500/30 transition-colors">
+                Certifications Expiring
+              </button>
             </div>
           </div>
         </motion.div>
@@ -302,31 +360,39 @@ const Profiles: React.FC = () => {
             transition={{ delay: 0.2 }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
-            {filteredProfiles.map((profile) => (
-              <ProfileCard
+            {filteredProfiles.map((profile, index) => (
+              <motion.div
                 key={profile.id}
-                profile={profile}
-                isCurrentUser={currentUser?.id === profile.id}
-                onEdit={() => toast({
-                  title: 'Edit Profile',
-                  description: `Opening edit form for ${profile.firstName} ${profile.lastName}`,
-                })}
-              />
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 * (index % 6) }}
+              >
+                <ProfileCard
+                  profile={profile}
+                  isCurrentUser={currentUser?.id === profile.id}
+                  onEdit={() => toast({
+                    title: 'Edit Profile',
+                    description: `Opening edit form for ${profile.firstName} ${profile.lastName}`,
+                  })}
+                />
+              </motion.div>
             ))}
           </motion.div>
         ) : (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-center py-12"
+            className="text-center py-16"
           >
-            <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              No profiles found
-            </h3>
-            <p className="text-gray-600 dark:text-gray-300">
-              Try adjusting your search or filter criteria
-            </p>
+            <div className="bg-slate-800/60 backdrop-blur-sm rounded-xl p-8 border border-blue-500/20 max-w-md mx-auto">
+              <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-white mb-2">
+                No profiles found
+              </h3>
+              <p className="text-gray-400">
+                Try adjusting your search or filter criteria
+              </p>
+            </div>
           </motion.div>
         )}
       </div>

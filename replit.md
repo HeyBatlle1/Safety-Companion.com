@@ -5,6 +5,9 @@ This is a comprehensive Safety Companion application built as a full-stack web p
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
+UI Design: Professional, enterprise-grade styling with dark theme and blue/cyan gradients
+Navigation: Profiles icon positioned at the end of navigation list
+Code Organization: Checklist functionality separated from SDS chat - clean separation of concerns
 
 # System Architecture
 

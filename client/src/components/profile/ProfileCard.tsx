@@ -30,12 +30,12 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
 }) => {
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'admin': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-      case 'safety_manager': return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
-      case 'project_manager': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-      case 'supervisor': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
-      case 'field_worker': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
+      case 'admin': return 'bg-gradient-to-r from-red-500/20 to-orange-500/20 text-red-300 border-red-500/30';
+      case 'safety_manager': return 'bg-gradient-to-r from-orange-500/20 to-yellow-500/20 text-orange-300 border-orange-500/30';
+      case 'project_manager': return 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-300 border-blue-500/30';
+      case 'supervisor': return 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-300 border-purple-500/30';
+      case 'field_worker': return 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-300 border-green-500/30';
+      default: return 'bg-gradient-to-r from-gray-500/20 to-slate-500/20 text-gray-300 border-gray-500/30';
     }
   };
 
@@ -54,7 +54,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+      whileHover={{ y: -4, scale: 1.02 }}
+      transition={{ duration: 0.2 }}
+      className="bg-slate-800/60 backdrop-blur-sm rounded-xl shadow-lg border border-blue-500/20 p-6 hover:border-blue-400/40 transition-all duration-300"
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
@@ -81,19 +83,19 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
 
           {/* Name and Role */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-white">
               {profile.firstName} {profile.lastName}
               {isCurrentUser && (
-                <span className="ml-2 text-sm text-blue-600 dark:text-blue-400">(You)</span>
+                <span className="ml-2 text-sm text-cyan-400">(You)</span>
               )}
             </h3>
-            <div className="flex items-center space-x-2 mt-1">
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleColor(profile.role)}`}>
+            <div className="flex items-center space-x-2 mt-2">
+              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border backdrop-blur-sm ${getRoleColor(profile.role)}`}>
                 <Shield className="w-3 h-3 mr-1" />
                 {formatRole(profile.role)}
               </span>
               {profile.employeeId && (
-                <span className="text-sm text-gray-500 dark:text-gray-400">
+                <span className="text-sm text-gray-400 bg-slate-700/30 px-2 py-1 rounded-md">
                   ID: {profile.employeeId}
                 </span>
               )}
@@ -115,39 +117,39 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
       {/* Contact Information */}
       <div className="space-y-3">
         {profile.email && (
-          <div className="flex items-center space-x-3 text-sm">
-            <Mail className="w-4 h-4 text-gray-400" />
-            <span className="text-gray-600 dark:text-gray-300">{profile.email}</span>
+          <div className="flex items-center space-x-3 text-sm p-2 bg-slate-700/30 rounded-lg">
+            <Mail className="w-4 h-4 text-cyan-400" />
+            <span className="text-gray-300">{profile.email}</span>
           </div>
         )}
         
         {profile.phone && (
-          <div className="flex items-center space-x-3 text-sm">
-            <Phone className="w-4 h-4 text-gray-400" />
-            <span className="text-gray-600 dark:text-gray-300">{profile.phone}</span>
+          <div className="flex items-center space-x-3 text-sm p-2 bg-slate-700/30 rounded-lg">
+            <Phone className="w-4 h-4 text-green-400" />
+            <span className="text-gray-300">{profile.phone}</span>
           </div>
         )}
         
         {profile.department && (
-          <div className="flex items-center space-x-3 text-sm">
-            <MapPin className="w-4 h-4 text-gray-400" />
-            <span className="text-gray-600 dark:text-gray-300">{profile.department}</span>
+          <div className="flex items-center space-x-3 text-sm p-2 bg-slate-700/30 rounded-lg">
+            <MapPin className="w-4 h-4 text-purple-400" />
+            <span className="text-gray-300">{profile.department}</span>
           </div>
         )}
         
         {profile.hireDate && (
-          <div className="flex items-center space-x-3 text-sm">
-            <Calendar className="w-4 h-4 text-gray-400" />
-            <span className="text-gray-600 dark:text-gray-300">
+          <div className="flex items-center space-x-3 text-sm p-2 bg-slate-700/30 rounded-lg">
+            <Calendar className="w-4 h-4 text-blue-400" />
+            <span className="text-gray-300">
               Hired: {formatDate(profile.hireDate)}
             </span>
           </div>
         )}
         
         {profile.lastLogin && (
-          <div className="flex items-center space-x-3 text-sm">
-            <Clock className="w-4 h-4 text-gray-400" />
-            <span className="text-gray-600 dark:text-gray-300">
+          <div className="flex items-center space-x-3 text-sm p-2 bg-slate-700/30 rounded-lg">
+            <Clock className="w-4 h-4 text-orange-400" />
+            <span className="text-gray-300">
               Last active: {formatDate(profile.lastLogin)}
             </span>
           </div>
@@ -155,18 +157,21 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
       </div>
 
       {/* Status Bar */}
-      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between text-sm">
-          <span className={`font-medium ${
+      <div className="mt-4 pt-4 border-t border-blue-500/20">
+        <div className="flex items-center justify-between">
+          <div className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium ${
             profile.isActive 
-              ? 'text-green-600 dark:text-green-400' 
-              : 'text-red-600 dark:text-red-400'
+              ? 'bg-green-500/20 text-green-300' 
+              : 'bg-red-500/20 text-red-300'
           }`}>
-            {profile.isActive ? 'Active Employee' : 'Inactive'}
-          </span>
+            <div className={`w-2 h-2 rounded-full ${
+              profile.isActive ? 'bg-green-400' : 'bg-red-400'
+            }`} />
+            <span>{profile.isActive ? 'Active Employee' : 'Inactive'}</span>
+          </div>
           
           {isCurrentUser && (
-            <span className="text-blue-600 dark:text-blue-400 font-medium">
+            <span className="text-cyan-400 font-medium text-sm bg-cyan-500/20 px-3 py-1 rounded-full">
               Your Profile
             </span>
           )}
