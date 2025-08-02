@@ -1,6 +1,9 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import AppLayout from './layouts/AppLayout';
+import PrivateRoute from './components/auth/PrivateRoute';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
 import Chat from './pages/Chat';
@@ -17,23 +20,98 @@ import ToastContainer from './components/common/ToastContainer';
 function App() {
   return (
     <div className="min-h-screen bg-slate-900">
-      <AppLayout>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/chat" element={<Chat />} />
-          <Route path="/analysis" element={<AnalysisHistory />} />
-          <Route path="/history" element={<AnalysisHistory />} />
-          <Route path="/maps" element={<Maps />} />
-          <Route path="/videos" element={<Videos />} />
-          <Route path="/drawings" element={<Drawings />} />
-          <Route path="/sds" element={<SDS />} />
-          <Route path="/checklists" element={<Checklists />} />
-          <Route path="/checklist/:templateId" element={<ChecklistView />} />
-          <Route path="/profiles" element={<Profiles />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </AppLayout>
+      <Routes>
+        {/* Public routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        
+        {/* Protected routes */}
+        <Route path="/" element={
+          <PrivateRoute>
+            <AppLayout>
+              <Home />
+            </AppLayout>
+          </PrivateRoute>
+        } />
+        <Route path="/profile" element={
+          <PrivateRoute>
+            <AppLayout>
+              <Profile />
+            </AppLayout>
+          </PrivateRoute>
+        } />
+        <Route path="/chat" element={
+          <PrivateRoute>
+            <AppLayout>
+              <Chat />
+            </AppLayout>
+          </PrivateRoute>
+        } />
+        <Route path="/analysis" element={
+          <PrivateRoute>
+            <AppLayout>
+              <AnalysisHistory />
+            </AppLayout>
+          </PrivateRoute>
+        } />
+        <Route path="/history" element={
+          <PrivateRoute>
+            <AppLayout>
+              <AnalysisHistory />
+            </AppLayout>
+          </PrivateRoute>
+        } />
+        <Route path="/maps" element={
+          <PrivateRoute>
+            <AppLayout>
+              <Maps />
+            </AppLayout>
+          </PrivateRoute>
+        } />
+        <Route path="/videos" element={
+          <PrivateRoute>
+            <AppLayout>
+              <Videos />
+            </AppLayout>
+          </PrivateRoute>
+        } />
+        <Route path="/drawings" element={
+          <PrivateRoute>
+            <AppLayout>
+              <Drawings />
+            </AppLayout>
+          </PrivateRoute>
+        } />
+        <Route path="/sds" element={
+          <PrivateRoute>
+            <AppLayout>
+              <SDS />
+            </AppLayout>
+          </PrivateRoute>
+        } />
+        <Route path="/checklists" element={
+          <PrivateRoute>
+            <AppLayout>
+              <Checklists />
+            </AppLayout>
+          </PrivateRoute>
+        } />
+        <Route path="/checklist/:templateId" element={
+          <PrivateRoute>
+            <AppLayout>
+              <ChecklistView />
+            </AppLayout>
+          </PrivateRoute>
+        } />
+        <Route path="/profiles" element={
+          <PrivateRoute>
+            <AppLayout>
+              <Profiles />
+            </AppLayout>
+          </PrivateRoute>
+        } />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
       <ToastContainer />
     </div>
   );
