@@ -3,13 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { LogOut, User, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import Logo from '../logo/Logo';
-import DatabaseStatusChecker from '../common/DatabaseStatusChecker';
 
-interface TopBarProps {
-  onDatabaseStatusChange?: (status: 'ok' | 'warning' | 'error') => void;
-}
-
-const TopBar: React.FC<TopBarProps> = ({ onDatabaseStatusChange }) => {
+const TopBar: React.FC = () => {
   const { user, signOut } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -33,8 +28,6 @@ const TopBar: React.FC<TopBarProps> = ({ onDatabaseStatusChange }) => {
           <Logo />
           
           <div className="flex items-center space-x-3">
-            <DatabaseStatusChecker onStatusChange={onDatabaseStatusChange} />
-            
             {/* User Menu */}
             <div className="relative">
               <motion.button
