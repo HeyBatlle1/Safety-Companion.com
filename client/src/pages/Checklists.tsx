@@ -8,9 +8,9 @@ const Checklists: React.FC = () => {
   const navigate = useNavigate();
 
   const handleChecklistClick = (templateId: string) => {
-    // All checklists now use enterprise mode by default
+    // Use the proper question-based checklist form with AI integration
     const actualId = templateId.replace('enterprise-', '');
-    navigate(`/checklist-enterprise/${actualId}`);
+    navigate(`/checklist/${actualId}`);
   };
 
   return (

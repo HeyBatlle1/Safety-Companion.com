@@ -20,42 +20,42 @@ interface ChecklistSelectorProps {
 // First 6 priority checklists for railway & AI integration
 const primaryTemplates: Template[] = [
   {
-    id: 'site-safety-assessment',
-    title: 'Daily Site Safety Inspection',
+    id: 'safety-assessment',
+    title: 'Site Safety Assessment',
     icon: Shield,
-    description: 'AI-powered comprehensive site evaluation with railway hazard detection',
+    description: 'AI-powered comprehensive site evaluation with intelligent risk scoring',
     color: 'from-blue-600 to-cyan-600'
   },
   {
     id: 'fall-protection',
     title: 'Fall Protection Systems',
     icon: AlertTriangle,
-    description: 'Critical height work safety with intelligent risk scoring',
+    description: 'Critical height work safety with OSHA compliance tracking',
     color: 'from-red-500 to-orange-500'
   },
   {
     id: 'electrical-safety',
     title: 'Electrical Safety Audit',
     icon: Zap,
-    description: 'High-voltage and railway electrical systems inspection',
+    description: 'High-voltage and electrical systems hazard assessment',
     color: 'from-yellow-500 to-amber-500'
   },
   {
-    id: 'hazcom',
+    id: 'hazard-communication',
     title: 'HazCom & Chemical Safety',
     icon: Beaker,
     description: 'Material safety with AI chemical analysis integration',
     color: 'from-purple-500 to-pink-500'
   },
   {
-    id: 'emergency-response',
-    title: 'Emergency Response Plan',
+    id: 'emergency-action',
+    title: 'Emergency Action Plan',
     icon: HardHat,
     description: 'Critical incident protocols with automated alerts',
     color: 'from-green-500 to-emerald-500'
   },
   {
-    id: 'ppe-compliance',
+    id: 'ppe',
     title: 'PPE Compliance Check',
     icon: Construction,
     description: 'Personal protective equipment verification system',
@@ -108,14 +108,14 @@ const ChecklistSelector: React.FC<ChecklistSelectorProps> = ({ onChecklistClick 
       >
         <h2 className="text-2xl font-bold text-white flex items-center justify-center space-x-3 mb-4">
           <Star className="w-6 h-6 text-yellow-400" />
-          <span>Priority Safety Checklists</span>
+          <span>Strategic Safety Assessment System</span>
           <Badge className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0">
-            AI + Railway Ready
+            Gemini AI Powered
           </Badge>
         </h2>
         <p className="text-gray-300 max-w-3xl mx-auto">
-          Enterprise-grade safety inspection system with AI analysis, railway integration, and real-time hazard detection. 
-          Optimized for tablets with professional components including photo uploads, severity sliders, and intelligent prompting.
+          Each checklist contains strategic questions with weighted scoring, OSHA compliance tracking, and intelligent prompting 
+          that feeds directly into our Gemini AI algorithms for real-time risk analysis and safety recommendations.
         </p>
       </motion.div>
 
@@ -130,7 +130,7 @@ const ChecklistSelector: React.FC<ChecklistSelectorProps> = ({ onChecklistClick 
               transition={{ delay: index * 0.1 }}
               whileHover={{ scale: 1.02, y: -4 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => onChecklistClick(`enterprise-${template.id}`)}
+              onClick={() => onChecklistClick(template.id)}
               className="relative group cursor-pointer"
             >
               <div className={`absolute inset-0 bg-gradient-to-r ${template.color} rounded-xl opacity-20 group-hover:opacity-30 transition-all duration-300 blur-md group-hover:blur-lg`} />
@@ -147,8 +147,8 @@ const ChecklistSelector: React.FC<ChecklistSelectorProps> = ({ onChecklistClick 
                       {template.description}
                     </p>
                     <div className="mt-3 flex items-center space-x-2">
-                      <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30">AI Ready</Badge>
-                      <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Railway</Badge>
+                      <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30">AI Analysis</Badge>
+                      <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Submit</Badge>
                     </div>
                   </div>
                 </div>
@@ -175,7 +175,7 @@ const ChecklistSelector: React.FC<ChecklistSelectorProps> = ({ onChecklistClick 
               transition={{ delay: 0.6 + index * 0.05 }}
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => onChecklistClick(`enterprise-${template.id}`)}
+              onClick={() => onChecklistClick(template.id)}
               className="relative group cursor-pointer"
             >
               <div className="relative p-4 rounded-lg bg-slate-800/40 backdrop-blur-sm border border-gray-600/30 group-hover:border-gray-500/50 transition-all duration-300">
