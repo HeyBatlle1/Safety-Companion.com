@@ -5,6 +5,7 @@ This is a comprehensive Safety Companion application built as a full-stack web p
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
+Hosting Preference: Netlify for production deployment over Replit due to cost considerations - wants always-on hosting without monthly fees
 UI Design: Professional, enterprise-grade styling with dark theme and blue/cyan gradients - Unified enterprise checklist system with photo uploads, severity sliders, and tablet-optimized components (44px touch targets)
 Navigation: Profiles icon positioned at the end of navigation list
 Code Organization: Checklist functionality separated from SDS chat - clean separation of concerns
@@ -18,7 +19,7 @@ Security Testing: Comprehensive RLS policy validation with role isolation verifi
 Migration Status: Comprehensive Supabase cleanup completed - removed 20+ outdated migrations, preserved existing data, created safe user_profiles setup
 Authentication Status: Production-ready authentication system with sessionStorage persistence, role-based signup (field_worker, supervisor, project_manager, safety_manager, admin), and eliminated loading loops
 JHA Form Status: Professional-grade Job Hazard Analysis form implemented with text inputs, file attachments, blueprint uploads, and intelligent AI analysis using real OSHA data integration
-Deployment Status: Production-ready with comprehensive security hardening completed - removed all console logs, implemented input validation on all endpoints, added rate limiting, secured CORS, fixed TypeScript errors, and created secure error handling
+Deployment Status: Production-ready with comprehensive security hardening completed - removed all console logs, implemented input validation on all endpoints, added rate limiting, secured CORS, fixed TypeScript errors, and created secure error handling. Netlify deployment configuration complete with serverless functions for cost-effective hosting.
 Admin Panel Enhancement: Implemented enterprise-grade command center with real-time safety metrics dashboard showing safety score (94.2%), training compliance (87%), incident rate (0.8 per 100k hours), budget utilization (78%), certification tracking, and recent incident monitoring
 Navigation Fix: Corrected icon centering in bottom navigation by expanding container width from max-w-md to max-w-2xl for proper distribution
 Security Enhancement: Added account lockout after 5 failed login attempts with 30-minute cooldown period, login tracking with timestamps and attempt counts
@@ -30,6 +31,7 @@ Real-time Admin Updates: Admin panel refreshes every 30 seconds with professiona
 Environment Configuration: Resolved all environment variable warnings by configuring SESSION_SECRET, CORS_ORIGIN, API_RATE_LIMIT, and LOG_LEVEL for secure production deployment
 TypeScript Compliance: Fixed all 24 TypeScript errors in server routes with proper type annotations, session type guards, and parameter typing for full type safety
 YouTube API Security: Fixed Content Security Policy to allow googleapis.com connections for company's Safe-comp YouTube channel and training video playlist integration
+Netlify Deployment Ready: Complete Netlify configuration implemented with serverless functions, proper build settings, and deployment guide - user choosing Netlify over Replit for cost-effective always-on hosting
 
 # System Architecture
 
