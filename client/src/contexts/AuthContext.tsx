@@ -103,23 +103,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const signUp = async (email: string, password: string, role: string) => {
+  const signUp = async (email: string, password: string, role: string, profileData?: any) => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            role: role,
-          },
+      
+      // Create user with complete profile data
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          email,
+          password,
+          role,
+          ...profileData
+        }),
       });
 
-      if (error) throw error;
-      showToast('Account created successfully! Please check your email to verify your account.');
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Registration failed');
+      }
+
+      const userData = await response.json();
+      setUser(userData.user);
+      showToast('Account created successfully! You are now logged in.');
     } catch (error: any) {
-      showToast(error.message || 'Failed to sign up', 'error');
+      showToast(error.message || 'Failed to create account', 'error');
       throw error;
     } finally {
       setLoading(false);

@@ -55,6 +55,13 @@ const AdminPanel: React.FC = () => {
 
   useEffect(() => {
     loadData();
+    
+    // Set up real-time updates for admin panel
+    const interval = setInterval(() => {
+      loadData(); // Refresh data every 30 seconds
+    }, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const loadData = async () => {
