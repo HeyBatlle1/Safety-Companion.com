@@ -1,0 +1,107 @@
+The Netlify deploy errored, with the following guidance provided:
+
+**Diagnosis:**
+The build failed due to the error "Could not resolve 'serverless-http'" at line [168](#L168). This error occurred in the file "netlify/functions/server.js" when trying to require the dependency 'serverless-http'.
+
+**Solution:**
+1. Verify that 'serverless-http' is present in the top-level "package.json" file of the site. If it is not listed, add it to the dependencies in the "package.json" file.
+2. After verifying the package is in "package.json" or was committed to the repo, you can mark 'serverless-http' as external to exclude it from the bundle. This can be done in the Netlify configuration by specifying 'serverless-http' as an external path to remove the error.
+
+The relevant error logs are:
+
+Line 0: Waiting for other deploys from your team to complete. Check the queue: https://app.netlify.com/teams/heybattle1-0/builds
+Line 1: build-image version: c440bb785c036c7461456dcbf56442db2c6157c7 (noble)
+Line 2: buildbot version: c440bb785c036c7461456dcbf56442db2c6157c7
+Line 3: Fetching cached dependencies
+Line 4: Failed to fetch cache, continuing with build
+Line 5: Starting to prepare the repo for build
+Line 6: No cached dependencies found. Cloning fresh repo
+Line 7: git clone --filter=blob:none https://github.com/HeyBatlle1/Safety-Companion.com
+Line 8: Preparing Git Reference refs/heads/main
+Line 9: Custom build command detected. Proceeding with the specified command: 'cd client && npm install && npm run build && cd ..'
+Line 10: Starting to install dependencies
+Line 11: Downloading and installing node v18.20.8...
+Line 12: Downloading https://nodejs.org/dist/v18.20.8/node-v18.20.8-linux-x64.tar.xz...
+Line 13: Computing checksum with sha256sum
+Line 14: Checksums matched!
+Line 35: npm WARN EBADENGINE Unsupported engine {
+Line 36: npm WARN EBADENGINE   package: 'react-router@7.7.1',
+Line 37: npm WARN EBADENGINE   required: { node: '>=20.0.0' },
+Line 38: npm WARN EBADENGINE   current: { node: 'v18.20.8', npm: '9.9.4' }
+Line 39: npm WARN EBADENGINE }
+Line 40: npm WARN EBADENGINE Unsupported engine {
+Line 41: npm WARN EBADENGINE   package: 'react-router-dom@7.7.1',
+Line 42: npm WARN EBADENGINE   required: { node: '>=20.0.0' },
+Line 43: npm WARN EBADENGINE   current: { node: 'v18.20.8', npm: '9.9.4' }
+Line 44: npm WARN EBADENGINE }
+Line 45: npm WARN deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+npm WARN deprecated @esbuild-kit/es
+Line 46: npm WARN deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+Line 47: added 671 packages in 7s
+Line 48: npm packages installed
+Line 49: Successfully installed dependencies
+Line 50: Starting build script
+Line 51: Detected 2 framework(s)
+Line 52: "hydrogen" at version "unknown"
+Line 53: "remix" at version "unknown"
+Line 54: Section completed: initializing
+Line 55: [96m[1m​[22m[39m
+Line 139:   Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+Line 140: ▲ [WARNING] The CommonJS "exports" variable is treated as a global variable in an ECMAScript module and may not work as expected
+Line 141:     netlify/functions/server.js:143:0:
+Line 142:       143 │ exports.handler = async (event, context) => {
+Line 143:           ╵ ~~~~~~~
+Line 144:   This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "mo
+Line 145:     package.json:4:10:
+Line 146:       4 │   "type": "module",
+Line 147:         ╵           ~~~~~~~~
+Line 148:   Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+Line 149: ✘ [ERROR] Could not resolve "serverless-http"
+Line 150:     netlify/functions/api.js:3:27:
+Line 151:       3 │ const serverless = require('serverless-http');
+Line 152:         ╵                            ~~~~~~~~~~~~~~~~~
+Line 153:   You can mark the path "serverless-http" as external to exclude it from the bundle, which will remove this error and leave the 
+Line 154: ✘ [ERROR] Could not resolve "serverless-http"
+Line 155:     netlify/functions/server.js:145:26:
+Line 156:       145 │   const express = require('serverless-http')(app);
+Line 157:           ╵                           ~~~~~~~~~~~~~~~~~
+Line 158:   You can mark the path "serverless-http" as external to exclude it from the bundle, which will remove this error and leave the 
+Line 159: Failed during stage 'building site': Build script returned non-zero exit code: 2
+Line 160: [91m[1m​[22m[39m
+Line 161: [91m[1mDependencies installation error                               [22m[39m
+Line 162: [91m[1m────────────────────────────────────────────────────────────────[22m[39m
+Line 163: ​
+Line 164:   [31m[1mError message[22m[39m
+Line 165:   A Netlify Function failed to require one of its dependencies.
+Line 166:   Please make sure it is present in the site's top-level "package.json".
+​
+Line 167:   Build failed with 1 error:
+Line 168:   netlify/functions/server.js:145:26: ERROR: Could not resolve "serverless-http"
+Line 169: ​
+Line 170:   [31m[1mResolved config[22m[39m
+Line 171:   build:
+Line 172:     base: /opt/build/repo
+Line 173:     command: cd client && npm install && npm run build && cd ..
+Line 174:     commandOrigin: config
+Line 175:     environment:
+Line 176:       - API_RATE_LIMIT
+Line 177:       - DATABASE_URL
+Line 178:       - GOOGLE_GEMINI_API_KEY
+Line 183:       - NODE_VERSION
+Line 184:       - NPM_VERSION
+Line 185:     publish: /opt/build/repo/client/dist
+Line 186:     publishOrigin: config
+Line 187:   functions:
+Line 188:     "*":
+Line 189:       node_bundler: esbuild
+Line 190:   functionsDirectory: /opt/build/repo/netlify/functions
+Line 191:   redirects:
+Line 192:     - from: /api/*
+      status: 200
+      to: /.netlify/functions/server
+    - from: /*
+      status: 200
+      to: /index.html
+Line 193: Build failed due to a user error: Build script returned non-zero exit code: 2
+Line 194: Failing build: Failed to build site
+Line 195: Finished processing build request in 55.283s

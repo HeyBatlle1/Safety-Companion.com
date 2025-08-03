@@ -1,9 +1,10 @@
 // Netlify serverless function for backend API
-const express = require('express');
-const cors = require('cors');
-const bcrypt = require('bcrypt');
-const rateLimit = require('express-rate-limit');
-const { neon } = require('@neondatabase/serverless');
+import express from 'express';
+import cors from 'cors';
+import bcrypt from 'bcrypt';
+import rateLimit from 'express-rate-limit';
+import { neon } from '@neondatabase/serverless';
+import serverless from 'serverless-http';
 
 const app = express();
 
@@ -140,8 +141,4 @@ app.get('/api/admin/users', (req, res) => {
 });
 
 // Export for Netlify
-exports.handler = async (event, context) => {
-  // Convert Netlify event to Express request
-  const express = require('serverless-http')(app);
-  return await express(event, context);
-};
+export const handler = serverless(app);
