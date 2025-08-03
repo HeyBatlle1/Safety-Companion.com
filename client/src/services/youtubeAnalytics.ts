@@ -31,7 +31,7 @@ class YouTubeAnalyticsService {
 
   constructor() {
     this.apiKey = import.meta.env.VITE_GOOGLE_API_KEY || '';
-    this.channelId = 'UC_YOUR_CHANNEL_ID'; // Replace with actual channel ID
+    this.channelId = 'UCfHD4CSGq_Hsm0fePToS6WQ'; // Safe-comp company channel
   }
 
   async getChannelVideos(): Promise<YouTubeVideoData[]> {
