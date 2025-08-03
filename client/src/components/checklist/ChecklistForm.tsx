@@ -11,6 +11,7 @@ import { showToast } from '../common/ToastContainer';
 import { safetyCompanionAPI, type RiskProfile, type SafetyAnalysis } from '../../services/safetyCompanionAPI';
 import { blueprintStorage, type BlueprintUpload } from '../../services/blueprintStorage';
 import { multiModalAnalysis } from '../../services/multiModalAnalysis';
+import { ReportFormatter } from '../../services/reportFormatter';
 
 interface ChecklistItem {
   id: string;
@@ -251,15 +252,34 @@ const ChecklistForm = () => {
             railwayData: oshaRiskProfile // Include railway system data
           });
 
-          // Generate insurance report
-          const insuranceReport = await multiModalAnalysis.generateInsuranceReport(multiModalResult);
+          // Generate professional markdown report
+          const formattedReport = ReportFormatter.formatMultiModalReport(
+            multiModalResult, 
+            template.title, 
+            allBlueprints.length, 
+            allImages.length
+          );
           
-          // Combine analyses
-          setAiResponse(`## Multi-Modal AI Analysis\n\n${JSON.stringify(multiModalResult, null, 2)}\n\n## Insurance Compliance Report\n\n${insuranceReport}`);
+          setAiResponse(formattedReport);
           showToast('Complete AI analysis with blueprint pattern recognition finished!', 'success');
         } else {
           // Standard intelligent analysis without visual data
           const intelligentAnalysis = await safetyCompanionAPI.analyzeChecklist(checklistData, oshaRiskProfile || undefined);
+          
+          // Convert SafetyAnalysis to SafetyAnalysisReport format
+          const reportData = {
+            risk_level: intelligentAnalysis.risk_level,
+            overall_score: intelligentAnalysis.score || 75,
+            critical_issues: intelligentAnalysis.critical_issues || [],
+            recommendations: intelligentAnalysis.recommendations || [],
+            action_items: intelligentAnalysis.action_items || [],
+            compliance_status: intelligentAnalysis.compliance_status || 'Under Review',
+            summary: intelligentAnalysis.summary || 'Safety analysis completed successfully.'
+          };
+          
+          // Format the response as professional markdown
+          const formattedReport = ReportFormatter.formatStandardSafetyReport(reportData, template.title);
+          setAiResponse(formattedReport);
           setSafetyAnalysis(intelligentAnalysis);
 
           if (oshaRiskProfile) {
@@ -402,6 +422,68 @@ Format your response professionally with clear sections and actionable insights.
       printWindow.focus();
       printWindow.print();
       printWindow.close();
+    }
+  };
+
+  const shareReport = async () => {
+    if (!aiResponse) {
+      showToast('No report available to share', 'error');
+      return;
+    }
+
+    try {
+      const formattedForSharing = ReportFormatter.formatForSharing(aiResponse);
+      
+      if (navigator.share) {
+        await navigator.share({
+          title: `Safety Report: ${template.title}`,
+          text: formattedForSharing
+        });
+        showToast('Report shared successfully!', 'success');
+      } else {
+        await navigator.clipboard.writeText(formattedForSharing);
+        showToast('Report copied to clipboard!', 'success');
+      }
+    } catch (error) {
+      showToast('Failed to share report', 'error');
+    }
+  };
+
+  const emailReport = async () => {
+    if (!aiResponse) {
+      showToast('No report available to email', 'error');
+      return;
+    }
+
+    try {
+      const emailData = ReportFormatter.formatForEmail(aiResponse, template.title);
+      const mailtoLink = `mailto:?subject=${encodeURIComponent(emailData.subject)}&body=${encodeURIComponent(emailData.body)}`;
+      window.open(mailtoLink);
+      showToast('Email client opened with report!', 'success');
+    } catch (error) {
+      showToast('Failed to prepare email', 'error');
+    }
+  };
+
+  const saveReportToDatabase = async () => {
+    if (!aiResponse) {
+      showToast('No report available to save', 'error');
+      return;
+    }
+
+    try {
+      const user = await getCurrentUser();
+      if (!user) {
+        showToast('Please log in to save reports', 'error');
+        return;
+      }
+
+      const reportData = ReportFormatter.formatForDatabase(aiResponse, templateId || 'unknown', user.id);
+      // Save as simple object since saveChecklistResponse expects basic data
+      await saveChecklistResponse(reportData.id, reportData);
+      showToast('Report saved to database successfully!', 'success');
+    } catch (error) {
+      showToast('Failed to save report to database', 'error');
     }
   };
 
@@ -1199,9 +1281,34 @@ Progress: ${Math.round(calculateProgress())}% complete
             animate={{ opacity: 1, y: 0 }}
             className="mt-8 bg-gradient-to-r from-slate-800/80 to-slate-700/80 backdrop-blur-sm rounded-2xl p-6 border border-blue-500/20 shadow-2xl"
           >
-            <div className="flex items-center mb-6">
-              <Sparkles className="w-6 h-6 text-cyan-400 mr-3 animate-pulse" />
-              <h3 className="text-xl font-bold text-white">Intelligent Safety Analysis Results</h3>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center">
+                <Sparkles className="w-6 h-6 text-cyan-400 mr-3 animate-pulse" />
+                <h3 className="text-xl font-bold text-white">Professional Safety Report</h3>
+              </div>
+              <div className="flex space-x-2">
+                <button
+                  onClick={shareReport}
+                  className="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded-lg transition-colors duration-200 flex items-center space-x-2 text-sm"
+                >
+                  <Share2 className="w-4 h-4" />
+                  <span>Share</span>
+                </button>
+                <button
+                  onClick={emailReport}
+                  className="px-3 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-300 rounded-lg transition-colors duration-200 flex items-center space-x-2 text-sm"
+                >
+                  <Send className="w-4 h-4" />
+                  <span>Email</span>
+                </button>
+                <button
+                  onClick={saveReportToDatabase}
+                  className="px-3 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 rounded-lg transition-colors duration-200 flex items-center space-x-2 text-sm"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>Save</span>
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -1324,12 +1431,37 @@ Progress: ${Math.round(calculateProgress())}% complete
             animate={{ opacity: 1, y: 0 }}
             className="mt-8 bg-gradient-to-r from-slate-800/80 to-slate-700/80 backdrop-blur-sm rounded-2xl p-6 border border-blue-500/20 shadow-2xl"
           >
-            <div className="flex items-center mb-4">
-              <FileText className="w-6 h-6 text-cyan-400 mr-3" />
-              <h3 className="text-xl font-bold text-white">AI Safety Analysis Results</h3>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center">
+                <FileText className="w-6 h-6 text-cyan-400 mr-3" />
+                <h3 className="text-xl font-bold text-white">Professional Safety Report</h3>
+              </div>
+              <div className="flex space-x-2">
+                <button
+                  onClick={shareReport}
+                  className="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded-lg transition-colors duration-200 flex items-center space-x-2 text-sm"
+                >
+                  <Share2 className="w-4 h-4" />
+                  <span>Share</span>
+                </button>
+                <button
+                  onClick={emailReport}
+                  className="px-3 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-300 rounded-lg transition-colors duration-200 flex items-center space-x-2 text-sm"
+                >
+                  <Send className="w-4 h-4" />
+                  <span>Email</span>
+                </button>
+                <button
+                  onClick={saveReportToDatabase}
+                  className="px-3 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 rounded-lg transition-colors duration-200 flex items-center space-x-2 text-sm"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>Save</span>
+                </button>
+              </div>
             </div>
             <div className="prose prose-invert max-w-none">
-              <div className="text-gray-300 whitespace-pre-wrap">{aiResponse}</div>
+              <div className="text-gray-300 whitespace-pre-wrap font-mono text-sm leading-relaxed">{aiResponse}</div>
             </div>
           </motion.div>
         )}
