@@ -245,18 +245,18 @@ const WeatherObservationCenter = () => {
             {getWeatherIcon(current.weather_code, current.is_day)}
             <div>
               <div className="text-2xl font-bold text-white">
-                {Math.round(current.temperature_2m)}°F
+                {Math.round((current.temperature_2m * 9/5) + 32)}°F / {Math.round(current.temperature_2m)}°C
               </div>
               <div className="text-sm text-gray-300">
-                Feels like {Math.round(current.apparent_temperature)}°F
+                Feels like {Math.round((current.apparent_temperature * 9/5) + 32)}°F
               </div>
             </div>
           </div>
           <div className="text-right">
             <div className="text-lg font-semibold text-gray-200">
-              {Math.round(today.temperature_2m_max[0])}° / {Math.round(today.temperature_2m_min[0])}°
+              {Math.round((today.temperature_2m_max[0] * 9/5) + 32)}° / {Math.round((today.temperature_2m_min[0] * 9/5) + 32)}°
             </div>
-            <div className="text-sm text-gray-400">High / Low</div>
+            <div className="text-sm text-gray-400">High / Low (°F)</div>
           </div>
         </div>
 
@@ -272,10 +272,10 @@ const WeatherObservationCenter = () => {
               <span className="text-sm font-medium text-gray-200">Wind</span>
             </div>
             <div className="text-lg font-semibold text-white">
-              {Math.round(current.wind_speed_10m)} mph
+              {Math.round(current.wind_speed_10m * 0.621371)} mph
             </div>
             <div className="text-xs text-gray-400">
-              Gusts {Math.round(current.wind_gusts_10m)} mph
+              Gusts {Math.round(current.wind_gusts_10m * 0.621371)} mph
             </div>
           </motion.div>
 
@@ -352,10 +352,10 @@ const WeatherObservationCenter = () => {
                     {getWeatherIcon(today.weather_code[dayIndex], 1)}
                   </div>
                   <div className="text-sm font-semibold text-white">
-                    {Math.round(today.temperature_2m_max[dayIndex])}°
+                    {Math.round((today.temperature_2m_max[dayIndex] * 9/5) + 32)}°F
                   </div>
                   <div className="text-xs text-gray-400">
-                    {Math.round(today.temperature_2m_min[dayIndex])}°
+                    {Math.round((today.temperature_2m_min[dayIndex] * 9/5) + 32)}°F
                   </div>
                   {today.precipitation_probability_max[dayIndex] > 20 && (
                     <div className="text-xs text-blue-400 mt-1">

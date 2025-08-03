@@ -78,7 +78,7 @@ const WeatherWidget = () => {
           <Thermometer className="w-6 h-6 text-blue-400" />
           <div>
             <div className="text-2xl font-bold text-white">
-              {Math.round(weather.current.temp_c)}°C / {Math.round(weather.current.temp_f)}°F
+              {Math.round(weather.current.temp_f)}°F / {Math.round(weather.current.temp_c)}°C
             </div>
             <div className="text-sm text-gray-400">
               Indianapolis, IN
@@ -102,7 +102,7 @@ const WeatherWidget = () => {
         <div className="flex items-center space-x-2">
           <Wind className="w-4 h-4 text-gray-400" />
           <span className="text-sm text-gray-300">
-            {weather.current.wind_kph} km/h {weather.current.wind_dir}
+            {Math.round(weather.current.wind_kph * 0.621371)} mph {weather.current.wind_dir}
           </span>
         </div>
         <div className="flex items-center space-x-2">
