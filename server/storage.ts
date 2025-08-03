@@ -73,6 +73,11 @@ export interface IStorage {
   // Projects
   getProjects(): Promise<Project[]>;
   getUserProjects(userId: string): Promise<Project[]>;
+  
+  // Health checks
+  testConnection(): Promise<boolean>;
+  getDatabaseStats(): Promise<any>;
+  
   createProject(project: InsertProject): Promise<Project>;
 }
 
@@ -274,6 +279,74 @@ export class DatabaseStorage implements IStorage {
   async createProject(project: InsertProject): Promise<Project> {
     const result = await db.insert(projects).values(project).returning();
     return result[0];
+  }
+
+  // Health checks
+  async testConnection(): Promise<boolean> {
+    try {
+      await db.execute('SELECT 1');
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  async getDatabaseStats(): Promise<any> {
+    try {
+      // Get user count
+      const userCountResult = await db.execute('SELECT COUNT(*) FROM users');
+      const userCount = parseInt(userCountResult.rows[0][0] as string);
+
+      // Get table count from information_schema
+      const tableCountResult = await db.execute(`
+        SELECT COUNT(*) 
+        FROM information_schema.tables 
+        WHERE table_schema = 'public'
+      `);
+      const tableCount = parseInt(tableCountResult.rows[0][0] as string);
+
+      // Get active connections
+      const connectionsResult = await db.execute(`
+        SELECT COUNT(*) 
+        FROM pg_stat_activity 
+        WHERE state = 'active'
+      `);
+      const activeConnections = parseInt(connectionsResult.rows[0][0] as string);
+
+      // Get database version
+      const versionResult = await db.execute('SELECT version()');
+      const version = (versionResult.rows[0][0] as string).split(' ')[1];
+
+      // Get uptime
+      const uptimeResult = await db.execute(`
+        SELECT EXTRACT(EPOCH FROM (now() - pg_postmaster_start_time())) / 3600 as uptime_hours
+      `);
+      const uptimeHours = Math.floor(parseFloat(uptimeResult.rows[0][0] as string));
+
+      // Get database size
+      const sizeResult = await db.execute(`
+        SELECT pg_size_pretty(pg_database_size(current_database())) as size
+      `);
+      const diskUsage = sizeResult.rows[0][0] as string;
+
+      return {
+        userCount,
+        tableCount,
+        activeConnections,
+        version: `PostgreSQL ${version}`,
+        uptime: `${uptimeHours} hours`,
+        diskUsage
+      };
+    } catch (error) {
+      return {
+        userCount: 0,
+        tableCount: 0,
+        activeConnections: 0,
+        version: 'Unknown',
+        uptime: 'Unknown',
+        diskUsage: 'Unknown'
+      };
+    }
   }
 }
 

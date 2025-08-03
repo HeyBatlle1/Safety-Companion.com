@@ -34,6 +34,7 @@ import SecuritySettingsModal from '../components/profile/SecuritySettingsModal';
 import NotificationsModal from '../components/profile/NotificationsModal';
 import PrivacyModal from '../components/profile/PrivacyModal';
 import ProfileDatabaseInfo from '../components/profile/ProfileDatabaseInfo';
+import DatabaseConnectionTest from '../components/profile/DatabaseConnectionTest';
 
 const Profile: React.FC = () => {
   // Mock user for now - auth removed
@@ -202,6 +203,7 @@ const Profile: React.FC = () => {
             It can help diagnose issues with data persistence and authentication.
           </p>
           <ProfileDatabaseInfo />
+          <DatabaseConnectionTest />
           
           {/* User Session Information */}
           <motion.div

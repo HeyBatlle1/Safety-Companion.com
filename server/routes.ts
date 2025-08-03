@@ -59,6 +59,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   };
 
+  // ==================== HEALTH CHECKS ====================
+
+  // Database health check endpoint
+  app.get("/api/health/database", async (req, res) => {
+    try {
+      const startTime = Date.now();
+      
+      // Test database connection
+      const connectionTest = await storage.testConnection();
+      const responseTime = Date.now() - startTime;
+      
+      // Get database stats
+      const stats = await storage.getDatabaseStats();
+      
+      const health = {
+        status: connectionTest ? 'healthy' : 'error',
+        connection: connectionTest,
+        responseTime,
+        activeConnections: stats.activeConnections || 0,
+        lastCheck: new Date(),
+        version: stats.version || 'Unknown',
+        uptime: stats.uptime || 'Unknown',
+        tableCount: stats.tableCount || 0,
+        userCount: stats.userCount || 0,
+        diskUsage: stats.diskUsage || 'Unknown',
+        errors: connectionTest ? [] : ['Database connection failed'],
+        warnings: responseTime > 1000 ? ['High response time detected'] : []
+      };
+
+      // Add warnings based on thresholds
+      if (stats.activeConnections > 100) {
+        health.warnings.push('High number of active connections');
+      }
+      
+      if (responseTime > 500) {
+        health.warnings.push('Database response time above 500ms');
+      }
+
+      res.json(health);
+    } catch (error) {
+      logError(error, 'health');
+      res.json({
+        status: 'error',
+        connection: false,
+        responseTime: 0,
+        activeConnections: 0,
+        lastCheck: new Date(),
+        version: 'Unknown',
+        uptime: 'Unknown',
+        tableCount: 0,
+        userCount: 0,
+        diskUsage: 'Unknown',
+        errors: ['Failed to check database health'],
+        warnings: []
+      });
+    }
+  });
+
   // ==================== AUTHENTICATION ROUTES ====================
   
   // Sign up with input validation
