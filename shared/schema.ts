@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, uuid, timestamp, jsonb, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, uuid, timestamp, jsonb, uniqueIndex, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -42,17 +42,30 @@ export const notificationPreferences = pgTable("notification_preferences", {
   updatedAt: timestamp("updated_at"),
 });
 
-// Analysis history for chat and assessments
+// Analysis history for chat and assessments - Enhanced for insurance analytics
 export const analysisHistory = pgTable("analysis_history", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
   query: text("query").notNull(),
   response: text("response").notNull(),
   type: text("type").notNull(), // 'safety_assessment', 'risk_assessment', 'sds_analysis', 'chat_response'
+  riskScore: integer("risk_score"), // 1-100 AI-calculated risk score
+  sentimentScore: integer("sentiment_score"), // -100 to 100 sentiment analysis
+  urgencyLevel: text("urgency_level"), // 'low', 'medium', 'high', 'critical'
+  safetyCategories: jsonb("safety_categories"), // Array of identified safety categories
+  keywordTags: jsonb("keyword_tags"), // Extracted keywords for pattern analysis
+  confidenceScore: integer("confidence_score"), // AI confidence in analysis (0-100)
+  behaviorIndicators: jsonb("behavior_indicators"), // Risk behavior patterns detected
+  complianceScore: integer("compliance_score"), // OSHA compliance score (0-100)
   metadata: jsonb("metadata"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at"),
-});
+}, (table) => ({
+  userIdIdx: index("analysis_history_user_id_idx").on(table.userId),
+  typeIdx: index("analysis_history_type_idx").on(table.type),
+  riskScoreIdx: index("analysis_history_risk_score_idx").on(table.riskScore),
+  createdAtIdx: index("analysis_history_created_at_idx").on(table.createdAt),
+}));
 
 // Risk assessments
 export const riskAssessments = pgTable("risk_assessments", {
@@ -63,7 +76,32 @@ export const riskAssessments = pgTable("risk_assessments", {
   updatedAt: timestamp("updated_at"),
 });
 
-// Safety reports
+// Insurance Analytics - Behavioral Risk Patterns
+export const behaviorAnalytics = pgTable("behavior_analytics", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  companyId: text("company_id"), // For multi-tenant analytics
+  department: text("department"),
+  jobRole: text("job_role"),
+  shiftType: text("shift_type"), // 'day', 'night', 'swing'
+  experienceLevel: integer("experience_level"), // Years of experience
+  totalInteractions: integer("total_interactions").default(0),
+  highRiskQueries: integer("high_risk_queries").default(0),
+  safetyViolationIndicators: integer("safety_violation_indicators").default(0),
+  complianceScore: integer("compliance_score").default(100), // Running average
+  riskTrend: text("risk_trend"), // 'improving', 'stable', 'declining'
+  lastHighRiskActivity: timestamp("last_high_risk_activity"),
+  incidentPredictionScore: integer("incident_prediction_score"), // 0-100 likelihood
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at"),
+}, (table) => ({
+  userIdIdx: index("behavior_analytics_user_id_idx").on(table.userId),
+  companyIdIdx: index("behavior_analytics_company_id_idx").on(table.companyId),
+  riskTrendIdx: index("behavior_analytics_risk_trend_idx").on(table.riskTrend),
+  incidentPredictionIdx: index("behavior_analytics_incident_prediction_idx").on(table.incidentPredictionScore),
+}));
+
+// Safety reports - Enhanced with predictive data
 export const safetyReports = pgTable("safety_reports", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
@@ -73,9 +111,16 @@ export const safetyReports = pgTable("safety_reports", {
   location: text("location"),
   status: text("status").default("pending").notNull(),
   attachments: jsonb("attachments"),
+  predictiveCostImpact: integer("predictive_cost_impact"), // Estimated dollar impact
+  rootCauseAnalysis: jsonb("root_cause_analysis"), // AI-generated root cause
+  similarIncidentIds: jsonb("similar_incident_ids"), // Related incidents
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at"),
-});
+}, (table) => ({
+  severityIdx: index("safety_reports_severity_idx").on(table.severity),
+  statusIdx: index("safety_reports_status_idx").on(table.status),
+  createdAtIdx: index("safety_reports_created_at_idx").on(table.createdAt),
+}));
 
 // Chat messages
 export const chatMessages = pgTable("chat_messages", {

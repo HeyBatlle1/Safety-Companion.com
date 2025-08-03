@@ -17,6 +17,7 @@ import Checklists from '@/pages/Checklists';
 import ChecklistView from '@/pages/ChecklistView';
 import EnterpriseChecklistForm from '@/components/checklist/EnterpriseChecklistForm';
 import Profiles from '@/pages/Profiles';
+import { InsuranceAnalytics } from '@/pages/InsuranceAnalytics';
 import ToastContainer from '@/components/common/ToastContainer';
 
 function App() {
@@ -132,6 +133,13 @@ function App() {
           <PrivateRoute>
             <AppLayout>
               <Profiles />
+            </AppLayout>
+          </PrivateRoute>
+        } />
+        <Route path="/analytics" element={
+          <PrivateRoute>
+            <AppLayout>
+              <InsuranceAnalytics />
             </AppLayout>
           </PrivateRoute>
         } />

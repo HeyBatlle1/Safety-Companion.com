@@ -20,6 +20,7 @@ import { sql } from "drizzle-orm";
 import { body, validationResult } from "express-validator";
 import { logError } from "./utils/logger";
 import './types/session';
+import { geminiAnalytics } from "./services/geminiAnalytics";
 
 // Session middleware for authentication
 const PgSession = connectPgSimple(session);
@@ -610,6 +611,234 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Favicon route to prevent 503 errors
   app.get("/favicon.ico", (req, res) => {
     res.status(204).end();
+  });
+
+  // ==================== ENHANCED CHAT WITH INSURANCE ANALYTICS ====================
+  
+  // Enhanced chat route with Google Gemini insurance analytics
+  app.post("/api/chat", requireAuth, async (req, res) => {
+    try {
+      const { text } = req.body;
+      const userId = req.session.userId!;
+      
+      if (!text?.trim()) {
+        return res.status(400).json({ error: 'Message text is required' });
+      }
+
+      // Get user context for risk analysis
+      const user = await storage.getUser(userId);
+      const userContext = {
+        role: user?.role || 'field_worker',
+        department: user?.department || 'Construction',
+        experienceLevel: 2 // Can be enhanced with actual user data
+      };
+
+      // Generate contextual safety response
+      let response = "I understand your safety concern. Let me help you with that...";
+      
+      if (text.toLowerCase().includes('fall') || text.toLowerCase().includes('height')) {
+        response = "Fall protection is critical in construction work. Always use proper harnesses, check anchor points, and maintain three-point contact when climbing. OSHA requires fall protection at 6 feet or more. Ensure your safety equipment is certified and inspect it daily before use.";
+      } else if (text.toLowerCase().includes('chemical') || text.toLowerCase().includes('hazmat')) {
+        response = "Chemical safety requires strict protocols. Always wear appropriate PPE, ensure adequate ventilation, and keep SDS sheets accessible. Never mix chemicals without authorization. Have emergency eyewash stations nearby and know evacuation procedures.";
+      } else if (text.toLowerCase().includes('electrical') || text.toLowerCase().includes('power')) {
+        response = "Electrical safety is paramount. Use lockout/tagout procedures, test circuits before work, and only let qualified electricians handle electrical systems. Ground all tools properly and inspect for damage before use.";
+      } else if (text.toLowerCase().includes('crane') || text.toLowerCase().includes('heavy equipment')) {
+        response = "Heavy equipment safety requires certified operators, daily inspections, and clear communication. Maintain safe distances, use spotters when needed, and never operate equipment beyond its rated capacity.";
+      }
+
+      // Analyze with Google Gemini for insurance risk assessment
+      let riskAnalysis = null;
+      try {
+        riskAnalysis = await geminiAnalytics.analyzeChatForInsurance(text, response, userContext);
+        console.log('Risk analysis completed:', riskAnalysis.riskScore);
+      } catch (error) {
+        console.log('Gemini analysis failed, continuing without analytics:', error.message);
+      }
+
+      // Save the conversation
+      await storage.createChatMessage({
+        userId,
+        text,
+        sender: 'user'
+      });
+
+      await storage.createChatMessage({
+        userId,
+        text: response,
+        sender: 'assistant'
+      });
+
+      // Save analysis history with insurance metrics if analysis succeeded
+      if (riskAnalysis) {
+        await storage.createAnalysisHistory({
+          userId,
+          query: text,
+          response,
+          type: 'chat_response',
+          riskScore: riskAnalysis.riskScore,
+          sentimentScore: riskAnalysis.sentimentScore,
+          urgencyLevel: riskAnalysis.urgencyLevel,
+          safetyCategories: riskAnalysis.safetyCategories,
+          keywordTags: riskAnalysis.keywordTags,
+          confidenceScore: riskAnalysis.confidenceScore,
+          behaviorIndicators: riskAnalysis.behaviorIndicators,
+          complianceScore: riskAnalysis.complianceScore,
+          metadata: {
+            insuranceFactors: riskAnalysis.insuranceFactors,
+            userContext,
+            analysisTimestamp: new Date().toISOString()
+          }
+        });
+      }
+
+      res.json({ response });
+    } catch (error) {
+      logError(error, 'chat');
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // ==================== INSURANCE ANALYTICS ROUTES ====================
+  
+  // Save insurance analysis data
+  app.post('/api/analytics/save', requireAuth, async (req, res) => {
+    try {
+      const {
+        query,
+        response,
+        type,
+        riskScore,
+        sentimentScore,
+        urgencyLevel,
+        safetyCategories,
+        keywordTags,
+        confidenceScore,
+        behaviorIndicators,
+        complianceScore,
+        metadata
+      } = req.body;
+
+      const userId = req.session.userId!;
+      
+      // Save to analysis history with insurance metrics
+      const analysis = await storage.createAnalysisHistory({
+        userId,
+        query,
+        response,
+        type,
+        riskScore: riskScore || null,
+        sentimentScore: sentimentScore || null,
+        urgencyLevel: urgencyLevel || null,
+        safetyCategories: safetyCategories || null,
+        keywordTags: keywordTags || null,
+        confidenceScore: confidenceScore || null,
+        behaviorIndicators: behaviorIndicators || null,
+        complianceScore: complianceScore || null,
+        metadata: metadata || null
+      });
+
+      res.json({ success: true, analysisId: analysis.id });
+    } catch (error) {
+      logError(error, 'analytics');
+      res.status(500).json({ error: 'Failed to save analytics' });
+    }
+  });
+
+  // Get insurance analytics dashboard data
+  app.get('/api/analytics/dashboard/:companyId', requireAuth, async (req, res) => {
+    try {
+      const { companyId } = req.params;
+      
+      // Only allow admin access to analytics dashboard
+      if (req.session.userRole !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      // Get recent high-risk activities (last 30 days)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const analysisHistory = await storage.getAnalysisHistory('', 100); // Get recent analyses
+      const highRiskActivities = analysisHistory.filter(
+        item => (item.riskScore || 0) >= 70 && 
+        new Date(item.createdAt) >= thirtyDaysAgo
+      );
+
+      // Calculate key metrics
+      const totalAnalyses = analysisHistory.length;
+      const avgRiskScore = analysisHistory.length > 0 
+        ? Math.round(analysisHistory.reduce((sum, item) => sum + (item.riskScore || 0), 0) / analysisHistory.length)
+        : 25;
+
+      const complianceScore = analysisHistory.length > 0
+        ? Math.round(analysisHistory.reduce((sum, item) => sum + (item.complianceScore || 75), 0) / analysisHistory.length)
+        : 75;
+
+      res.json({
+        highRiskActivities: highRiskActivities.slice(0, 20),
+        metrics: {
+          totalAnalyses,
+          avgRiskScore,
+          highRiskCount: highRiskActivities.length,
+          complianceScore,
+          riskTrend: avgRiskScore > 50 ? 'declining' : 'stable'
+        }
+      });
+    } catch (error) {
+      logError(error, 'analytics');
+      res.status(500).json({ error: 'Failed to get dashboard data' });
+    }
+  });
+
+  // Export insurance data for sale (anonymized)
+  app.get('/api/analytics/export/:industryCode', requireAuth, async (req, res) => {
+    try {
+      // Only allow admin access to export data
+      if (req.session.userRole !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      const { industryCode } = req.params;
+      const analysisHistory = await storage.getAnalysisHistory('', 1000); // Get large dataset
+
+      // Anonymize and aggregate data by industry/department
+      const anonymizedData = analysisHistory.map(item => ({
+        industryCode,
+        riskScore: item.riskScore,
+        sentimentScore: item.sentimentScore,
+        urgencyLevel: item.urgencyLevel,
+        safetyCategories: item.safetyCategories,
+        behaviorIndicators: item.behaviorIndicators,
+        complianceScore: item.complianceScore,
+        type: item.type,
+        timestamp: item.createdAt,
+        // Remove any identifiable information
+        anonymizedId: item.id
+      }));
+
+      const summary = {
+        totalRecords: anonymizedData.length,
+        avgRiskScore: Math.round(
+          anonymizedData.reduce((sum, item) => sum + (item.riskScore || 0), 0) / anonymizedData.length
+        ),
+        avgComplianceScore: Math.round(
+          anonymizedData.reduce((sum, item) => sum + (item.complianceScore || 75), 0) / anonymizedData.length
+        ),
+        highRiskPercentage: Math.round(
+          (anonymizedData.filter(item => (item.riskScore || 0) >= 70).length / anonymizedData.length) * 100
+        )
+      };
+
+      res.json({
+        industryCode,
+        exportDate: new Date().toISOString(),
+        summary,
+        data: anonymizedData
+      });
+    } catch (error) {
+      logError(error, 'analytics');
+      res.status(500).json({ error: 'Failed to export data' });
+    }
   });
 
   // ==================== ADMIN ROUTES ====================
