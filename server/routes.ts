@@ -15,7 +15,8 @@ import {
 import { z } from "zod";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
-import { pool } from "./db";
+import { pool, db } from "./db";
+import { sql } from "drizzle-orm";
 import { body, validationResult } from "express-validator";
 import { logError } from "./utils/logger";
 import './types/session';
@@ -515,7 +516,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       for (const table of requiredTables) {
         try {
-          await pool.query(`SELECT 1 FROM ${table} LIMIT 1`);
+          await db.execute(sql`SELECT 1 FROM ${sql.identifier(table)} LIMIT 1`);
         } catch (error) {
           results.missingTables.push(table);
           if (fix) {
