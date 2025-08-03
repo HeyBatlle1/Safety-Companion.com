@@ -548,6 +548,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
 
+  // Favicon route to prevent 503 errors
+  app.get("/favicon.ico", (req, res) => {
+    res.status(204).end();
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
