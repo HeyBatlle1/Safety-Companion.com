@@ -18,7 +18,7 @@ import connectPgSimple from "connect-pg-simple";
 import { pool } from "./db";
 import { body, validationResult } from "express-validator";
 import { logError } from "./utils/logger";
-// TypeScript session types are declared in server/types/session.d.ts
+import './types/session';
 
 // Session middleware for authentication
 const PgSession = connectPgSimple(session);
@@ -607,10 +607,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin: Get all users  
-  app.get('/api/admin/users', requireAuth, async (req, res) => {
+  app.get('/api/admin/users', requireAuth, async (req: Request, res: Response) => {
     try {
-      if (req.session.userRole !== 'admin') {
-        return res.status(403).json({ error: 'Admin access required' });
+      // Only allow admin, project_manager, and safety_manager roles
+      if (!['admin', 'project_manager', 'safety_manager'].includes(req.session.userRole || '')) {
+        return res.status(403).json({ error: 'Administrative access required' });
       }
       
       const users = await storage.getAllUsers();
@@ -622,10 +623,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin: Export reports
-  app.get('/api/admin/export/:type', requireAuth, async (req, res) => {
+  app.get('/api/admin/export/:type', requireAuth, async (req: Request, res: Response) => {
     try {
-      if (req.session.userRole !== 'admin') {
-        return res.status(403).json({ error: 'Admin access required' });
+      if (!['admin', 'project_manager', 'safety_manager'].includes(req.session.userRole || '')) {
+        return res.status(403).json({ error: 'Administrative access required' });
       }
       
       const { type } = req.params;

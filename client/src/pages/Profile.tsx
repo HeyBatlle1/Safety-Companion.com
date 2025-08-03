@@ -166,7 +166,8 @@ const Profile: React.FC = () => {
           My Profile
         </button>
         
-        {profile?.role === 'admin' && (
+        {/* Admin Panel - Only for admin, project_manager, and safety_manager */}
+        {['admin', 'project_manager', 'safety_manager'].includes(profile?.role || '') && (
           <button
             onClick={() => setActiveTab('admin')}
             className={`px-4 py-2 rounded-lg font-medium ${
@@ -179,18 +180,20 @@ const Profile: React.FC = () => {
           </button>
         )}
         
-        {/* Add Debug tab for developers */}
-        <button
-          onClick={() => setActiveTab('debug')}
-          className={`px-4 py-2 rounded-lg font-medium ${
-            activeTab === 'debug'
-              ? 'bg-blue-500 text-white'
-              : 'bg-slate-700 text-gray-300 hover:bg-slate-600'
-          }`}
-        >
-          <Database className="w-4 h-4 inline mr-1" />
-          Database
-        </button>
+        {/* Database Tab - Restricted from field workers */}
+        {profile?.role !== 'field_worker' && (
+          <button
+            onClick={() => setActiveTab('debug')}
+            className={`px-4 py-2 rounded-lg font-medium ${
+              activeTab === 'debug'
+                ? 'bg-blue-500 text-white'
+                : 'bg-slate-700 text-gray-300 hover:bg-slate-600'
+            }`}
+          >
+            <Database className="w-4 h-4 inline mr-1" />
+            Database
+          </button>
+        )}
       </div>
 
       {activeTab === 'admin' ? (
