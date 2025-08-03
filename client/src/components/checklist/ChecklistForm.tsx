@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, Upload, X, Camera, MapPin, Loader, Check, ArrowLeft, Clock, Save, Printer, Share2, Flag, MessageSquare, Plus, Send, Sparkles, CheckCircle, XCircle, FileText } from 'lucide-react';
+import { AlertTriangle, Upload, X, Camera, MapPin, Loader, Check, ArrowLeft, Clock, Save, Printer, Share2, Flag, MessageSquare, Plus, Send, Sparkles, CheckCircle, XCircle, FileText, FileImage, Building, Eye } from 'lucide-react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { checklistData } from './checklistData';
 import BackButton from '../navigation/BackButton';
@@ -9,6 +9,8 @@ import { getMSDSResponse } from '../../services/msdsChat';
 import { saveChecklistResponse } from '../../services/checklistService';
 import { showToast } from '../common/ToastContainer';
 import { safetyCompanionAPI, type RiskProfile, type SafetyAnalysis } from '../../services/safetyCompanionAPI';
+import { blueprintStorage, type BlueprintUpload } from '../../services/blueprintStorage';
+import { multiModalAnalysis } from '../../services/multiModalAnalysis';
 
 interface ChecklistItem {
   id: string;
@@ -29,6 +31,7 @@ interface Response {
   value: string;
   timestamp: string;
   images?: string[];
+  blueprints?: BlueprintUpload[];
   notes?: string;
   deadline?: string;
   flagged?: boolean;
@@ -56,6 +59,7 @@ const ChecklistForm = () => {
   const [riskProfile, setRiskProfile] = useState<RiskProfile | null>(null);
   const [safetyAnalysis, setSafetyAnalysis] = useState<SafetyAnalysis | null>(null);
   const [analysisMode, setAnalysisMode] = useState<'standard' | 'intelligent'>('intelligent');
+  const [uploadingBlueprints, setUploadingBlueprints] = useState<Record<string, boolean>>({});
   const formRef = useRef<HTMLFormElement>(null);
 
   const handleResponse = (itemId: string, value: string) => {
@@ -130,6 +134,40 @@ const ChecklistForm = () => {
     }
   };
 
+  const handleBlueprintUpload = async (itemId: string, files: FileList) => {
+    setUploadingBlueprints(prev => ({ ...prev, [itemId]: true }));
+    
+    try {
+      const user = await getCurrentUser();
+      if (!user) {
+        showToast('Please log in to upload blueprints', 'error');
+        return;
+      }
+
+      const uploadPromises = Array.from(files).map(file => 
+        blueprintStorage.uploadBlueprint(file, templateId || 'unknown', itemId, user.id)
+      );
+
+      const uploadedBlueprints = await Promise.all(uploadPromises);
+      
+      setResponses(prev => ({
+        ...prev,
+        [itemId]: {
+          ...prev[itemId],
+          blueprints: [...(prev[itemId]?.blueprints || []), ...uploadedBlueprints],
+          timestamp: new Date().toISOString()
+        }
+      }));
+
+      showToast(`Successfully uploaded ${files.length} blueprint(s)`, 'success');
+    } catch (error) {
+      console.error('Blueprint upload error:', error);
+      showToast('Failed to upload blueprints. Please try again.', 'error');
+    } finally {
+      setUploadingBlueprints(prev => ({ ...prev, [itemId]: false }));
+    }
+  };
+
   useEffect(() => {
     // Load previous responses from localStorage
     const savedResponses = localStorage.getItem(`checklist-${templateId}-responses`);
@@ -174,24 +212,61 @@ const ChecklistForm = () => {
             flagged: responses[item.id]?.flagged || false,
             aiWeight: item.aiWeight || 1,
             riskCategory: item.riskCategory,
-            complianceStandard: item.complianceStandard
+            complianceStandard: item.complianceStandard,
+            images: responses[item.id]?.images || [],
+            blueprints: responses[item.id]?.blueprints || []
           }))
         }))
       };
 
       if (analysisMode === 'intelligent') {
+        // Collect all blueprints and images for multi-modal analysis
+        const allBlueprints: BlueprintUpload[] = [];
+        const allImages: string[] = [];
+        
+        template.sections.forEach(section => {
+          section.items.forEach(item => {
+            const itemResponse = responses[item.id];
+            if (itemResponse?.blueprints && itemResponse.blueprints.length > 0) {
+              allBlueprints.push(...itemResponse.blueprints);
+            }
+            if (itemResponse?.images && itemResponse.images.length > 0) {
+              allImages.push(...itemResponse.images);
+            }
+          });
+        });
+
         // Get real OSHA risk profile first
         const oshaRiskProfile = await safetyCompanionAPI.getRiskProfile(templateId || 'general-construction', checklistData);
         setRiskProfile(oshaRiskProfile);
 
-        // Perform intelligent analysis with real OSHA data
-        const intelligentAnalysis = await safetyCompanionAPI.analyzeChecklist(checklistData, oshaRiskProfile || undefined);
-        setSafetyAnalysis(intelligentAnalysis);
+        // Perform multi-modal analysis if blueprints or images exist
+        if (allBlueprints.length > 0 || allImages.length > 0) {
+          showToast('Analyzing blueprints and images with AI...', 'info');
+          
+          const multiModalResult = await multiModalAnalysis.analyzeComprehensive({
+            checklistData,
+            blueprints: allBlueprints,
+            images: allImages,
+            railwayData: oshaRiskProfile // Include railway system data
+          });
 
-        if (oshaRiskProfile) {
-          showToast(`Analysis complete! Risk Level: ${intelligentAnalysis.risk_level.toUpperCase()}`, 'success');
+          // Generate insurance report
+          const insuranceReport = await multiModalAnalysis.generateInsuranceReport(multiModalResult);
+          
+          // Combine analyses
+          setAiResponse(`## Multi-Modal AI Analysis\n\n${JSON.stringify(multiModalResult, null, 2)}\n\n## Insurance Compliance Report\n\n${insuranceReport}`);
+          showToast('Complete AI analysis with blueprint pattern recognition finished!', 'success');
         } else {
-          showToast('Analysis complete using local intelligence (OSHA API unavailable)', 'success');
+          // Standard intelligent analysis without visual data
+          const intelligentAnalysis = await safetyCompanionAPI.analyzeChecklist(checklistData, oshaRiskProfile || undefined);
+          setSafetyAnalysis(intelligentAnalysis);
+
+          if (oshaRiskProfile) {
+            showToast(`Analysis complete! Risk Level: ${intelligentAnalysis.risk_level.toUpperCase()}`, 'success');
+          } else {
+            showToast('Analysis complete using local intelligence (OSHA API unavailable)', 'success');
+          }
         }
       } else {
         // Standard analysis using existing system
@@ -806,9 +881,9 @@ Progress: ${Math.round(calculateProgress())}% complete
                                     </div>
                                     
                                     {/* Display uploaded files/images */}
-                                    {responses[item.id]?.images && responses[item.id].images.length > 0 && (
+                                    {responses[item.id]?.images && responses[item.id]?.images && responses[item.id]!.images!.length > 0 && (
                                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                        {responses[item.id].images.map((image, index) => (
+                                        {responses[item.id]!.images!.map((image, index) => (
                                           <div key={index} className="relative group">
                                             <img
                                               src={image}
@@ -819,7 +894,7 @@ Progress: ${Math.round(calculateProgress())}% complete
                                               whileTap={{ scale: 0.9 }}
                                               onClick={(e) => {
                                                 e.stopPropagation();
-                                                const newImages = responses[item.id]?.images?.filter((_, i) => i !== index);
+                                                const newImages = responses[item.id]?.images?.filter((_, i) => i !== index) || [];
                                                 setResponses(prev => ({
                                                   ...prev,
                                                   [item.id]: {
@@ -837,32 +912,97 @@ Progress: ${Math.round(calculateProgress())}% complete
                                       </div>
                                     )}
 
+                                    {/* Display uploaded blueprints */}
+                                    {responses[item.id]?.blueprints && responses[item.id]?.blueprints.length > 0 && (
+                                      <div className="space-y-2 mb-4">
+                                        <div className="flex items-center space-x-2 mb-2">
+                                          <Building className="w-5 h-5 text-blue-400" />
+                                          <span className="text-blue-400 font-medium">Uploaded Blueprints</span>
+                                        </div>
+                                        {responses[item.id]?.blueprints?.map((blueprint, index) => (
+                                          <div key={blueprint.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-700/30 border border-blue-500/20">
+                                            <div className="flex items-center space-x-3">
+                                              <FileImage className="w-5 h-5 text-blue-400" />
+                                              <div>
+                                                <p className="text-white text-sm font-medium">{blueprint.fileName}</p>
+                                                <p className="text-gray-400 text-xs">
+                                                  {(blueprint.fileSize / 1024 / 1024).toFixed(2)} MB
+                                                  {blueprint.analysisStatus === 'completed' && (
+                                                    <span className="ml-2 text-green-400">✓ AI Analyzed</span>
+                                                  )}
+                                                </p>
+                                              </div>
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                              <motion.button
+                                                whileTap={{ scale: 0.9 }}
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  window.open(blueprint.fileUrl, '_blank');
+                                                }}
+                                                className="p-2 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 transition-colors"
+                                                title="View Blueprint"
+                                              >
+                                                <Eye className="w-4 h-4" />
+                                              </motion.button>
+                                              <motion.button
+                                                whileTap={{ scale: 0.9 }}
+                                                onClick={async (e) => {
+                                                  e.stopPropagation();
+                                                  await blueprintStorage.deleteBlueprint(blueprint.id, blueprint.fileName);
+                                                  const newBlueprints = responses[item.id]?.blueprints?.filter(b => b.id !== blueprint.id) || [];
+                                                  setResponses(prev => ({
+                                                    ...prev,
+                                                    [item.id]: {
+                                                      ...prev[item.id],
+                                                      blueprints: newBlueprints
+                                                    }
+                                                  }));
+                                                }}
+                                                className="p-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 transition-colors"
+                                                title="Delete Blueprint"
+                                              >
+                                                <X className="w-4 h-4" />
+                                              </motion.button>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+
                                     {/* Upload controls */}
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                      {/* File upload for documents/blueprints */}
+                                      {/* Blueprint upload */}
                                       {item.files && (
                                         <>
                                           <input
                                             type="file"
-                                            accept=".pdf,.dwg,.jpg,.jpeg,.png,.gif,.bmp,.tiff,.doc,.docx,.xls,.xlsx"
+                                            accept=".pdf,.dwg,.dxf,.jpg,.jpeg,.png,.svg"
                                             multiple
                                             onChange={(e) => {
                                               e.stopPropagation();
-                                              if (e.target.files) handleImageUpload(item.id, e.target.files);
+                                              if (e.target.files) handleBlueprintUpload(item.id, e.target.files);
                                             }}
                                             className="hidden"
-                                            id={`file-${item.id}`}
+                                            id={`blueprint-${item.id}`}
                                           />
                                           <motion.button
                                             whileTap={{ scale: 0.95 }}
                                             onClick={(e) => {
                                               e.stopPropagation();
-                                              document.getElementById(`file-${item.id}`)?.click();
+                                              document.getElementById(`blueprint-${item.id}`)?.click();
                                             }}
-                                            className="h-12 flex items-center justify-center space-x-2 border-2 border-dashed border-green-500/30 rounded-lg hover:border-green-400/60 hover:bg-green-500/10 transition-all"
+                                            disabled={uploadingBlueprints[item.id]}
+                                            className="h-12 flex items-center justify-center space-x-2 border-2 border-dashed border-cyan-500/30 rounded-lg hover:border-cyan-400/60 hover:bg-cyan-500/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                           >
-                                            <Upload className="w-5 h-5 text-green-400" />
-                                            <span className="text-green-400 text-sm font-medium">Blueprints/Docs</span>
+                                            {uploadingBlueprints[item.id] ? (
+                                              <Loader className="w-5 h-5 text-cyan-400 animate-spin" />
+                                            ) : (
+                                              <Building className="w-5 h-5 text-cyan-400" />
+                                            )}
+                                            <span className="text-cyan-400 text-sm font-medium">
+                                              {uploadingBlueprints[item.id] ? 'Uploading...' : 'Blueprints'}
+                                            </span>
                                           </motion.button>
                                         </>
                                       )}
