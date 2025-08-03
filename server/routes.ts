@@ -129,7 +129,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       body('role').isIn(['field_worker', 'supervisor', 'project_manager', 'safety_manager', 'admin'])
     ],
     handleValidationErrors,
-    async (req, res) => {
+    async (req: Request, res: Response) => {
     try {
       const userData = insertUserSchema.parse(req.body);
       const user = await storage.createUser(userData);
@@ -155,7 +155,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       body('password').notEmpty()
     ],
     handleValidationErrors,
-    async (req, res) => {
+    async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body;
       if (!email || !password) {
@@ -190,7 +190,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get current user
   app.get("/api/auth/user", requireAuth, async (req, res) => {
     try {
-      const user = await storage.getUser(req.session.userId);
+      const userId = req.session.userId!; // Safe after requireAuth
+      const user = await storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
@@ -208,8 +209,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update user profile
   app.patch("/api/users/profile", requireAuth, async (req, res) => {
     try {
+      const userId = req.session.userId!; // Safe after requireAuth
       const updates = req.body;
-      const user = await storage.updateUser(req.session.userId, updates);
+      const user = await storage.updateUser(userId, updates);
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
@@ -227,7 +229,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get notification preferences
   app.get("/api/users/notification-preferences", requireAuth, async (req, res) => {
     try {
-      const preferences = await storage.getUserNotificationPreferences(req.session.userId);
+      const userId = req.session.userId!; // Safe after requireAuth
+      const preferences = await storage.getUserNotificationPreferences(userId);
       res.json({ preferences });
     } catch (error) {
       logError(error, 'auth');
@@ -238,8 +241,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update notification preferences
   app.patch("/api/users/notification-preferences", requireAuth, async (req, res) => {
     try {
+      const userId = req.session.userId!; // Safe after requireAuth
       const updates = req.body;
-      const preferences = await storage.updateNotificationPreferences(req.session.userId, updates);
+      const preferences = await storage.updateNotificationPreferences(userId, updates);
       res.json({ preferences });
     } catch (error) {
       logError(error, 'auth');
@@ -252,8 +256,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get analysis history
   app.get("/api/analysis-history", requireAuth, async (req, res) => {
     try {
+      const userId = req.session.userId!; // Safe after requireAuth
       const limit = parseInt(req.query.limit as string) || 50;
-      const history = await storage.getAnalysisHistory(req.session.userId, limit);
+      const history = await storage.getAnalysisHistory(userId, limit);
       res.json({ history });
     } catch (error) {
       logError(error, 'auth');
@@ -271,11 +276,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       body('siteLocation').optional().trim().escape()
     ],
     handleValidationErrors,
-    async (req, res) => {
+    async (req: Request, res: Response) => {
     try {
+      const userId = req.session.userId!; // Safe after requireAuth
       const analysisData = insertAnalysisHistorySchema.parse({
         ...req.body,
-        userId: req.session.userId
+        userId: userId
       });
       const analysis = await storage.createAnalysisHistory(analysisData);
       res.status(201).json({ analysis });
@@ -370,8 +376,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get chat messages
   app.get("/api/chat-messages", requireAuth, async (req, res) => {
     try {
+      const userId = req.session.userId!; // Safe after requireAuth
       const limit = parseInt(req.query.limit as string) || 100;
-      const messages = await storage.getChatMessages(req.session.userId, limit);
+      const messages = await storage.getChatMessages(userId, limit);
       res.json({ messages });
     } catch (error) {
       logError(error, 'auth');
@@ -382,9 +389,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create chat message
   app.post("/api/chat-messages", requireAuth, async (req, res) => {
     try {
+      const userId = req.session.userId!; // Safe after requireAuth
       const messageData = insertChatMessageSchema.parse({
         ...req.body,
-        userId: req.session.userId
+        userId: userId
       });
       const message = await storage.createChatMessage(messageData);
       res.status(201).json({ message });
@@ -402,7 +410,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get watched videos
   app.get("/api/watched-videos", requireAuth, async (req, res) => {
     try {
-      const watchedVideos = await storage.getWatchedVideos(req.session.userId);
+      const userId = req.session.userId!; // Safe after requireAuth
+      const watchedVideos = await storage.getWatchedVideos(userId);
       res.json({ watchedVideos });
     } catch (error) {
       logError(error, 'auth');
@@ -418,7 +427,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Video ID required' });
       }
       
-      const watchedVideo = await storage.markVideoWatched(req.session.userId, videoId);
+      const userId = req.session.userId!; // Safe after requireAuth
+      const watchedVideo = await storage.markVideoWatched(userId, videoId);
       res.status(201).json({ watchedVideo });
     } catch (error) {
       logError(error, 'auth');
@@ -470,7 +480,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get user projects
   app.get("/api/users/projects", requireAuth, async (req, res) => {
     try {
-      const projects = await storage.getUserProjects(req.session.userId);
+      const userId = req.session.userId!; // Safe after requireAuth
+      const projects = await storage.getUserProjects(userId);
       res.json({ projects });
     } catch (error) {
       logError(error, 'auth');
@@ -500,11 +511,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const results = {
         checkTime: new Date().toISOString(),
-        missingTables: [],
-        missingColumns: [],
-        fixedTables: [],
-        fixedColumns: [],
-        errors: []
+        missingTables: [] as string[],
+        missingColumns: [] as string[],
+        fixedTables: [] as string[],
+        fixedColumns: [] as string[],
+        errors: [] as string[]
       };
 
       // Check if all required tables exist by trying to query them
@@ -536,7 +547,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message += ' No issues found.';
       }
 
-      results.message = message;
+      (results as any).message = message;
       res.json(results);
     } catch (error) {
       logError(error, 'auth');
@@ -567,7 +578,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     body('role').isIn(['field_worker', 'project_manager', 'safety_manager', 'admin']),
     body('emergencyContactName').notEmpty().trim(),
     body('emergencyContactPhone').notEmpty().trim()
-  ], handleValidationErrors, async (req, res) => {
+  ], handleValidationErrors, async (req: Request, res: Response) => {
     try {
       // Check admin permissions
       if (req.session.userRole !== 'admin') {
@@ -695,7 +706,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     body('firstName').notEmpty().trim(),
     body('lastName').notEmpty().trim(),
     body('role').isIn(['field_worker', 'supervisor', 'project_manager', 'safety_manager', 'admin'])
-  ], handleValidationErrors, async (req, res) => {
+  ], handleValidationErrors, async (req: Request, res: Response) => {
     try {
       const userData = req.body;
       
@@ -735,10 +746,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     body('watchDuration').isNumeric(),
     body('totalDuration').isNumeric(),
     body('completionRate').isNumeric()
-  ], handleValidationErrors, async (req, res) => {
+  ], handleValidationErrors, async (req: Request, res: Response) => {
     try {
       const { videoId, watchDuration, totalDuration, completionRate } = req.body;
-      const userId = req.session.userId;
+      const userId = req.session.userId!; // Safe after requireAuth
       
       await storage.markVideoWatched(userId, videoId);
       

@@ -6,14 +6,3 @@ declare module 'express-session' {
     userRole?: string;
   }
 }
-
-declare global {
-  namespace Express {
-    interface Request {
-      session: {
-        userId?: string;
-        userRole?: string;
-      } & session.Session;
-    }
-  }
-}
