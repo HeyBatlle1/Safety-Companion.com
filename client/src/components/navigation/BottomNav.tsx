@@ -33,8 +33,9 @@ const BottomNav = () => {
       <div className="absolute inset-0 bg-gradient-to-t from-slate-900/95 via-slate-900/80 to-transparent backdrop-blur-xl" />
       
       {/* Navigation content */}
-      <div className="relative max-w-md mx-auto px-4 pointer-events-auto">
-        <div className="flex justify-around py-3">
+      <div className="relative w-full pointer-events-auto">
+        <div className="flex justify-center py-3">
+          <div className="flex justify-around max-w-2xl w-full px-4">
           {navItems.map(({ icon: Icon, label, path }) => {
             const isActive = location.pathname === path;
             return (
@@ -108,6 +109,7 @@ const BottomNav = () => {
               </motion.button>
             );
           })}
+          </div>
         </div>
       </div>
       

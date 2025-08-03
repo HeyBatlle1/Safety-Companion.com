@@ -18,6 +18,7 @@ import {
   hasPermission 
 } from '../../services/profileService';
 import { showToast } from '../common/ToastContainer';
+import EnhancedAdminDashboard from '../admin/EnhancedAdminDashboard';
 
 const AdminPanel: React.FC = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -36,7 +37,7 @@ const AdminPanel: React.FC = () => {
       setLoading(true);
       
       // Check if user has admin permissions
-      const hasAdminPermission = await hasPermission('profiles', 'read');
+      const hasAdminPermission = await hasPermission('profiles');
       setIsAdmin(hasAdminPermission);
       
       if (hasAdminPermission) {
@@ -68,7 +69,8 @@ const AdminPanel: React.FC = () => {
         employee_id: 'EMP001',
         certification_name: 'First Aid/CPR',
         expiry_date: new Date(today.getTime() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        days_until_expiry: 15
+        days_until_expiry: 15,
+        certification_alert_days: 30
       },
       {
         id: 'alert-2',
@@ -78,7 +80,8 @@ const AdminPanel: React.FC = () => {
         employee_id: 'EMP002',
         certification_name: 'OSHA 10-Hour',
         expiry_date: new Date(today.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        days_until_expiry: 5
+        days_until_expiry: 5,
+        certification_alert_days: 30
       },
       {
         id: 'alert-3',
@@ -88,7 +91,8 @@ const AdminPanel: React.FC = () => {
         employee_id: 'EMP003',
         certification_name: 'Forklift Operation',
         expiry_date: new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        days_until_expiry: -2
+        days_until_expiry: -2,
+        certification_alert_days: 30
       }
     ];
   };
@@ -149,25 +153,57 @@ const AdminPanel: React.FC = () => {
     );
   }
 
+  const [viewMode, setViewMode] = useState<'dashboard' | 'users'>('dashboard');
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Admin Panel</h1>
-          <p className="text-gray-400">Manage users, roles, and system settings</p>
-        </div>
-        <div className="flex space-x-2">
-          <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center space-x-2">
-            <UserPlus className="w-4 h-4" />
-            <span>Add User</span>
+      {/* View Toggle */}
+      <div className="flex justify-center mb-6">
+        <div className="bg-slate-800/50 backdrop-blur-xl border border-blue-500/20 rounded-xl p-1 flex">
+          <button
+            onClick={() => setViewMode('dashboard')}
+            className={`px-6 py-2 rounded-lg font-medium transition-all ${
+              viewMode === 'dashboard'
+                ? 'bg-blue-500 text-white shadow-lg'
+                : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            Dashboard
           </button>
-          <button className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 flex items-center space-x-2">
-            <Settings className="w-4 h-4" />
-            <span>Settings</span>
+          <button
+            onClick={() => setViewMode('users')}
+            className={`px-6 py-2 rounded-lg font-medium transition-all ${
+              viewMode === 'users'
+                ? 'bg-blue-500 text-white shadow-lg'
+                : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            User Management
           </button>
         </div>
       </div>
+
+      {viewMode === 'dashboard' ? (
+        <EnhancedAdminDashboard />
+      ) : (
+        <>
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-white">User Management</h1>
+              <p className="text-gray-400">Manage users, roles, and permissions</p>
+            </div>
+            <div className="flex space-x-2">
+              <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center space-x-2">
+                <UserPlus className="w-4 h-4" />
+                <span>Add User</span>
+              </button>
+              <button className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 flex items-center space-x-2">
+                <Settings className="w-4 h-4" />
+                <span>Settings</span>
+              </button>
+            </div>
+          </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -361,6 +397,8 @@ const AdminPanel: React.FC = () => {
           </table>
         </div>
       </motion.div>
+        </>
+      )}
     </div>
   );
 };

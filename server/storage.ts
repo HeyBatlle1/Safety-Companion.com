@@ -135,8 +135,38 @@ export class DatabaseStorage implements IStorage {
     const user = await this.getUserByEmail(email);
     if (!user) return null;
     
+    // Check if account is locked
+    if (user.accountLockedUntil && new Date() < new Date(user.accountLockedUntil)) {
+      return null;
+    }
+    
     const isValid = await bcrypt.compare(password, user.password);
-    return isValid ? user : null;
+    
+    if (isValid) {
+      // Reset failed attempts and update last login
+      await db.update(users)
+        .set({ 
+          failedLoginAttempts: 0,
+          lastLoginAt: new Date(),
+          loginCount: (user.loginCount || 0) + 1
+        })
+        .where(eq(users.id, user.id));
+      return user;
+    } else {
+      // Increment failed attempts
+      const failedAttempts = (user.failedLoginAttempts || 0) + 1;
+      const updates: any = { failedLoginAttempts: failedAttempts };
+      
+      // Lock account after 5 failed attempts
+      if (failedAttempts >= 5) {
+        updates.accountLockedUntil = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+      }
+      
+      await db.update(users)
+        .set(updates)
+        .where(eq(users.id, user.id));
+      return null;
+    }
   }
 
   // Notification preferences
