@@ -1,165 +1,124 @@
 import { Message } from '../types/chat';
-import supabase, { getCurrentUser } from './supabase';
 
-// Save chat message to database
-export const saveMessage = async (message: Omit<Message, 'id'>): Promise<Message> => {
-  try {
-    const user = await getCurrentUser();
-    
-    if (!user) {
-      throw new Error('User not authenticated');
-    }
-    
-    const { data, error } = await supabase
-      .from('chat_messages')
-      .insert([{
-        user_id: user.id,
-        text: message.text,
-        sender: message.sender,
-        attachments: message.attachments || null
-      }])
-      .select()
-      .single();
-      
-    if (error) throw error;
-    
-    return {
-      id: data.id,
-      text: data.text,
-      sender: data.sender as 'user' | 'bot',
-      timestamp: data.created_at,
-      attachments: data.attachments || undefined
-    };
-  } catch (error) {
-    
-    
-    // If Supabase fails, create a message with a local ID
-    return {
-      ...message,
-      id: `local-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
-    };
-  }
-};
+const API_BASE = '/api';
+const MESSAGES_KEY = 'safety-companion-messages';
 
-// Get chat history
-export const getChatHistory = async (limit = 50): Promise<Message[]> => {
+// Extended message type with chatId for storage
+interface StoredMessage extends Message {
+  chatId: string;
+}
+
+// Local storage helpers
+const getLocalMessages = (): StoredMessage[] => {
   try {
-    const user = await getCurrentUser();
-    
-    if (!user) {
-      throw new Error('User not authenticated');
-    }
-    
-    const { data, error } = await supabase
-      .from('chat_messages')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: true })
-      .limit(limit);
-      
-    if (error) throw error;
-    
-    // Transform from database format to application format
-    return data.map(msg => ({
-      id: msg.id,
-      text: msg.text,
-      sender: msg.sender as 'user' | 'bot',
-      timestamp: msg.created_at,
-      attachments: msg.attachments || undefined
-    }));
+    const stored = localStorage.getItem(MESSAGES_KEY);
+    if (!stored) return [];
+    const messages = JSON.parse(stored);
+    return Array.isArray(messages) ? messages : [];
   } catch (error) {
-    
+    console.error('Error reading messages:', error);
     return [];
   }
 };
 
-// Clear chat history
-export const clearChatHistory = async (): Promise<boolean> => {
+const saveLocalMessages = (messages: StoredMessage[]): void => {
   try {
-    const user = await getCurrentUser();
-    
-    if (!user) {
-      throw new Error('User not authenticated');
-    }
-    
-    const { error } = await supabase
-      .from('chat_messages')
-      .delete()
-      .eq('user_id', user.id);
-      
-    if (error) throw error;
-    
-    return true;
+    localStorage.setItem(MESSAGES_KEY, JSON.stringify(messages));
   } catch (error) {
-    
-    return false;
+    console.error('Error saving messages:', error);
   }
 };
 
-// Get message by ID
-export const getMessageById = async (messageId: string): Promise<Message | null> => {
+// Get messages for a chat
+export const getMessages = async (chatId: string): Promise<Message[]> => {
   try {
-    const { data, error } = await supabase
-      .from('chat_messages')
-      .select('*')
-      .eq('id', messageId)
-      .single();
-      
-    if (error) throw error;
-    
-    return {
-      id: data.id,
-      text: data.text,
-      sender: data.sender as 'user' | 'bot',
-      timestamp: data.created_at,
-      attachments: data.attachments || undefined
-    };
+    // TODO: Implement API endpoint when backend is ready
+    // For now, use localStorage
+    const allMessages = getLocalMessages();
+    return allMessages.filter(msg => msg.chatId === chatId);
   } catch (error) {
+    console.error('Error getting messages:', error);
+    return [];
+  }
+};
+
+// Add a new message
+export const addMessage = async (message: Omit<Message, 'id' | 'timestamp'>, chatId: string = 'default'): Promise<Message> => {
+  try {
+    const newMessage: Message = {
+      ...message,
+      id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      timestamp: new Date().toISOString()
+    };
     
+    const storedMessage: StoredMessage = {
+      ...newMessage,
+      chatId
+    };
+    
+    const allMessages = getLocalMessages();
+    allMessages.push(storedMessage);
+    saveLocalMessages(allMessages);
+    
+    return newMessage;
+  } catch (error) {
+    console.error('Error adding message:', error);
+    throw new Error('Failed to add message');
+  }
+};
+
+// Update a message
+export const updateMessage = async (messageId: string, updates: Partial<Message>): Promise<Message | null> => {
+  try {
+    const allMessages = getLocalMessages();
+    const index = allMessages.findIndex(msg => msg.id === messageId);
+    
+    if (index === -1) return null;
+    
+    allMessages[index] = { ...allMessages[index], ...updates };
+    saveLocalMessages(allMessages);
+    
+    return allMessages[index];
+  } catch (error) {
+    console.error('Error updating message:', error);
     return null;
   }
 };
 
-// Update message (e.g., for editing)
-export const updateMessage = async (messageId: string, updates: Partial<Message>): Promise<boolean> => {
-  try {
-    const { error } = await supabase
-      .from('chat_messages')
-      .update({
-        text: updates.text,
-        attachments: updates.attachments || null
-      })
-      .eq('id', messageId);
-      
-    if (error) throw error;
-    return true;
-  } catch (error) {
-    
-    return false;
-  }
-};
-
-// Delete a specific message
+// Delete a message
 export const deleteMessage = async (messageId: string): Promise<boolean> => {
   try {
-    const { error } = await supabase
-      .from('chat_messages')
-      .delete()
-      .eq('id', messageId);
-      
-    if (error) throw error;
+    const allMessages = getLocalMessages();
+    const filtered = allMessages.filter(msg => msg.id !== messageId);
+    
+    if (filtered.length === allMessages.length) return false;
+    
+    saveLocalMessages(filtered);
     return true;
   } catch (error) {
-    
+    console.error('Error deleting message:', error);
     return false;
   }
 };
 
-export default {
-  saveMessage,
-  getChatHistory,
-  clearChatHistory,
-  getMessageById,
-  updateMessage,
-  deleteMessage
+// Clear all messages for a chat
+export const clearChatMessages = async (chatId: string): Promise<boolean> => {
+  try {
+    const allMessages = getLocalMessages();
+    const filtered = allMessages.filter(msg => msg.chatId !== chatId);
+    saveLocalMessages(filtered);
+    return true;
+  } catch (error) {
+    console.error('Error clearing chat messages:', error);
+    return false;
+  }
 };
+
+// Alias for backwards compatibility
+export const clearChatHistory = clearChatMessages;
+
+// Get chat history (alias for getMessages)
+export const getChatHistory = getMessages;
+
+// Save a message (alias for addMessage)
+export const saveMessage = addMessage;

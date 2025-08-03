@@ -204,6 +204,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get team members (admin only)
+  app.get("/api/team/members", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+      
+      const members = await storage.getAllUsers();
+      const membersWithoutPasswords = members.map(({ password, ...member }) => member);
+      
+      res.json({ members: membersWithoutPasswords });
+    } catch (error) {
+      logError(error, 'team-members');
+      res.status(500).json({ error: 'Failed to fetch team members' });
+    }
+  });
+
+  // Export users data (admin only)
+  app.get("/api/admin/export/users", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+      
+      const members = await storage.getAllUsers();
+      const exportData = members.map(({ password, ...member }) => ({
+        ...member,
+        exportedAt: new Date().toISOString()
+      }));
+      
+      res.json({
+        exportDate: new Date().toISOString(),
+        totalUsers: exportData.length,
+        users: exportData
+      });
+    } catch (error) {
+      logError(error, 'export-users');
+      res.status(500).json({ error: 'Failed to export user data' });
+    }
+  });
+
   // ==================== USER MANAGEMENT ====================
 
   // Update user profile

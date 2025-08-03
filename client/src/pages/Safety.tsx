@@ -6,14 +6,15 @@ import ReportHistory from '../components/safety/ReportHistory';
 import BackButton from '../components/navigation/BackButton';
 import { SafetyReport } from '../types/safety';
 import { addReport, getAllReports, deleteReport, processReportFiles } from '../services/safetyReports';
-import { getCurrentUser } from '../services/supabase';
+import { useAuth } from '../contexts/AuthContext';
 
 const Safety = () => {
+  const { user } = useAuth();
   const [reports, setReports] = useState<SafetyReport[]>([]);
   const [showForm, setShowForm] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const isAuthenticated = !!user;
 
   useEffect(() => {
     // Check authentication and load existing reports
@@ -22,9 +23,7 @@ const Safety = () => {
         setLoading(true);
         setError(null);
         
-        // Check if user is authenticated
-        const user = await getCurrentUser();
-        setIsAuthenticated(!!user);
+        // User authentication is handled by AuthContext
         
         // Load reports from Supabase (or localStorage fallback)
         const existingReports = await getAllReports();
@@ -50,7 +49,7 @@ const Safety = () => {
     initPage();
   }, []);
 
-  const handleSubmitReport = async (formData: FormData) => {
+  const handleSubmitReport = async (formData: FormData): Promise<void> => {
     try {
       setError(null);
       
@@ -82,8 +81,6 @@ const Safety = () => {
       
       // Switch to history view after submission
       setShowForm(false);
-
-      return newReport;
     } catch (error) {
       
       setError('Failed to submit report. Please try again.');

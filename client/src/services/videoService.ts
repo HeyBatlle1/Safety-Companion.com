@@ -1,4 +1,3 @@
-import supabase, { getCurrentUser } from './supabase';
 import { trackVideoInteraction } from '../utils/analytics';
 
 interface WatchedVideo {
@@ -7,32 +6,42 @@ interface WatchedVideo {
   watchedAt: string;
 }
 
+// Local storage key for watched videos
+const WATCHED_VIDEOS_KEY = 'safety-companion-watched-videos';
+
+/**
+ * Get watched videos from localStorage
+ */
+const getLocalWatchedVideos = (): string[] => {
+  try {
+    const stored = localStorage.getItem(WATCHED_VIDEOS_KEY);
+    if (!stored) return [];
+    const videos = JSON.parse(stored);
+    return Array.isArray(videos) ? videos : [];
+  } catch (error) {
+    console.error('Error reading watched videos:', error);
+    return [];
+  }
+};
+
+/**
+ * Save watched videos to localStorage
+ */
+const saveLocalWatchedVideos = (videoIds: string[]): void => {
+  try {
+    localStorage.setItem(WATCHED_VIDEOS_KEY, JSON.stringify(videoIds));
+  } catch (error) {
+    console.error('Error saving watched videos:', error);
+  }
+};
+
 /**
  * Get all videos that have been watched by the current user
  */
 export const getWatchedVideos = async (): Promise<string[]> => {
-  try {
-    const user = await getCurrentUser();
-    
-    if (!user) {
-      return getLocalWatchedVideos();
-    }
-    
-    const { data, error } = await supabase
-      .from('watched_videos')
-      .select('video_id')
-      .eq('user_id', user.id);
-      
-    if (error) {
-      
-      return getLocalWatchedVideos();
-    }
-    
-    return data.map(item => item.video_id);
-  } catch (error) {
-    
-    return getLocalWatchedVideos();
-  }
+  // TODO: Implement API endpoint when backend is ready
+  // For now, use localStorage
+  return getLocalWatchedVideos();
 };
 
 /**
@@ -43,107 +52,40 @@ export const markVideoAsWatched = async (videoId: string): Promise<boolean> => {
     // Track analytics event
     trackVideoInteraction('mark_watched', videoId);
     
-    const user = await getCurrentUser();
+    // Get current watched videos
+    const watched = getLocalWatchedVideos();
     
-    if (!user) {
-      return markLocalVideoAsWatched(videoId);
-    }
-    
-    const { error } = await supabase
-      .from('watched_videos')
-      .insert([{
-        user_id: user.id,
-        video_id: videoId,
-        watched_at: new Date().toISOString()
-      }])
-      .onConflict(['user_id', 'video_id'])
-      .merge(); // Update the watched_at timestamp if record already exists
-      
-    if (error) {
-      
-      return markLocalVideoAsWatched(videoId);
+    // Add if not already watched
+    if (!watched.includes(videoId)) {
+      watched.push(videoId);
+      saveLocalWatchedVideos(watched);
     }
     
     return true;
   } catch (error) {
-    
-    return markLocalVideoAsWatched(videoId);
+    console.error('Error marking video as watched:', error);
+    return false;
   }
 };
 
 /**
- * Remove a video from the watched list
+ * Mark a video as unwatched by the current user
  */
 export const markVideoAsUnwatched = async (videoId: string): Promise<boolean> => {
   try {
     // Track analytics event
     trackVideoInteraction('mark_unwatched', videoId);
     
-    const user = await getCurrentUser();
+    // Get current watched videos
+    const watched = getLocalWatchedVideos();
     
-    if (!user) {
-      return markLocalVideoAsUnwatched(videoId);
-    }
-    
-    const { error } = await supabase
-      .from('watched_videos')
-      .delete()
-      .eq('user_id', user.id)
-      .eq('video_id', videoId);
-      
-    if (error) {
-      
-      return markLocalVideoAsUnwatched(videoId);
-    }
+    // Remove from watched list
+    const updated = watched.filter(id => id !== videoId);
+    saveLocalWatchedVideos(updated);
     
     return true;
   } catch (error) {
-    
-    return markLocalVideoAsUnwatched(videoId);
-  }
-};
-
-// Local storage fallbacks for offline/unauthenticated usage
-const LOCAL_STORAGE_KEY = 'toolbox-talks-watched-videos';
-
-const getLocalWatchedVideos = (): string[] => {
-  try {
-    const watchedVideos = localStorage.getItem(LOCAL_STORAGE_KEY);
-    return watchedVideos ? JSON.parse(watchedVideos) : [];
-  } catch (error) {
-    
-    return [];
-  }
-};
-
-const markLocalVideoAsWatched = (videoId: string): boolean => {
-  try {
-    const watchedVideos = getLocalWatchedVideos();
-    if (!watchedVideos.includes(videoId)) {
-      watchedVideos.push(videoId);
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(watchedVideos));
-    }
-    return true;
-  } catch (error) {
-    
+    console.error('Error marking video as unwatched:', error);
     return false;
   }
-};
-
-const markLocalVideoAsUnwatched = (videoId: string): boolean => {
-  try {
-    let watchedVideos = getLocalWatchedVideos();
-    watchedVideos = watchedVideos.filter(id => id !== videoId);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(watchedVideos));
-    return true;
-  } catch (error) {
-    
-    return false;
-  }
-};
-
-export default {
-  getWatchedVideos,
-  markVideoAsWatched,
-  markVideoAsUnwatched
 };

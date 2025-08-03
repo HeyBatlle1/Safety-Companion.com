@@ -1,5 +1,4 @@
-import { getCurrentUser } from '../supabase';
-import { supabase } from '../supabase';
+// Analysis history service - using local storage until backend is ready
 
 export interface AnalysisRecord {
   id?: string;
@@ -11,6 +10,19 @@ export interface AnalysisRecord {
   metadata?: Record<string, any>;
 }
 
+// Get history from localStorage
+const getLocalAnalysisHistory = (): AnalysisRecord[] => {
+  try {
+    const history = localStorage.getItem('analysis_history');
+    if (!history) return [];
+    const records = JSON.parse(history);
+    return Array.isArray(records) ? records : [];
+  } catch (error) {
+    console.error('Error reading analysis history:', error);
+    return [];
+  }
+};
+
 /**
  * Save an analysis record to history
  */
@@ -18,58 +30,18 @@ export const saveAnalysisToHistory = async (
   analysis: Omit<AnalysisRecord, 'id' | 'user_id' | 'timestamp'>
 ): Promise<AnalysisRecord> => {
   try {
-    const user = await getCurrentUser();
-    
     // Create the record object
     const record: AnalysisRecord = {
       ...analysis,
-      user_id: user?.id,
+      id: `analysis_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       timestamp: new Date().toISOString()
     };
-    
-    // Try to save to Supabase if user is authenticated
-    if (user) {
-      try {
-        const { data, error } = await supabase
-          .from('analysis_history')
-          .insert([{
-            user_id: user.id,
-            query: record.query,
-            response: record.response,
-            type: record.type,
-            metadata: record.metadata || {}
-          }])
-          .select();
-          
-        if (error) {
-          
-          // Fall back to localStorage below
-        } else if (data && data.length > 0) {
-          return {
-            id: data[0].id,
-            user_id: data[0].user_id,
-            query: data[0].query,
-            response: data[0].response,
-            timestamp: data[0].created_at,
-            type: data[0].type as AnalysisRecord['type'],
-            metadata: data[0].metadata
-          };
-        }
-      } catch (error) {
-        
-        // Fall back to localStorage
-      }
-    }
-    
-    // Save to localStorage as fallback
-    const localId = `analysis_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-    const localRecord = { ...record, id: localId };
     
     // Get existing records
     const existingRecords = getLocalAnalysisHistory();
     
     // Add new record to the beginning
-    existingRecords.unshift(localRecord);
+    existingRecords.unshift(record);
     
     // Keep only the last 100 records to prevent localStorage overflow
     const trimmedRecords = existingRecords.slice(0, 100);
@@ -77,9 +49,9 @@ export const saveAnalysisToHistory = async (
     // Save back to localStorage
     localStorage.setItem('analysis_history', JSON.stringify(trimmedRecords));
     
-    return localRecord;
+    return record;
   } catch (error) {
-    
+    console.error('Error saving analysis to history:', error);
     // Return the original record instead of throwing to prevent breaking the app flow
     return {
       id: `local_fallback_${Date.now()}`,
@@ -93,176 +65,78 @@ export const saveAnalysisToHistory = async (
 };
 
 /**
- * Get analysis history from localStorage
- */
-const getLocalAnalysisHistory = (): AnalysisRecord[] => {
-  try {
-    const historyJson = localStorage.getItem('analysis_history');
-    return historyJson ? JSON.parse(historyJson) : [];
-  } catch (error) {
-    
-    return [];
-  }
-};
-
-/**
- * Get analysis history for the current user
+ * Get analysis history
  */
 export const getAnalysisHistory = async (
   type?: AnalysisRecord['type'],
-  limit = 50
+  limit: number = 50
 ): Promise<AnalysisRecord[]> => {
   try {
-    const user = await getCurrentUser();
-    
-    if (user) {
-      try {
-        let query = supabase
-          .from('analysis_history')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(limit);
-          
-        if (type) {
-          query = query.eq('type', type);
-        }
-        
-        const { data, error } = await query;
-        
-        if (error) {
-          
-          // Fall back to localStorage below
-        } else if (data) {
-          return data.map(item => ({
-            id: item.id,
-            user_id: item.user_id,
-            query: item.query,
-            response: item.response,
-            timestamp: item.created_at,
-            type: item.type as AnalysisRecord['type'],
-            metadata: item.metadata
-          }));
-        }
-      } catch (error) {
-        
-        // Fall back to localStorage
-      }
-    }
-    
-    // Get from localStorage
-    let records = getLocalAnalysisHistory();
+    const allRecords = getLocalAnalysisHistory();
     
     // Filter by type if specified
-    if (type) {
-      records = records.filter(record => record.type === type);
-    }
+    let filtered = type 
+      ? allRecords.filter(record => record.type === type)
+      : allRecords;
     
     // Apply limit
-    return records.slice(0, limit);
+    return filtered.slice(0, limit);
   } catch (error) {
-    
+    console.error('Error getting analysis history:', error);
     return [];
   }
 };
 
 /**
- * Delete an analysis record
+ * Clear analysis history
  */
-export const deleteAnalysisRecord = async (id: string): Promise<boolean> => {
+export const clearAnalysisHistory = async (type?: AnalysisRecord['type']): Promise<boolean> => {
   try {
-    const user = await getCurrentUser();
-    
-    if (user) {
-      try {
-        const { error } = await supabase
-          .from('analysis_history')
-          .delete()
-          .eq('id', id)
-          .eq('user_id', user.id);
-          
-        if (error) {
-          
-          // Fall back to localStorage below
-        } else {
-          // Also remove from localStorage if exists
-          removeLocalRecord(id);
-          return true;
-        }
-      } catch (error) {
-        
-        // Fall back to localStorage
-      }
+    if (type) {
+      // Clear only specific type
+      const allRecords = getLocalAnalysisHistory();
+      const filtered = allRecords.filter(record => record.type !== type);
+      localStorage.setItem('analysis_history', JSON.stringify(filtered));
+    } else {
+      // Clear all history
+      localStorage.removeItem('analysis_history');
     }
-    
-    // Delete from localStorage
-    return removeLocalRecord(id);
-  } catch (error) {
-    
-    return false;
-  }
-};
-
-// Helper to remove record from localStorage
-const removeLocalRecord = (id: string): boolean => {
-  try {
-    const records = getLocalAnalysisHistory();
-    const filteredRecords = records.filter(record => record.id !== id);
-    
-    if (records.length === filteredRecords.length) {
-      return false; // Record not found
-    }
-    
-    localStorage.setItem('analysis_history', JSON.stringify(filteredRecords));
     return true;
   } catch (error) {
-    
+    console.error('Error clearing analysis history:', error);
     return false;
   }
 };
 
 /**
- * Clear all analysis history
+ * Get a single analysis record by ID
  */
-export const clearAnalysisHistory = async (type?: AnalysisRecord['type']): Promise<boolean> => {
+export const getAnalysisById = async (id: string): Promise<AnalysisRecord | null> => {
   try {
-    const user = await getCurrentUser();
+    const allRecords = getLocalAnalysisHistory();
+    return allRecords.find(record => record.id === id) || null;
+  } catch (error) {
+    console.error('Error getting analysis by ID:', error);
+    return null;
+  }
+};
+
+/**
+ * Delete an analysis record by ID
+ */
+export const deleteAnalysisRecord = async (id: string): Promise<boolean> => {
+  try {
+    const allRecords = getLocalAnalysisHistory();
+    const filtered = allRecords.filter(record => record.id !== id);
     
-    if (user) {
-      try {
-        let query = supabase
-          .from('analysis_history')
-          .delete()
-          .eq('user_id', user.id);
-          
-        if (type) {
-          query = query.eq('type', type);
-        }
-        
-        const { error } = await query;
-        
-        if (error) {
-          
-          // Continue to clear localStorage even if Supabase fails
-        }
-      } catch (error) {
-        
-        // Continue to clear localStorage even if Supabase fails
-      }
+    if (filtered.length === allRecords.length) {
+      return false; // Record not found
     }
     
-    // Clear from localStorage
-    if (type) {
-      const records = getLocalAnalysisHistory();
-      const filteredRecords = records.filter(record => record.type !== type);
-      localStorage.setItem('analysis_history', JSON.stringify(filteredRecords));
-    } else {
-      localStorage.removeItem('analysis_history');
-    }
-    
+    localStorage.setItem('analysis_history', JSON.stringify(filtered));
     return true;
   } catch (error) {
-    
+    console.error('Error deleting analysis record:', error);
     return false;
   }
 };

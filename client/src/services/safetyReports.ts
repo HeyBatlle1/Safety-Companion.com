@@ -1,315 +1,125 @@
 import { SafetyReport } from '../types/safety';
-import supabase, { getCurrentUser } from './supabase';
 
-// Get all safety reports
-export const getAllReports = async (): Promise<SafetyReport[]> => {
-  try {
-    const user = await getCurrentUser();
-    
-    if (!user) {
-      // Handle unauthenticated users gracefully - return empty array instead of throwing
-
-      return getLocalReports();
-    }
-    
-    const { data, error } = await supabase
-      .from('safety_reports')
-      .select('*')
-      .order('created_at', { ascending: false });
-      
-    if (error) {
-      
-      throw error;
-    }
-    
-    // If no data, return empty array
-    if (!data || data.length === 0) {
-      return getLocalReports();
-    }
-    
-    // Transform from database format to application format
-    return data.map(report => ({
-      id: report.id,
-      severity: report.severity as 'low' | 'medium' | 'high' | 'critical',
-      category: report.category,
-      description: report.description,
-      attachments: report.attachments as SafetyReport['attachments'],
-      submittedAt: report.created_at,
-      status: report.status as 'pending' | 'investigating' | 'resolved',
-      location: report.location || undefined,
-      lastUpdated: report.updated_at || undefined
-    }));
-  } catch (error) {
-    
-    
-    // Always return reports from localStorage if Supabase fails
-    return getLocalReports();
-  }
-};
+const API_BASE = '/api';
 
 // Helper function to get reports from localStorage
 const getLocalReports = (): SafetyReport[] => {
   try {
     const reportsJSON = localStorage.getItem('safety-companion-reports');
     if (!reportsJSON) {
-      // Initialize empty reports array in localStorage if it doesn't exist
-      localStorage.setItem('safety-companion-reports', JSON.stringify([]));
       return [];
     }
-    return JSON.parse(reportsJSON);
-  } catch (localError) {
-    
+    const reports = JSON.parse(reportsJSON);
+    return Array.isArray(reports) ? reports : [];
+  } catch (error) {
+    console.error('Error reading local reports:', error);
     return [];
   }
 };
 
-// Get a single report by ID
-export const getReportById = async (id: string): Promise<SafetyReport | undefined> => {
+// Helper function to save reports to localStorage
+const saveLocalReports = (reports: SafetyReport[]): void => {
   try {
-    const { data, error } = await supabase
-      .from('safety_reports')
-      .select('*')
-      .eq('id', id)
-      .single();
-      
-    if (error) {
-      
-      throw error;
-    }
-    
-    if (!data) return undefined;
-    
-    return {
-      id: data.id,
-      severity: data.severity as 'low' | 'medium' | 'high' | 'critical',
-      category: data.category,
-      description: data.description,
-      attachments: data.attachments as SafetyReport['attachments'],
-      submittedAt: data.created_at,
-      status: data.status as 'pending' | 'investigating' | 'resolved',
-      location: data.location || undefined,
-      lastUpdated: data.updated_at || undefined
-    };
+    localStorage.setItem('safety-companion-reports', JSON.stringify(reports));
   } catch (error) {
-    
-    
-    // Fallback to localStorage if Supabase fails
-    try {
-      const reports = getLocalReports();
-      return reports.find(report => report.id === id);
-    } catch (localError) {
-      
-      return undefined;
-    }
+    console.error('Error saving local reports:', error);
+  }
+};
+
+// Get all safety reports
+export const getAllReports = async (): Promise<SafetyReport[]> => {
+  try {
+    // For now, use localStorage as the backend endpoint isn't implemented yet
+    // TODO: Replace with API call when backend endpoint is ready
+    return getLocalReports();
+  } catch (error) {
+    console.error('Error getting reports:', error);
+    return getLocalReports();
   }
 };
 
 // Add a new safety report
-export const addReport = async (reportData: Omit<SafetyReport, 'id' | 'submittedAt' | 'status'>): Promise<SafetyReport> => {
+export const addReport = async (reportData: {
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  category: string;
+  description: string;
+  location?: string;
+  attachments: SafetyReport['attachments'];
+}): Promise<SafetyReport> => {
   try {
-    const user = await getCurrentUser();
-    
-    if (!user) {
-      // If not authenticated, fallback to localStorage only
-      return addLocalReport(reportData);
-    }
-    
-    const { data, error } = await supabase
-      .from('safety_reports')
-      .insert([{
-        user_id: user.id,
-        severity: reportData.severity,
-        category: reportData.category,
-        description: reportData.description,
-        location: reportData.location,
-        attachments: reportData.attachments,
-        status: 'pending'
-      }])
-      .select()
-      .single();
-      
-    if (error) {
-      
-      throw error;
-    }
-    
-    return {
-      id: data.id,
-      severity: data.severity as 'low' | 'medium' | 'high' | 'critical',
-      category: data.category,
-      description: data.description,
-      attachments: data.attachments as SafetyReport['attachments'],
-      submittedAt: data.created_at,
-      status: data.status as 'pending' | 'investigating' | 'resolved',
-      location: data.location || undefined
-    };
-  } catch (error) {
-    
-    
-    // Fallback to localStorage
-    return addLocalReport(reportData);
-  }
-};
-
-// Helper function to add a report to localStorage
-const addLocalReport = (reportData: Omit<SafetyReport, 'id' | 'submittedAt' | 'status'>): SafetyReport => {
-  // Create a new report with generated ID and timestamps
-  const newReport: SafetyReport = {
-    id: `report-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-    submittedAt: new Date().toISOString(),
-    status: 'pending',
-    ...reportData
-  };
-
-  // Get existing reports and add the new one
-  const reports = getLocalReports();
-  reports.unshift(newReport); // Add to beginning of array
-
-  // Save back to localStorage
-  localStorage.setItem('safety-companion-reports', JSON.stringify(reports));
-
-  return newReport;
-};
-
-// Update an existing report
-export const updateReport = async (id: string, updatedData: Partial<SafetyReport>): Promise<SafetyReport> => {
-  try {
-    // Prepare data for Supabase update (transforming from app format to DB format)
-    const updateObj: any = {};
-    
-    if (updatedData.severity) updateObj.severity = updatedData.severity;
-    if (updatedData.category) updateObj.category = updatedData.category;
-    if (updatedData.description) updateObj.description = updatedData.description;
-    if (updatedData.status) updateObj.status = updatedData.status;
-    if (updatedData.location) updateObj.location = updatedData.location;
-    if (updatedData.attachments) updateObj.attachments = updatedData.attachments;
-    
-    // Always update the updated_at timestamp
-    updateObj.updated_at = new Date().toISOString();
-    
-    const { data, error } = await supabase
-      .from('safety_reports')
-      .update(updateObj)
-      .eq('id', id)
-      .select()
-      .single();
-      
-    if (error) {
-      
-      throw error;
-    }
-    
-    return {
-      id: data.id,
-      severity: data.severity as 'low' | 'medium' | 'high' | 'critical',
-      category: data.category,
-      description: data.description,
-      attachments: data.attachments as SafetyReport['attachments'],
-      submittedAt: data.created_at,
-      status: data.status as 'pending' | 'investigating' | 'resolved',
-      location: data.location || undefined,
-      lastUpdated: data.updated_at || undefined
-    };
-  } catch (error) {
-    
-    
-    // Fallback to localStorage if Supabase fails
-    const reports = getLocalReports();
-    const reportIndex = reports.findIndex(report => report.id === id);
-
-    if (reportIndex === -1) {
-      throw new Error(`Report with ID ${id} not found`);
-    }
-
-    // Update the report
-    reports[reportIndex] = {
-      ...reports[reportIndex],
-      ...updatedData,
+    // Create new report
+    const newReport: SafetyReport = {
+      id: `report-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      ...reportData,
+      submittedAt: new Date().toISOString(),
+      status: 'pending',
       lastUpdated: new Date().toISOString()
     };
 
-    // Save back to localStorage
-    localStorage.setItem('safety-companion-reports', JSON.stringify(reports));
+    // Save to localStorage (until backend endpoint is implemented)
+    const existingReports = getLocalReports();
+    const updatedReports = [newReport, ...existingReports];
+    saveLocalReports(updatedReports);
 
-    return reports[reportIndex];
+    return newReport;
+  } catch (error) {
+    console.error('Error adding report:', error);
+    throw new Error('Failed to add report');
   }
 };
 
-// Delete a report
+// Delete a safety report
 export const deleteReport = async (id: string): Promise<boolean> => {
   try {
-    const { error } = await supabase
-      .from('safety_reports')
-      .delete()
-      .eq('id', id);
-      
-    if (error) {
-      
-      throw error;
+    const existingReports = getLocalReports();
+    const filteredReports = existingReports.filter(report => report.id !== id);
+    
+    if (filteredReports.length === existingReports.length) {
+      return false; // Report not found
     }
     
-    // Also remove from localStorage if it exists there
-    removeLocalReport(id);
-    
+    saveLocalReports(filteredReports);
     return true;
   } catch (error) {
-    
-    
-    // Fallback to localStorage if Supabase fails
-    return removeLocalReport(id);
-  }
-};
-
-// Helper function to remove a report from localStorage
-const removeLocalReport = (id: string): boolean => {
-  try {
-    const reports = getLocalReports();
-    const filteredReports = reports.filter(report => report.id !== id);
-
-    if (filteredReports.length === reports.length) {
-      return false; // No report was removed
-    }
-
-    // Save back to localStorage
-    localStorage.setItem('safety-companion-reports', JSON.stringify(filteredReports));
-    return true;
-  } catch (localError) {
-    
+    console.error('Error deleting report:', error);
     return false;
   }
 };
 
-// Process file uploads for safety reports
-export const processReportFiles = async (files: File[]): Promise<
-  Array<{
-    name: string;
-    type: string;
-    url: string;
-    size: number;
-  }>
-> => {
-  if (!files || files.length === 0) return [];
-
-  return Promise.all(
-    files.map(
-      (file) =>
-        new Promise<{
-          name: string;
-          type: string;
-          url: string;
-          size: number;
-        }>((resolve) => {
+// Process files for report attachments
+export const processReportFiles = async (files: File[]): Promise<SafetyReport['attachments']> => {
+  const attachments: SafetyReport['attachments'] = [];
+  
+  for (const file of files) {
+    try {
+      // For now, create data URLs for images (until cloud storage is implemented)
+      if (file.type.startsWith('image/')) {
+        const dataUrl = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
-          reader.onloadend = () => {
-            resolve({
-              name: file.name,
-              type: file.type,
-              url: reader.result as string,
-              size: file.size
-            });
-          };
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
           reader.readAsDataURL(file);
-        })
-    )
-  );
+        });
+        
+        attachments.push({
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          url: dataUrl
+        });
+      } else {
+        // For non-image files, just store metadata
+        attachments.push({
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          url: '' // No preview for non-images
+        });
+      }
+    } catch (error) {
+      console.error(`Error processing file ${file.name}:`, error);
+    }
+  }
+  
+  return attachments;
 };
