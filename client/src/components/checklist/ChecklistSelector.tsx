@@ -17,196 +17,186 @@ interface ChecklistSelectorProps {
   onChecklistClick: (templateId: string) => void;
 }
 
-const templates: Template[] = [
+// First 6 priority checklists for railway & AI integration
+const primaryTemplates: Template[] = [
   {
-    id: 'safety-assessment',
-    title: 'Site Safety Assessment',
-    icon: ClipboardCheck,
-    description: 'Comprehensive site safety evaluation and risk assessment',
-    color: 'from-emerald-500 to-teal-500'
+    id: 'site-safety-assessment',
+    title: 'Daily Site Safety Inspection',
+    icon: Shield,
+    description: 'AI-powered comprehensive site evaluation with railway hazard detection',
+    color: 'from-blue-600 to-cyan-600'
   },
   {
     id: 'fall-protection',
-    title: 'Fall Protection',
-    icon: Shield,
-    description: 'Ensures compliance with regulations preventing falls from heights',
-    color: 'from-blue-500 to-cyan-500'
-  },
-  {
-    id: 'scaffold-safety',
-    title: 'Scaffold Safety',
-    icon: Construction,
-    description: 'Safe scaffold setup and usage guidelines',
-    color: 'from-cyan-500 to-blue-500'
+    title: 'Fall Protection Systems',
+    icon: AlertTriangle,
+    description: 'Critical height work safety with intelligent risk scoring',
+    color: 'from-red-500 to-orange-500'
   },
   {
     id: 'electrical-safety',
-    title: 'Electrical Safety',
+    title: 'Electrical Safety Audit',
     icon: Zap,
-    description: 'Addresses electrical hazards and compliance',
-    color: 'from-blue-400 to-indigo-500'
+    description: 'High-voltage and railway electrical systems inspection',
+    color: 'from-yellow-500 to-amber-500'
   },
   {
-    id: 'hazard-communication',
-    title: 'Hazard Communication',
+    id: 'hazcom',
+    title: 'HazCom & Chemical Safety',
     icon: Beaker,
-    description: 'Chemical hazards identification and labeling',
+    description: 'Material safety with AI chemical analysis integration',
+    color: 'from-purple-500 to-pink-500'
+  },
+  {
+    id: 'emergency-response',
+    title: 'Emergency Response Plan',
+    icon: HardHat,
+    description: 'Critical incident protocols with automated alerts',
     color: 'from-green-500 to-emerald-500'
+  },
+  {
+    id: 'ppe-compliance',
+    title: 'PPE Compliance Check',
+    icon: Construction,
+    description: 'Personal protective equipment verification system',
+    color: 'from-indigo-500 to-blue-500'
+  }
+];
+
+// Secondary checklists
+const secondaryTemplates: Template[] = [
+  {
+    id: 'scaffold-safety',
+    title: 'Scaffold Safety',
+    icon: Stairs,
+    description: 'Scaffold setup and inspection protocols',
+    color: 'from-gray-500 to-gray-600'
   },
   {
     id: 'respiratory-protection',
     title: 'Respiratory Protection',
     icon: Wind,
-    description: 'Respiratory protection and PPE guidelines',
-    color: 'from-teal-500 to-cyan-500'
-  },
-  {
-    id: 'ppe',
-    title: 'Personal Protective Equipment',
-    icon: HardHat,
-    description: 'PPE usage and maintenance guidelines',
-    color: 'from-indigo-500 to-blue-500'
+    description: 'Breathing apparatus and air quality checks',
+    color: 'from-gray-500 to-gray-600'
   },
   {
     id: 'ladder-safety',
     title: 'Ladder Safety',
-    icon: Stairs,
-    description: 'Safe ladder usage and inspection protocols',
-    color: 'from-blue-500 to-teal-500'
+    icon: Box,
+    description: 'Ladder inspection and usage protocols',
+    color: 'from-gray-500 to-gray-600'
   },
   {
     id: 'confined-space',
     title: 'Confined Space Entry',
-    icon: Box,
-    description: 'Procedures for confined space entry',
-    color: 'from-emerald-500 to-green-500'
-  },
-  {
-    id: 'fire-prevention',
-    title: 'Fire Prevention',
     icon: Flame,
-    description: 'Fire prevention strategies and protocols',
-    color: 'from-blue-600 to-cyan-600'
-  },
-  {
-    id: 'emergency-action',
-    title: 'Emergency Action Plan',
-    icon: AlertTriangle,
-    description: 'Comprehensive emergency response procedures',
-    color: 'from-indigo-600 to-blue-600'
-  },
-  {
-    id: 'roche-hse',
-    title: 'Roche SHE',
-    icon: TestTube,
-    description: 'Comprehensive SHE checklist for Roche laboratory operations',
-    color: 'from-emerald-500 to-teal-500'
-  },
-  {
-    id: 'lilly-hse',
-    title: 'Eli Lilly & Co HSE',
-    icon: Microscope,
-    description: 'Complete HSE assessment for Eli Lilly facilities',
-    color: 'from-blue-500 to-indigo-500'
+    description: 'Confined space procedures and permits',
+    color: 'from-gray-500 to-gray-600'
   }
 ];
 
-const ChecklistSelector: React.FC<ChecklistSelectorProps> = ({ onChecklistClick }) => {
-  const [enterpriseMode, setEnterpriseMode] = useState(false);
+const templates = [...primaryTemplates, ...secondaryTemplates];
 
+const ChecklistSelector: React.FC<ChecklistSelectorProps> = ({ onChecklistClick }) => {
   return (
     <>
-      {/* Enterprise Mode Toggle */}
+      {/* Priority Section Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-8 flex items-center justify-center"
+        className="mb-8 text-center"
       >
-        <div className="bg-slate-800/60 backdrop-blur-sm border border-blue-500/20 rounded-full px-6 py-3 flex items-center space-x-4">
-          <Label htmlFor="enterprise-mode" className="text-sm font-medium text-gray-300 cursor-pointer">
-            Standard Mode
-          </Label>
-          <Switch
-            id="enterprise-mode"
-            checked={enterpriseMode}
-            onCheckedChange={setEnterpriseMode}
-          />
-          <Label htmlFor="enterprise-mode" className="text-sm font-medium text-gray-300 cursor-pointer flex items-center space-x-2">
-            <Sparkles className="w-4 h-4 text-cyan-400" />
-            <span>Enterprise Mode</span>
-            <Badge variant="secondary" className="ml-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white border-0">
-              NEW
-            </Badge>
-          </Label>
+        <h2 className="text-2xl font-bold text-white flex items-center justify-center space-x-3 mb-4">
+          <Star className="w-6 h-6 text-yellow-400" />
+          <span>Priority Safety Checklists</span>
+          <Badge className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0">
+            AI + Railway Ready
+          </Badge>
+        </h2>
+        <p className="text-gray-300 max-w-3xl mx-auto">
+          Enterprise-grade safety inspection system with AI analysis, railway integration, and real-time hazard detection. 
+          Optimized for tablets with professional components including photo uploads, severity sliders, and intelligent prompting.
+        </p>
+      </motion.div>
+
+      {/* Priority Checklists - First 6 */}
+      <div className="mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {primaryTemplates.map((template, index) => (
+            <motion.div
+              key={template.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              whileHover={{ scale: 1.02, y: -4 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => onChecklistClick(`enterprise-${template.id}`)}
+              className="relative group cursor-pointer"
+            >
+              <div className={`absolute inset-0 bg-gradient-to-r ${template.color} rounded-xl opacity-20 group-hover:opacity-30 transition-all duration-300 blur-md group-hover:blur-lg`} />
+              <div className="relative p-6 rounded-xl bg-slate-800/80 backdrop-blur-sm border-2 border-blue-500/30 group-hover:border-blue-400/50 transition-all duration-300">
+                <div className="flex items-start space-x-4">
+                  <div className={`p-4 rounded-lg bg-gradient-to-r ${template.color} shadow-xl group-hover:shadow-2xl transition-all duration-300`}>
+                    <template.icon className="w-8 h-8 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-300 transition-colors">
+                      {template.title}
+                    </h3>
+                    <p className="text-sm text-gray-300 group-hover:text-gray-200 transition-colors">
+                      {template.description}
+                    </p>
+                    <div className="mt-3 flex items-center space-x-2">
+                      <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30">AI Ready</Badge>
+                      <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Railway</Badge>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Shimmer effect on hover */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+                </div>
+              </div>
+            </motion.div>
+          ))}
         </div>
-      </motion.div>
+      </div>
 
-      {/* Mode Description */}
-      <motion.div
-        key={enterpriseMode ? "enterprise" : "standard"}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -10 }}
-        className="text-center mb-8"
-      >
-        {enterpriseMode ? (
-          <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-white flex items-center justify-center space-x-2">
-              <Star className="w-6 h-6 text-yellow-400" />
-              <span>Enterprise Professional Interface</span>
-            </h2>
-            <p className="text-gray-400 max-w-2xl mx-auto">
-              Advanced inspection tools with toggle switches, photo uploads, severity sliders, and professional 
-              UI components designed for tablet use in the field. Perfect for construction supervisors and safety managers.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-white">Standard Safety Checklists</h2>
-            <p className="text-gray-400 max-w-2xl mx-auto">
-              Traditional text-based checklists with comprehensive questions and intelligent AI analysis. 
-              Ideal for quick assessments and compliance documentation.
-            </p>
-          </div>
-        )}
-      </motion.div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {templates.map((template, index) => (
-        <motion.div
-          key={template.id}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.1 }}
-          whileHover={{ scale: 1.02, y: -4 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => onChecklistClick(enterpriseMode ? `enterprise-${template.id}` : template.id)}
-          className="relative group cursor-pointer"
-        >
-          <div className={`absolute inset-0 bg-gradient-to-r ${template.color} rounded-xl opacity-10 group-hover:opacity-20 transition-all duration-300 blur-sm group-hover:blur-md`} />
-          <div className="relative p-6 rounded-xl bg-slate-800/60 backdrop-blur-sm border border-blue-500/20 group-hover:border-blue-400/40 transition-all duration-300">
-            <div className="flex items-start space-x-4">
-              <div className={`p-3 rounded-lg bg-gradient-to-r ${template.color} shadow-lg group-hover:shadow-xl transition-all duration-300`}>
-                <template.icon className="w-6 h-6 text-white" />
+      {/* Secondary Checklists */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-400 mb-4 text-center">Additional Safety Checklists</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {secondaryTemplates.map((template, index) => (
+            <motion.div
+              key={template.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 + index * 0.05 }}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => onChecklistClick(`enterprise-${template.id}`)}
+              className="relative group cursor-pointer"
+            >
+              <div className="relative p-4 rounded-lg bg-slate-800/40 backdrop-blur-sm border border-gray-600/30 group-hover:border-gray-500/50 transition-all duration-300">
+                <div className="flex items-center space-x-3">
+                  <div className={`p-2 rounded-lg bg-gradient-to-r ${template.color}`}>
+                    <template.icon className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-md font-medium text-gray-300 group-hover:text-white transition-colors">
+                      {template.title}
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                      {template.description}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-blue-300 transition-colors">
-                  {template.title}
-                </h3>
-                <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">
-                  {template.description}
-                </p>
-              </div>
-            </div>
-            
-            {/* Shimmer effect on hover */}
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000" />
-            </div>
-          </div>
-        </motion.div>
-      ))}
-    </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
     </>
   );
 };

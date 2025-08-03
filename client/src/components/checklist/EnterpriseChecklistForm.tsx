@@ -122,7 +122,7 @@ export default function EnterpriseChecklistForm() {
       responses.weatherCondition,
       responses.workerCount !== undefined,
       responses.supervisorName,
-      responses.identifiedHazards?.length > 0,
+      (responses.identifiedHazards?.length ?? 0) > 0,
       responses.overallRiskLevel !== undefined,
       Object.keys(responses.ppeCompliance || {}).length === ppeItems.length,
       responses.equipmentInspected,

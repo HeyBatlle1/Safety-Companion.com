@@ -8,12 +8,9 @@ const Checklists: React.FC = () => {
   const navigate = useNavigate();
 
   const handleChecklistClick = (templateId: string) => {
-    if (templateId.startsWith('enterprise-')) {
-      const actualId = templateId.replace('enterprise-', '');
-      navigate(`/checklist-enterprise/${actualId}`);
-    } else {
-      navigate(`/checklist/${templateId}`);
-    }
+    // All checklists now use enterprise mode by default
+    const actualId = templateId.replace('enterprise-', '');
+    navigate(`/checklist-enterprise/${actualId}`);
   };
 
   return (
@@ -32,8 +29,8 @@ const Checklists: React.FC = () => {
             </h1>
           </div>
           <p className="text-gray-300 text-lg max-w-2xl mx-auto">
-            AI-powered safety assessments with intelligent algorithms and prompting logic. 
-            Select a checklist to begin your comprehensive safety evaluation.
+            Enterprise-grade safety management system integrated with AI analysis and railway operations. 
+            Designed for 175+ employees with tablet-optimized professional components.
           </p>
         </motion.div>
 
@@ -46,7 +43,7 @@ const Checklists: React.FC = () => {
           <ChecklistSelector onChecklistClick={handleChecklistClick} />
         </motion.div>
 
-        {/* Algorithm Info */}
+        {/* Integration Features */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -55,20 +52,24 @@ const Checklists: React.FC = () => {
         >
           <h2 className="text-2xl font-bold text-white mb-4 flex items-center space-x-2">
             <ArrowRight className="w-6 h-6 text-cyan-400" />
-            <span>Smart Assessment Features</span>
+            <span>Enterprise Integration Features</span>
           </h2>
-          <div className="grid md:grid-cols-3 gap-6 text-gray-300">
+          <div className="grid md:grid-cols-4 gap-6 text-gray-300">
             <div>
-              <h3 className="font-semibold text-cyan-400 mb-2">AI Analysis</h3>
-              <p className="text-sm">Advanced algorithms analyze your responses and provide intelligent safety recommendations.</p>
+              <h3 className="font-semibold text-cyan-400 mb-2">Railway Integration</h3>
+              <p className="text-sm">Direct connection to railway safety systems with real-time hazard monitoring and automated alerts.</p>
             </div>
             <div>
-              <h3 className="font-semibold text-cyan-400 mb-2">Risk Scoring</h3>
-              <p className="text-sm">Each response is weighted and scored to calculate comprehensive risk assessments.</p>
+              <h3 className="font-semibold text-cyan-400 mb-2">AI Risk Analysis</h3>
+              <p className="text-sm">Gemini AI processes responses with OSHA data integration for intelligent safety recommendations.</p>
             </div>
             <div>
-              <h3 className="font-semibold text-cyan-400 mb-2">Compliance Tracking</h3>
-              <p className="text-sm">Automatic compliance verification against OSHA standards and industry regulations.</p>
+              <h3 className="font-semibold text-cyan-400 mb-2">Photo Evidence</h3>
+              <p className="text-sm">Capture and attach photos directly to checklist items for comprehensive documentation.</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-cyan-400 mb-2">Real-time Sync</h3>
+              <p className="text-sm">Instant synchronization across all 175+ employees with offline capability for field work.</p>
             </div>
           </div>
         </motion.div>
