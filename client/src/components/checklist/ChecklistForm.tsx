@@ -370,54 +370,96 @@ Format your response professionally with clear sections and actionable insights.
   };
 
   const handlePrint = () => {
-    // Create a printable version
+    // Create a printable version using safe DOM methods
     const printContent = document.createElement('div');
-    printContent.innerHTML = `
-      <style>
-        @media print {
-          body { font-family: Arial, sans-serif; }
-          .header { margin-bottom: 20px; }
-          .section { margin-bottom: 15px; }
-          .item { margin-bottom: 10px; }
-          .response { margin-left: 20px; }
-          .notes { margin-left: 20px; font-style: italic; }
-          .timestamp { color: #666; font-size: 0.9em; }
-          @page { margin: 2cm; }
-        }
-      </style>
-      <div class="header">
-        <h1>${template.title}</h1>
-        <p>Generated on: ${new Date().toLocaleString()}</p>
-      </div>
+    
+    // Add styles safely
+    const style = document.createElement('style');
+    style.textContent = `
+      @media print {
+        body { font-family: Arial, sans-serif; }
+        .header { margin-bottom: 20px; }
+        .section { margin-bottom: 15px; }
+        .item { margin-bottom: 10px; }
+        .response { margin-left: 20px; }
+        .notes { margin-left: 20px; font-style: italic; }
+        .timestamp { color: #666; font-size: 0.9em; }
+        @page { margin: 2cm; }
+      }
     `;
+    printContent.appendChild(style);
+
+    // Create header safely
+    const headerDiv = document.createElement('div');
+    headerDiv.className = 'header';
+    
+    const titleH1 = document.createElement('h1');
+    titleH1.textContent = template.title;
+    headerDiv.appendChild(titleH1);
+    
+    const datePara = document.createElement('p');
+    datePara.textContent = `Generated on: ${new Date().toLocaleString()}`;
+    headerDiv.appendChild(datePara);
+    
+    printContent.appendChild(headerDiv);
 
     template.sections.forEach(section => {
       const sectionDiv = document.createElement('div');
       sectionDiv.className = 'section';
-      sectionDiv.innerHTML = `<h2>${section.title}</h2>`;
+      
+      const sectionTitle = document.createElement('h2');
+      sectionTitle.textContent = section.title;
+      sectionDiv.appendChild(sectionTitle);
 
       section.items.forEach(item => {
         const response = responses[item.id];
         const itemDiv = document.createElement('div');
         itemDiv.className = 'item';
-        itemDiv.innerHTML = `
-          <p><strong>${item.question}</strong></p>
-          ${response ? `
-            <p class="response">Response: ${response.value}</p>
-            ${response.notes ? `<p class="notes">Notes: ${response.notes}</p>` : ''}
-            ${response.deadline ? `<p class="timestamp">Deadline: ${new Date(response.deadline).toLocaleString()}</p>` : ''}
-          ` : '<p class="response">No response recorded</p>'}
-        `;
+        
+        const questionPara = document.createElement('p');
+        const questionStrong = document.createElement('strong');
+        questionStrong.textContent = item.question;
+        questionPara.appendChild(questionStrong);
+        itemDiv.appendChild(questionPara);
+
+        if (response) {
+          const responsePara = document.createElement('p');
+          responsePara.className = 'response';
+          responsePara.textContent = `Response: ${response.value}`;
+          itemDiv.appendChild(responsePara);
+
+          if (response.notes) {
+            const notesPara = document.createElement('p');
+            notesPara.className = 'notes';
+            notesPara.textContent = `Notes: ${response.notes}`;
+            itemDiv.appendChild(notesPara);
+          }
+
+          if (response.deadline) {
+            const timestampPara = document.createElement('p');
+            timestampPara.className = 'timestamp';
+            timestampPara.textContent = `Deadline: ${new Date(response.deadline).toLocaleString()}`;
+            itemDiv.appendChild(timestampPara);
+          }
+        } else {
+          const noResponsePara = document.createElement('p');
+          noResponsePara.className = 'response';
+          noResponsePara.textContent = 'No response recorded';
+          itemDiv.appendChild(noResponsePara);
+        }
+        
         sectionDiv.appendChild(itemDiv);
       });
 
       printContent.appendChild(sectionDiv);
     });
 
-    // Create a new window for printing
+    // Create a new window for printing using safe methods
     const printWindow = window.open('', '_blank');
     if (printWindow) {
-      printWindow.document.write(printContent.innerHTML);
+      printWindow.document.head.innerHTML = '';
+      printWindow.document.body.innerHTML = '';
+      printWindow.document.body.appendChild(printContent);
       printWindow.document.close();
       printWindow.focus();
       printWindow.print();
