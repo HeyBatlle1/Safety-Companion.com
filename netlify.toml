@@ -1,6 +1,6 @@
 [build]
   base = "."
-  command = "npm install && cd client && npm install && npm run build && cd .."
+  command = "cd client && npm install && npm run build"
   publish = "client/dist"
 
 [build.environment]
@@ -11,6 +11,7 @@
   from = "/api/*"
   to = "/.netlify/functions/server"
   status = 200
+  force = true
 
 [[redirects]]
   from = "/*"
@@ -19,7 +20,6 @@
 
 [functions]
   directory = "netlify/functions"
-  node_bundler = "esbuild"
 
 [dev]
   command = "npm run dev"
