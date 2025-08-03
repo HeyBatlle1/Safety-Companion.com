@@ -127,8 +127,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     [
       body('email').isEmail().normalizeEmail(),
       body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
-      body('name').trim().notEmpty().escape(),
-      body('role').isIn(['field_worker', 'supervisor', 'project_manager', 'safety_manager', 'admin'])
+      body('firstName').trim().notEmpty().escape(),
+      body('lastName').trim().notEmpty().escape(),
+      body('role').isIn(['field_worker', 'supervisor', 'project_manager', 'safety_manager', 'admin']),
+      body('phone').optional().trim().escape(),
+      body('employeeId').optional().trim().escape(),
+      body('department').optional().trim().escape()
     ],
     handleValidationErrors,
     async (req: Request, res: Response) => {

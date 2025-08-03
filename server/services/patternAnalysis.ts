@@ -50,6 +50,7 @@ export class PatternAnalysisService {
 
   /**
    * Analyze multiple analysis records for patterns (Monthly/Quarterly/Annual)
+   * Supports both chat conversations and checklist assessments
    */
   async analyzeHistoricalPatterns(
     analysisRecords: any[],
@@ -255,42 +256,39 @@ Base all analysis on actual data patterns, not assumptions.
    * Generate executive summary for pattern analysis
    */
   async generateExecutiveSummary(patternAnalysis: PatternAnalysisResult): Promise<string> {
-    const prompt = `
-Based on this comprehensive safety pattern analysis, create an executive summary for insurance and safety executives:
-
-ANALYSIS DATA: ${JSON.stringify(patternAnalysis, null, 2)}
-
-Generate a professional executive summary covering:
-1. Key risk findings
-2. Financial impact assessment
-3. Recommended actions
-4. Insurance implications
-5. ROI projections for safety investments
-
-Keep it concise but comprehensive, suitable for C-level executives and insurance underwriters.
-`;
-
     try {
-      const result = await this.model.generateContent({
-        contents: prompt,
-        generationConfig: {
-          temperature: 0.3,
-          maxOutputTokens: 800
-        }
-      });
+      const result = await this.model.generateContent([{
+        role: "user",
+        parts: [{
+          text: `Create an executive summary for insurance and safety executives based on this safety pattern analysis:
+
+Risk Score: ${patternAnalysis.riskMetrics.avgRiskScore}/100
+Compliance Score: ${patternAnalysis.riskMetrics.complianceScore}%
+High Risk Activities: ${patternAnalysis.riskMetrics.highRiskPercentage}%
+Predicted Incidents: ${patternAnalysis.riskMetrics.predictedIncidents}
+Premium Risk Factor: ${patternAnalysis.actuarialData.premiumRiskFactor}x
+
+Key Patterns: ${patternAnalysis.keyPatterns.riskTrends.join(', ')}
+
+Create a concise executive summary covering key findings, financial impact, and recommendations.`
+        }]
+      }]);
 
       return result.response.text();
     } catch (error) {
       console.error('Executive summary generation failed:', error);
-      return `Executive Summary - Safety Pattern Analysis
+      return `EXECUTIVE SUMMARY - SAFETY PATTERN ANALYSIS
 
 Risk Assessment: Average risk score of ${patternAnalysis.riskMetrics.avgRiskScore}/100 with ${patternAnalysis.riskMetrics.highRiskPercentage}% high-risk activities identified.
 
 Financial Impact: Projected annual claims of $${patternAnalysis.actuarialData.costProjections.expectedClaims.toLocaleString()} with potential savings of $${patternAnalysis.actuarialData.costProjections.netSavings.toLocaleString()} through prevention programs.
 
-Recommendations: Focus on ${patternAnalysis.recommendations.immediate.length} immediate actions and ${patternAnalysis.recommendations.trainingNeeds.length} training initiatives.
+Key Recommendations: 
+• ${patternAnalysis.recommendations.immediate.join('\n• ')}
 
-Insurance Implications: Premium risk factor of ${patternAnalysis.actuarialData.premiumRiskFactor.toFixed(2)}x industry standard based on current risk profile.`;
+Insurance Implications: Premium risk factor of ${patternAnalysis.actuarialData.premiumRiskFactor.toFixed(2)}x industry standard based on current risk profile.
+
+Training Needs: ${patternAnalysis.recommendations.trainingNeeds.join(', ')}`;
     }
   }
 }
