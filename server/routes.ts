@@ -21,6 +21,7 @@ import { body, validationResult } from "express-validator";
 import { logError } from "./utils/logger";
 import './types/session';
 import { geminiAnalytics } from "./services/geminiAnalytics";
+import { patternAnalysisService } from "./services/patternAnalysis";
 
 // Session middleware for authentication
 const PgSession = connectPgSimple(session);
@@ -652,7 +653,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         riskAnalysis = await geminiAnalytics.analyzeChatForInsurance(text, response, userContext);
         console.log('Risk analysis completed:', riskAnalysis.riskScore);
       } catch (error) {
-        console.log('Gemini analysis failed, continuing without analytics:', error.message);
+        console.log('Gemini analysis failed, continuing without analytics:', error instanceof Error ? error.message : 'Unknown error');
       }
 
       // Save the conversation
@@ -695,6 +696,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       logError(error, 'chat');
       res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // ==================== PATTERN ANALYSIS ROUTES ====================
+
+  // Big Picture Pattern Analysis - Monthly/Quarterly/Annual
+  app.post('/api/analytics/pattern-analysis', requireAuth, async (req, res) => {
+    try {
+      const { records, timeframe, analysisType } = req.body;
+      
+      if (!records || !Array.isArray(records) || records.length === 0) {
+        return res.status(400).json({ error: 'Records array is required' });
+      }
+
+      // Perform comprehensive pattern analysis using Google Gemini
+      const patternAnalysis = await patternAnalysisService.analyzeHistoricalPatterns(
+        records,
+        timeframe || 'quarterly'
+      );
+
+      // Generate executive summary
+      const executiveSummary = await patternAnalysisService.generateExecutiveSummary(patternAnalysis);
+      
+      res.json({
+        ...patternAnalysis,
+        executiveSummary
+      });
+    } catch (error) {
+      logError(error, 'pattern_analysis');
+      res.status(500).json({ error: 'Pattern analysis failed' });
+    }
+  });
+
+  // Export pattern analysis data for actuarial purposes
+  app.get('/api/analytics/export/:analysisId', requireAuth, async (req, res) => {
+    try {
+      const { analysisId } = req.params;
+      const { format = 'json' } = req.query;
+
+      // In a real implementation, you'd retrieve the analysis from database
+      // For now, return a structured export format
+      const exportData = {
+        analysisId,
+        exportTimestamp: new Date().toISOString(),
+        format,
+        // This would contain the actual analysis data
+        message: 'Analysis export ready for actuarial processing'
+      };
+
+      if (format === 'csv') {
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="pattern_analysis_${analysisId}.csv"`);
+        res.send('Analysis export functionality ready');
+      } else {
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Disposition', `attachment; filename="pattern_analysis_${analysisId}.json"`);
+        res.json(exportData);
+      }
+    } catch (error) {
+      logError(error, 'export');
+      res.status(500).json({ error: 'Export failed' });
     }
   });
 

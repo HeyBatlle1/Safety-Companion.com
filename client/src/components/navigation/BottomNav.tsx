@@ -13,7 +13,7 @@ const BottomNav = () => {
     { icon: MessageCircle, label: 'Chat', path: '/chat' },
     { icon: ClipboardCheck, label: 'Checklists', path: '/checklists' },
     { icon: Layout, label: 'Drawings', path: '/drawings' },
-    { icon: FileText, label: 'SDS', path: '/sds' },
+
     { icon: Clock, label: 'History', path: '/history' },
     { 
       icon: Wrench, 

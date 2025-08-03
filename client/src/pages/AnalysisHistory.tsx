@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Clock, Filter, Download, Trash2 } from 'lucide-react';
+import { Clock, Filter, Download, Trash2, BarChart3 } from 'lucide-react';
 import AnalysisHistoryViewer from '../components/history/AnalysisHistoryViewer';
 import { AnalysisRecord } from '../services/history';
 import BackButton from '../components/navigation/BackButton';
@@ -39,9 +39,24 @@ const AnalysisHistory: React.FC = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            View your history of AI safety analyses, risk assessments, and SDS queries.
-            All your interactions are stored securely for future reference.
+            View your history of AI safety analyses and risk assessments.
+            All your interactions are stored securely for future reference and pattern analysis.
           </motion.p>
+          
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="mt-4"
+          >
+            <button
+              onClick={() => window.location.href = '/pattern-analysis'}
+              className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-lg transition-all duration-200"
+            >
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Big Picture Pattern Analysis
+            </button>
+          </motion.div>
         </div>
 
         <div className="bg-slate-800/50 backdrop-blur-sm border border-blue-500/20 rounded-xl p-6">

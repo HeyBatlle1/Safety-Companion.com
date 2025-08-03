@@ -12,12 +12,13 @@ import AnalysisHistory from '@/pages/AnalysisHistory';
 import Maps from '@/pages/Maps';
 import Videos from '@/pages/Videos';
 import Drawings from '@/pages/Drawings';
-import SDS from '@/pages/SDS';
+
 import Checklists from '@/pages/Checklists';
 import ChecklistView from '@/pages/ChecklistView';
 import EnterpriseChecklistForm from '@/components/checklist/EnterpriseChecklistForm';
 import Profiles from '@/pages/Profiles';
 import { InsuranceAnalytics } from '@/pages/InsuranceAnalytics';
+import PatternAnalysisPage from '@/pages/PatternAnalysis';
 import ToastContainer from '@/components/common/ToastContainer';
 
 function App() {
@@ -101,13 +102,7 @@ function App() {
             </AppLayout>
           </PrivateRoute>
         } />
-        <Route path="/sds" element={
-          <PrivateRoute>
-            <AppLayout>
-              <SDS />
-            </AppLayout>
-          </PrivateRoute>
-        } />
+
         <Route path="/checklists" element={
           <PrivateRoute>
             <AppLayout>
@@ -140,6 +135,13 @@ function App() {
           <PrivateRoute>
             <AppLayout>
               <InsuranceAnalytics />
+            </AppLayout>
+          </PrivateRoute>
+        } />
+        <Route path="/pattern-analysis" element={
+          <PrivateRoute>
+            <AppLayout>
+              <PatternAnalysisPage />
             </AppLayout>
           </PrivateRoute>
         } />
