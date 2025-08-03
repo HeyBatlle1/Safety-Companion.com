@@ -1,6 +1,58 @@
-node_modules
-dist
-.DS_Store
-server/public
-vite.config.ts.*
+# Dependencies
+node_modules/
 *.tar.gz
+
+# Build outputs
+dist/
+build/
+server/public/
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.development
+
+# Development
+.DS_Store
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+
+# Temporary files
+tmp/
+temp/
+
+# Config files
+vite.config.ts.*
+
+# Database
+*.sqlite
+*.db
+
+# Logs
+logs/
+combined.log
+error.log
