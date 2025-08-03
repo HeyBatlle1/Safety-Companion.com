@@ -1,6 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User } from '@supabase/supabase-js';
-import { supabase } from '@/services/supabase';
+
+interface User {
+  id: string;
+  email: string;
+  role?: string;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -29,7 +33,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
-    
+    // Toast functionality will be handled by individual components
+    console.log(`Toast: ${type} - ${message}`);
   };
 
   // Initialize auth state
@@ -38,10 +43,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const initializeAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const response = await fetch('/api/auth/user', {
+          credentials: 'include'
+        });
         
         if (isMounted) {
-          setUser(session?.user ?? null);
+          if (response.ok) {
+            const userData = await response.json();
+            setUser(userData);
+          } else {
+            setUser(null);
+          }
         }
       } catch (error) {
         if (isMounted) {
@@ -53,22 +65,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       }
     };
-
-    // Set up auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!isMounted) return;
-
-        setUser(session?.user ?? null);
-        setLoading(false);
-
-        if (event === 'SIGNED_IN') {
-          showToast('Successfully signed in');
-        } else if (event === 'SIGNED_OUT') {
-          showToast('Successfully signed out');
-        }
-      }
-    );
 
     // Initialize with a fallback timeout
     const fallbackTimeout = setTimeout(() => {
@@ -82,19 +78,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return () => {
       isMounted = false;
       clearTimeout(fallbackTimeout);
-      subscription.unsubscribe();
     };
   }, []);
 
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const response = await fetch('/api/auth/signin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ email, password }),
       });
 
-      if (error) throw error;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to sign in');
+      }
+
+      const userData = await response.json();
+      setUser(userData.user);
+      showToast('Successfully signed in');
     } catch (error: any) {
       showToast(error.message || 'Failed to sign in', 'error');
       throw error;
@@ -108,11 +114,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(true);
       
       // Create user with complete profile data
-      const response = await fetch('/api/register', {
+      const response = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           email,
           password,
@@ -140,8 +147,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signOut = async () => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      const response = await fetch('/api/auth/signout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to sign out');
+      }
+
+      setUser(null);
+      showToast('Successfully signed out');
     } catch (error: any) {
       showToast(error.message || 'Failed to sign out', 'error');
       throw error;

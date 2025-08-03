@@ -1,6 +1,7 @@
 // Keep the existing imports
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { 
   User, 
   LogOut, 
@@ -17,7 +18,7 @@ import {
   X,
   Database
 } from 'lucide-react';
-// Auth removed - using Supabase directly
+import { useAuth } from '../contexts/AuthContext';
 import { showToast } from '../components/common/ToastContainer';
 import { 
   getUserProfile, 
@@ -37,9 +38,8 @@ import ProfileDatabaseInfo from '../components/profile/ProfileDatabaseInfo';
 import DatabaseConnectionTest from '../components/profile/DatabaseConnectionTest';
 
 const Profile: React.FC = () => {
-  // Mock user for now - auth removed
-  const user = { id: 'test-user', email: 'user@example.com' };
-  const logout = async () => { };
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [certifications, setCertifications] = useState<UserCertification[]>([]);
   const [drugScreens, setDrugScreens] = useState<DrugScreen[]>([]);
@@ -87,9 +87,9 @@ const Profile: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await signOut();
+      navigate('/login');
     } catch (error) {
-      
       showToast('Failed to sign out', 'error');
     }
   };
@@ -316,6 +316,13 @@ const Profile: React.FC = () => {
                     </button>
                   </div>
                 )}
+                <button
+                  onClick={handleLogout}
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 flex items-center space-x-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign Out</span>
+                </button>
               </div>
             </div>
           </motion.div>

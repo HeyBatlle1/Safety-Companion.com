@@ -4,7 +4,7 @@ import { AlertTriangle, Upload, X, Camera, MapPin, Loader, Check, ArrowLeft, Clo
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { checklistData } from './checklistData';
 import BackButton from '../navigation/BackButton';
-import { getCurrentUser } from '../../services/supabase';
+import { useAuth } from '../../contexts/AuthContext';
 import { getMSDSResponse } from '../../services/msdsChat';
 import { saveChecklistResponse } from '../../services/checklistService';
 import { showToast } from '../common/ToastContainer';
@@ -43,6 +43,7 @@ const ChecklistForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const fromSDS = location.state?.fromSDS;
+  const { user } = useAuth();
   
   const template = templateId && checklistData[templateId] 
     ? checklistData[templateId] 
@@ -139,7 +140,7 @@ const ChecklistForm = () => {
     setUploadingBlueprints(prev => ({ ...prev, [itemId]: true }));
     
     try {
-      const user = await getCurrentUser();
+      // User from auth context available
       if (!user) {
         showToast('Please log in to upload blueprints', 'error');
         return;
@@ -334,7 +335,7 @@ Format your response professionally with clear sections and actionable insights.
       const timestamp = new Date().toISOString();
       
       // Check authentication before saving
-      const user = await getCurrentUser();
+      // User from auth context available
       if (!user) {
         setError('Please sign in to save the checklist');
         showToast('Authentication required', 'error');
@@ -514,7 +515,7 @@ Format your response professionally with clear sections and actionable insights.
     }
 
     try {
-      const user = await getCurrentUser();
+      // User from auth context available
       if (!user) {
         showToast('Please log in to save reports', 'error');
         return;
