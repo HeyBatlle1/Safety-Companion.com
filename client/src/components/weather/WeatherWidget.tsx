@@ -7,6 +7,7 @@ const WeatherWidget = () => {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   useEffect(() => {
     const fetchWeather = async () => {
@@ -15,9 +16,11 @@ const WeatherWidget = () => {
         setError(null);
         const data = await getCurrentWeather('Indianapolis,Indiana');
         setWeather(data);
+        setLastUpdated(new Date());
+        console.log('Weather data updated successfully:', data);
       } catch (err) {
-        setError('Unable to load weather data');
-        
+        console.error('Weather API error:', err);
+        setError(`Weather data unavailable: ${err instanceof Error ? err.message : 'Unknown error'}`);
       } finally {
         setLoading(false);
       }
@@ -80,6 +83,11 @@ const WeatherWidget = () => {
             <div className="text-sm text-gray-400">
               Indianapolis, IN
             </div>
+            {lastUpdated && (
+              <div className="text-xs text-gray-500">
+                Updated: {lastUpdated.toLocaleTimeString()}
+              </div>
+            )}
           </div>
         </div>
         <div className="flex items-center space-x-2">

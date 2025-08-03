@@ -36,7 +36,9 @@ export const getCurrentWeather = async (location: string): Promise<WeatherData> 
         latitude: lat,
         longitude: lng,
         current: 'temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,wind_direction_10m,weather_code',
-        timezone: 'America/New_York'
+        timezone: 'America/New_York',
+        temperature_unit: 'celsius',
+        wind_speed_unit: 'kmh'
       }
     });
 
@@ -90,14 +92,17 @@ export const getCurrentWeather = async (location: string): Promise<WeatherData> 
           text: conditionText,
           icon: getWeatherIcon(weatherCode)
         },
-        wind_kph: data.current.wind_speed_10m * 3.6, // convert m/s to km/h
-        wind_dir: getWindDirection(data.current.wind_direction_10m),
+        wind_kph: data.current.wind_speed_10m, // already in km/h
+        wind_dir: getWindDirection(data.current.wind_direction_10m || 0),
         humidity: data.current.relative_humidity_2m,
-        feelslike_c: data.current.apparent_temperature,
+        feelslike_c: data.current.apparent_temperature || data.current.temperature_2m,
         uv: 0 // open-meteo doesn't provide UV index in free tier
       }
     };
   } catch (error) {
+    console.error('Weather API Error:', error);
+    console.error('Failed to fetch from Open-Meteo API, returning fallback data');
+    
     // Return default data in case of error
     return {
       location: {

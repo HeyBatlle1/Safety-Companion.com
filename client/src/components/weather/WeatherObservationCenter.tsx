@@ -66,9 +66,9 @@ const WeatherObservationCenter = () => {
   useEffect(() => {
     const fetchWeatherData = async () => {
       try {
-        // Try Open-Meteo first (no API key needed)
+        // Use comprehensive Open-Meteo API for real-time data
         const response = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=39.8386&longitude=-86.0253&current_weather=true&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=America%2FNew_York`,
+          `https://api.open-meteo.com/v1/forecast?latitude=39.8386&longitude=-86.0253&current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,wind_gusts_10m,precipitation,weather_code,is_day,pressure_msl,cloud_cover&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max&hourly=visibility&timezone=America%2FNew_York&temperature_unit=celsius&wind_speed_unit=kmh`,
           {
             mode: 'cors',
             headers: {
@@ -83,19 +83,19 @@ const WeatherObservationCenter = () => {
         
         const data = await response.json();
         
-        // Transform to our expected format
+        // Transform real-time data to our expected format
         const transformedData: WeatherData = {
           current: {
-            temperature_2m: data.current_weather.temperature,
-            apparent_temperature: data.current_weather.temperature + 2, // Estimate
-            relative_humidity_2m: 65, // Default values for demo
-            wind_speed_10m: data.current_weather.windspeed,
-            wind_gusts_10m: data.current_weather.windspeed * 1.3,
-            precipitation: 0,
-            weather_code: data.current_weather.weathercode,
-            is_day: data.current_weather.is_day,
-            pressure_msl: 1013,
-            cloud_cover: 30
+            temperature_2m: data.current.temperature_2m,
+            apparent_temperature: data.current.apparent_temperature || data.current.temperature_2m,
+            relative_humidity_2m: data.current.relative_humidity_2m,
+            wind_speed_10m: data.current.wind_speed_10m,
+            wind_gusts_10m: data.current.wind_gusts_10m || data.current.wind_speed_10m * 1.3,
+            precipitation: data.current.precipitation || 0,
+            weather_code: data.current.weather_code,
+            is_day: data.current.is_day,
+            pressure_msl: data.current.pressure_msl || 1013,
+            cloud_cover: data.current.cloud_cover || 30
           },
           daily: {
             time: data.daily.time,
@@ -103,18 +103,19 @@ const WeatherObservationCenter = () => {
             temperature_2m_min: data.daily.temperature_2m_min,
             weather_code: data.daily.weather_code,
             precipitation_sum: data.daily.precipitation_sum,
-            precipitation_probability_max: [20, 15, 10, 5] // Default values
+            precipitation_probability_max: data.daily.precipitation_probability_max || [20, 15, 10, 5]
           },
           hourly: {
-            visibility: [10000] // Default visibility
+            visibility: data.hourly.visibility || [10000]
           }
         };
         
         setWeatherData(transformedData);
         setLoading(false);
       } catch (error) {
+        console.error('Weather observation center API error:', error);
         
-        // Fallback to mock data for demo
+        // Return minimal fallback data in case of error
         setWeatherData({
           current: {
             temperature_2m: 72,
