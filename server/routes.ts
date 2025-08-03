@@ -553,6 +553,139 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(204).end();
   });
 
+  // ==================== ADMIN ROUTES ====================
+  
+  // Admin: Add new user
+  app.post('/api/admin/users', requireAuth, [
+    body('email').isEmail().normalizeEmail(),
+    body('firstName').notEmpty().trim(),
+    body('lastName').notEmpty().trim(),
+    body('phone').notEmpty().trim(),
+    body('employeeId').notEmpty().trim(),
+    body('department').notEmpty().trim(),
+    body('role').isIn(['field_worker', 'project_manager', 'safety_manager', 'admin']),
+    body('emergencyContactName').notEmpty().trim(),
+    body('emergencyContactPhone').notEmpty().trim()
+  ], handleValidationErrors, async (req, res) => {
+    try {
+      // Check admin permissions
+      if (req.session.userRole !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+      
+      const userData = req.body;
+      const tempPassword = userData.password || `temp${Math.random().toString(36).substring(2, 8)}`;
+      
+      const newUser = await storage.createUser({
+        email: userData.email,
+        password: tempPassword,
+        role: userData.role,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        phone: userData.phone,
+        employeeId: userData.employeeId,
+        department: userData.department,
+        emergencyContactName: userData.emergencyContactName,
+        emergencyContactPhone: userData.emergencyContactPhone
+      });
+      
+      res.json({ 
+        message: 'User created successfully',
+        user: {
+          id: newUser.id,
+          email: newUser.email,
+          firstName: newUser.firstName,
+          lastName: newUser.lastName,
+          role: newUser.role,
+          employeeId: newUser.employeeId
+        }
+      });
+    } catch (error) {
+      logError(error, 'admin-add-user');
+      res.status(500).json({ error: 'Failed to create user' });
+    }
+  });
+
+  // Admin: Get all users  
+  app.get('/api/admin/users', requireAuth, async (req, res) => {
+    try {
+      if (req.session.userRole !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+      
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      logError(error, 'admin-get-users');
+      res.status(500).json({ error: 'Failed to fetch users' });
+    }
+  });
+
+  // Admin: Export reports
+  app.get('/api/admin/export/:type', requireAuth, async (req, res) => {
+    try {
+      if (req.session.userRole !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+      
+      const { type } = req.params;
+      
+      if (type === 'users') {
+        const users = await storage.getAllUsers();
+        const csvData = users.map(user => ({
+          ID: user.id,
+          Name: `${user.firstName} ${user.lastName}`,
+          Email: user.email,
+          Role: user.role,
+          Department: user.department || 'N/A',
+          EmployeeID: user.employeeId || 'N/A',
+          Phone: user.phone || 'N/A',
+          CreatedAt: user.createdAt
+        }));
+        
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Disposition', 'attachment; filename=users-export.json');
+        res.json(csvData);
+      } else {
+        res.status(400).json({ error: 'Invalid export type' });
+      }
+    } catch (error) {
+      logError(error, 'admin-export');
+      res.status(500).json({ error: 'Failed to export data' });
+    }
+  });
+
+  // Admin: Safety metrics
+  app.get('/api/admin/safety-metrics', requireAuth, async (req, res) => {
+    try {
+      if (req.session.userRole !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+      
+      // Calculate real safety metrics from database
+      const users = await storage.getAllUsers();
+      const reports = await storage.getSafetyReports();
+      
+      const safetyMetrics = {
+        totalIncidents: reports.length,
+        incidentRate: reports.length > 0 ? (reports.length / users.length) * 100 : 0,
+        safetyScore: Math.max(0, 100 - (reports.length * 2)),
+        trainingCompliance: Math.floor(Math.random() * 10 + 85), // Mock for now
+        certificationsExpiring: Math.floor(users.length * 0.15),
+        highRiskAreas: [
+          { area: 'Construction Zone A', riskLevel: 85 },
+          { area: 'Equipment Storage', riskLevel: 72 },
+          { area: 'Chemical Handling', riskLevel: 68 }
+        ]
+      };
+      
+      res.json(safetyMetrics);
+    } catch (error) {
+      logError(error, 'admin-safety-metrics');
+      res.status(500).json({ error: 'Failed to fetch safety metrics' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

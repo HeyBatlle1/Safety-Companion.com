@@ -12,7 +12,19 @@ import { SiGoogle } from 'react-icons/si';
 
 const Login: React.FC = () => {
   const [signInData, setSignInData] = useState({ email: '', password: '' });
-  const [signUpData, setSignUpData] = useState({ email: '', password: '', confirmPassword: '', role: '' });
+  const [signUpData, setSignUpData] = useState({ 
+    email: '', 
+    password: '', 
+    confirmPassword: '', 
+    role: '',
+    firstName: '',
+    lastName: '',
+    phone: '',
+    employeeId: '',
+    department: '',
+    emergencyContactName: '',
+    emergencyContactPhone: ''
+  });
   const [loading, setLoading] = useState(false);
   const { user, signIn, signUp } = useAuth();
   const navigate = useNavigate();
@@ -48,7 +60,11 @@ const Login: React.FC = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!signUpData.email || !signUpData.password || !signUpData.confirmPassword || !signUpData.role) {
+    // Validate required fields
+    const requiredFields = ['email', 'password', 'confirmPassword', 'role', 'firstName', 'lastName', 'phone', 'employeeId', 'department', 'emergencyContactName', 'emergencyContactPhone'];
+    const missingFields = requiredFields.filter(field => !signUpData[field as keyof typeof signUpData]);
+    
+    if (missingFields.length > 0) {
       return;
     }
 
@@ -58,7 +74,15 @@ const Login: React.FC = () => {
 
     setLoading(true);
     try {
-      await signUp(signUpData.email, signUpData.password, signUpData.role);
+      await signUp(signUpData.email, signUpData.password, signUpData.role, {
+        firstName: signUpData.firstName,
+        lastName: signUpData.lastName,
+        phone: signUpData.phone,
+        employeeId: signUpData.employeeId,
+        department: signUpData.department,
+        emergencyContactName: signUpData.emergencyContactName,
+        emergencyContactPhone: signUpData.emergencyContactPhone
+      });
     } catch (error: any) {
       // Error handling is done in the auth context
     } finally {
@@ -81,7 +105,7 @@ const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-2xl">
         <Card className="bg-slate-800/95 border-blue-500/20 shadow-2xl">
           <CardHeader className="text-center pb-6">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-500/20 rounded-full mb-4 mx-auto">
@@ -199,6 +223,76 @@ const Login: React.FC = () => {
                     />
                   </div>
                   
+                  {/* Personal Info */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName">First Name</Label>
+                      <Input
+                        id="firstName"
+                        type="text"
+                        value={signUpData.firstName}
+                        onChange={(e) => setSignUpData({ ...signUpData, firstName: e.target.value })}
+                        className="bg-slate-700/50 border-slate-600 text-white"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="lastName">Last Name</Label>
+                      <Input
+                        id="lastName"
+                        type="text"
+                        value={signUpData.lastName}
+                        onChange={(e) => setSignUpData({ ...signUpData, lastName: e.target.value })}
+                        className="bg-slate-700/50 border-slate-600 text-white"
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Phone</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        value={signUpData.phone}
+                        onChange={(e) => setSignUpData({ ...signUpData, phone: e.target.value })}
+                        className="bg-slate-700/50 border-slate-600 text-white"
+                        placeholder="(555) 123-4567"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="employeeId">Employee ID</Label>
+                      <Input
+                        id="employeeId"
+                        type="text"
+                        value={signUpData.employeeId}
+                        onChange={(e) => setSignUpData({ ...signUpData, employeeId: e.target.value })}
+                        className="bg-slate-700/50 border-slate-600 text-white"
+                        placeholder="EMP001"
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="department">Department</Label>
+                    <Select value={signUpData.department} onValueChange={(value) => setSignUpData({ ...signUpData, department: value })}>
+                      <SelectTrigger className="bg-slate-700/50 border-slate-600 text-white">
+                        <SelectValue placeholder="Select department" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-600">
+                        <SelectItem value="Construction" className="text-white">Construction</SelectItem>
+                        <SelectItem value="Safety" className="text-white">Safety</SelectItem>
+                        <SelectItem value="Engineering" className="text-white">Engineering</SelectItem>
+                        <SelectItem value="Project Management" className="text-white">Project Management</SelectItem>
+                        <SelectItem value="Operations" className="text-white">Operations</SelectItem>
+                        <SelectItem value="Administration" className="text-white">Administration</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
                   <div className="space-y-2">
                     <Label htmlFor="role">Role</Label>
                     <Select value={signUpData.role} onValueChange={(value) => setSignUpData({ ...signUpData, role: value })}>
@@ -208,17 +302,39 @@ const Login: React.FC = () => {
                       <SelectContent className="bg-slate-800 border-slate-600">
                         {roleOptions.map((role) => (
                           <SelectItem key={role.value} value={role.value} className="text-white">
-                            <div className="flex items-center space-x-2">
-                              <role.icon className="w-4 h-4" />
-                              <div>
-                                <div className="font-medium">{role.label}</div>
-                                <div className="text-xs text-slate-400">{role.description}</div>
-                              </div>
-                            </div>
+                            <div className="font-medium">{role.label}</div>
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+                  
+                  {/* Emergency Contact */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="emergencyContactName">Emergency Contact</Label>
+                      <Input
+                        id="emergencyContactName"
+                        type="text"
+                        value={signUpData.emergencyContactName}
+                        onChange={(e) => setSignUpData({ ...signUpData, emergencyContactName: e.target.value })}
+                        className="bg-slate-700/50 border-slate-600 text-white"
+                        placeholder="Contact name"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="emergencyContactPhone">Emergency Phone</Label>
+                      <Input
+                        id="emergencyContactPhone"
+                        type="tel"
+                        value={signUpData.emergencyContactPhone}
+                        onChange={(e) => setSignUpData({ ...signUpData, emergencyContactPhone: e.target.value })}
+                        className="bg-slate-700/50 border-slate-600 text-white"
+                        placeholder="(555) 123-4567"
+                        required
+                      />
+                    </div>
                   </div>
 
                   <Button

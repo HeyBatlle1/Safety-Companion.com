@@ -19,6 +19,7 @@ import {
 } from '../../services/profileService';
 import { showToast } from '../common/ToastContainer';
 import EnhancedAdminDashboard from '../admin/EnhancedAdminDashboard';
+import AddUserModal from '../admin/AddUserModal';
 
 const AdminPanel: React.FC = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -27,6 +28,30 @@ const AdminPanel: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRole, setSelectedRole] = useState<string>('all');
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+
+  const handleExportUsers = async () => {
+    try {
+      const response = await fetch('/api/admin/export/users');
+      if (response.ok) {
+        const data = await response.json();
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `users-export-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('User data exported successfully', 'success');
+      } else {
+        showToast('Failed to export user data', 'error');
+      }
+    } catch (error) {
+      showToast('Failed to export user data', 'error');
+    }
+  };
 
   useEffect(() => {
     loadData();
@@ -194,13 +219,19 @@ const AdminPanel: React.FC = () => {
               <p className="text-gray-400">Manage users, roles, and permissions</p>
             </div>
             <div className="flex space-x-2">
-              <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center space-x-2">
+              <button 
+                onClick={() => setShowAddUserModal(true)}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center space-x-2 transition-all"
+              >
                 <UserPlus className="w-4 h-4" />
                 <span>Add User</span>
               </button>
-              <button className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 flex items-center space-x-2">
+              <button 
+                onClick={handleExportUsers}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center space-x-2 transition-all"
+              >
                 <Settings className="w-4 h-4" />
-                <span>Settings</span>
+                <span>Export Users</span>
               </button>
             </div>
           </div>
@@ -399,6 +430,12 @@ const AdminPanel: React.FC = () => {
       </motion.div>
         </>
       )}
+      
+      <AddUserModal
+        isOpen={showAddUserModal}
+        onClose={() => setShowAddUserModal(false)}
+        onUserAdded={loadData}
+      />
     </div>
   );
 };

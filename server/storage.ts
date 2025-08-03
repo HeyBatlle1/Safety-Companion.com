@@ -39,6 +39,8 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined>;
   verifyPassword(email: string, password: string): Promise<User | null>;
+  getAllUsers(): Promise<User[]>;
+  updateUserRole(userId: string, role: string): Promise<void>;
   
   // Notification preferences
   getUserNotificationPreferences(userId: string): Promise<NotificationPreferences | undefined>;
@@ -116,6 +118,17 @@ export class DatabaseStorage implements IStorage {
     });
     
     return newUser;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users);
+  }
+
+  async updateUserRole(userId: string, role: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ role })
+      .where(eq(users.id, userId));
   }
 
   async updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined> {

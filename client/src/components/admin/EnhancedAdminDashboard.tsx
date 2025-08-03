@@ -14,6 +14,7 @@ import {
   CheckCircle,
   XCircle
 } from 'lucide-react';
+import { analyticsService, type AnalyticsData, type SafetyMetrics } from '../../services/googleAnalytics';
 
 interface AdminMetrics {
   totalEmployees: number;
