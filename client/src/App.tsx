@@ -18,7 +18,6 @@ import ChecklistView from '@/pages/ChecklistView';
 import EnterpriseChecklistForm from '@/components/checklist/EnterpriseChecklistForm';
 import Profiles from '@/pages/Profiles';
 import ToastContainer from '@/components/common/ToastContainer';
-import DatabaseHealthCheck from '@/components/health/DatabaseHealthCheck';
 
 function App() {
   const { loading, user } = useAuth();
@@ -39,8 +38,6 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-900">
-      {/* Database Health Check - Only show when authenticated */}
-      {user && <DatabaseHealthCheck />}
       <Routes>
         {/* Public routes */}
         <Route path="/login" element={<Login />} />

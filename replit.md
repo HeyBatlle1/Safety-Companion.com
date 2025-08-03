@@ -8,7 +8,7 @@ Preferred communication style: Simple, everyday language.
 UI Design: Professional, enterprise-grade styling with dark theme and blue/cyan gradients - NEW: Enterprise checklist interface with toggle switches, photo uploads, severity sliders, and tablet-optimized professional components
 Navigation: Profiles icon positioned at the end of navigation list
 Code Organization: Checklist functionality separated from SDS chat - clean separation of concerns
-Database Health Monitoring: Hidden expandable health check in top-right corner with detailed diagnostics, plus profile tab connection testing - read-only for monitoring
+Database Health Monitoring: Available in Profile > Database tab with detailed connection testing and diagnostics - read-only for monitoring
 Security: Enterprise-grade RLS policies, audit trails, secure file uploads with virus scanning
 Profile System: Tabbed interface with personal info, certifications, safety records, and preferences
 Database Setup: Optimized migration order (tables→RLS→indexes→triggers) with comprehensive testing
