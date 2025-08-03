@@ -41,8 +41,10 @@ const DatabaseHealthCheck: React.FC = () => {
       const response = await fetch('/api/health/database');
       if (response.ok) {
         const data = await response.json();
+        // Debug log removed for production
         setHealth(data);
       } else {
+        console.error('Health check failed with status:', response.status);
         setHealth({
           status: 'error',
           connection: false,
@@ -54,11 +56,12 @@ const DatabaseHealthCheck: React.FC = () => {
           tableCount: 0,
           userCount: 0,
           diskUsage: 'Unknown',
-          errors: ['Failed to fetch database health'],
+          errors: [`HTTP ${response.status}: Failed to fetch database health`],
           warnings: []
         });
       }
     } catch (error) {
+      console.error('Health check error:', error);
       setHealth({
         status: 'error',
         connection: false,
@@ -70,7 +73,7 @@ const DatabaseHealthCheck: React.FC = () => {
         tableCount: 0,
         userCount: 0,
         diskUsage: 'Unknown',
-        errors: ['Database connection failed'],
+        errors: [error instanceof Error ? error.message : 'Database connection failed'],
         warnings: []
       });
     } finally {
