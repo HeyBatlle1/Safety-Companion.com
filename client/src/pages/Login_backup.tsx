@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -70,6 +70,8 @@ const Login: React.FC = () => {
     // TODO: Implement Google OAuth
     console.log('Google Sign In clicked');
   };
+
+
 
   const roleOptions = [
     { value: 'field_worker', label: 'Field Worker', icon: HardHat, description: 'Front-line safety operations' },
@@ -148,17 +150,29 @@ const Login: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Google OAuth Button */}
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleGoogleSignIn}
-                  disabled={loading}
-                  className="w-full bg-slate-700/50 border-slate-600 text-white hover:bg-slate-700"
-                >
-                  <SiGoogle className="w-4 h-4 mr-2" />
-                  Continue with Google
-                </Button>
+                {/* OAuth Buttons */}
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleGoogleSignIn}
+                    disabled={loading}
+                    className="w-full bg-slate-700/50 border-slate-600 text-white hover:bg-slate-700"
+                  >
+                    <SiGoogle className="w-4 h-4 mr-2" />
+                    Google
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleMicrosoftSignIn}
+                    disabled={loading}
+                    className="w-full bg-slate-700/50 border-slate-600 text-white hover:bg-slate-700"
+                  >
+                    <SiMicrosoft className="w-4 h-4 mr-2" />
+                    Microsoft
+                  </Button>
+                </div>
               </TabsContent>
               
               <TabsContent value="signup" className="space-y-4">
@@ -243,17 +257,29 @@ const Login: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Google OAuth Button */}
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleGoogleSignIn}
-                  disabled={loading}
-                  className="w-full bg-slate-700/50 border-slate-600 text-white hover:bg-slate-700"
-                >
-                  <SiGoogle className="w-4 h-4 mr-2" />
-                  Continue with Google
-                </Button>
+                {/* OAuth Buttons */}
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleGoogleSignIn}
+                    disabled={loading}
+                    className="w-full bg-slate-700/50 border-slate-600 text-white hover:bg-slate-700"
+                  >
+                    <SiGoogle className="w-4 h-4 mr-2" />
+                    Google
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleMicrosoftSignIn}
+                    disabled={loading}
+                    className="w-full bg-slate-700/50 border-slate-600 text-white hover:bg-slate-700"
+                  >
+                    <SiMicrosoft className="w-4 h-4 mr-2" />
+                    Microsoft
+                  </Button>
+                </div>
               </TabsContent>
             </Tabs>
           </CardContent>
