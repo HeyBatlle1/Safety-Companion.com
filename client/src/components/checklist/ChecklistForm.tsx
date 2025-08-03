@@ -132,7 +132,7 @@ const ChecklistForm = () => {
       
       showToast('Failed to upload images. Please try again.', 'error');
     }
-  };
+  }
 
   const handleBlueprintUpload = async (itemId: string, files: FileList) => {
     setUploadingBlueprints(prev => ({ ...prev, [itemId]: true }));
@@ -913,7 +913,7 @@ Progress: ${Math.round(calculateProgress())}% complete
                                     )}
 
                                     {/* Display uploaded blueprints */}
-                                    {responses[item.id]?.blueprints && responses[item.id]?.blueprints.length > 0 && (
+                                    {responses[item.id]?.blueprints && responses[item.id]!.blueprints!.length > 0 && (
                                       <div className="space-y-2 mb-4">
                                         <div className="flex items-center space-x-2 mb-2">
                                           <Building className="w-5 h-5 text-blue-400" />

@@ -12,11 +12,11 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://maps.googleapis.com", "https://www.youtube.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://maps.googleapis.com", "https://www.youtube.com", "https://replit.com"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       imgSrc: ["'self'", "data:", "https:", "blob:"],
-      connectSrc: ["'self'", "https://api.open-meteo.com", "https://pubchem.ncbi.nlm.nih.gov", "https://safety-companion.up.railway.app", "https://*.supabase.co", "wss://*.supabase.co"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      connectSrc: ["'self'", "https://api.open-meteo.com", "https://pubchem.ncbi.nlm.nih.gov", "https://safety-companion.up.railway.app", "https://*.supabase.co", "wss://*.supabase.co", "https://generativelanguage.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
       frameSrc: ["'self'", "https://www.youtube.com"]
     }
   },
