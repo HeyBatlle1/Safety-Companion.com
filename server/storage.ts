@@ -1,11 +1,10 @@
-import { drizzle } from 'drizzle-orm/neon-serverless';
+import { drizzle } from 'drizzle-orm/neon-http';
 import { neon } from '@neondatabase/serverless';
 import * as schema from '@shared/schema';
 import type {
   User,
   InsertUser,
-  UserProfile,
-  InsertUserProfile,
+
   SafetyChecklist,
   InsertSafetyChecklist,
   JhaForm,
@@ -125,7 +124,11 @@ export class PostgreSQLStorage implements IStorage {
   async updateUserLoginAttempts(id: string, attempts: number, lockedUntil?: Date): Promise<void> {
     await db
       .update(schema.users)
-      .set({ loginAttempts: attempts, lockedUntil, updatedAt: new Date() })
+      .set({ 
+        failedLoginAttempts: attempts, 
+        accountLockedUntil: lockedUntil,
+        updatedAt: new Date() 
+      })
       .where(eq(schema.users.id, id));
   }
 

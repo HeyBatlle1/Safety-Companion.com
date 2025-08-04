@@ -28,7 +28,7 @@ if (!process.env.DATABASE_URL) {
 
 // Session store setup
 const PgSession = ConnectPgSimple(session);
-const pgPool = neon(process.env.DATABASE_URL);
+const sql = neon(process.env.DATABASE_URL);
 
 // Security middleware
 app.use(helmet({
@@ -63,13 +63,8 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Session configuration
+// Session configuration - Use memory store for development
 app.use(session({
-  store: new PgSession({
-    pool: pgPool as any,
-    createTableIfMissing: true,
-    tableName: 'session',
-  }),
   secret: process.env.SESSION_SECRET || 'fallback-secret-key',
   resave: false,
   saveUninitialized: false,

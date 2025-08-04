@@ -3,7 +3,6 @@ import bcrypt from 'bcrypt';
 import { storage } from './storage';
 import { 
   insertUserSchema,
-  insertUserProfileSchema,
   insertSafetyChecklistSchema,
   insertJhaFormSchema,
   insertChatSessionSchema,
@@ -75,14 +74,14 @@ router.post('/auth/signin', async (req, res) => {
     }
 
     // Check if account is locked
-    if (user.lockedUntil && user.lockedUntil > new Date()) {
+    if (user.accountLockedUntil && user.accountLockedUntil > new Date()) {
       return res.status(423).json({ error: 'Account locked. Try again later.' });
     }
 
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
       // Increment login attempts
-      const attempts = (user.loginAttempts || 0) + 1;
+      const attempts = (user.failedLoginAttempts || 0) + 1;
       const lockUntil = attempts >= 5 ? new Date(Date.now() + 30 * 60 * 1000) : undefined; // 30 minutes
       
       await storage.updateUserLoginAttempts(user.id, attempts, lockUntil);
@@ -92,7 +91,10 @@ router.post('/auth/signin', async (req, res) => {
 
     // Reset login attempts and update last login
     await storage.updateUserLoginAttempts(user.id, 0);
-    await storage.updateUser(user.id, { lastLogin: new Date() });
+    await storage.updateUser(user.id, { 
+      lastLoginAt: new Date(),
+      loginCount: (user.loginCount || 0) + 1 
+    });
 
     // Create session
     req.session.userId = user.id;

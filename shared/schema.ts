@@ -2,35 +2,34 @@ import { pgTable, text, timestamp, boolean, integer, uuid, jsonb, decimal } from
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
-// Users table for authentication
+// Users table for authentication (matching existing database schema)
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
   email: text('email').notNull().unique(),
   password: text('password').notNull(),
   role: text('role').notNull().default('field_worker'), // field_worker, supervisor, project_manager, safety_manager, admin
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  firstName: text('first_name'),
+  lastName: text('last_name'),
+  phone: text('phone'),
+  employeeId: text('employee_id'),
+  department: text('department'),
+  emergencyContactName: text('emergency_contact_name'),
+  emergencyContactPhone: text('emergency_contact_phone'),
   isActive: boolean('is_active').default(true).notNull(),
-  loginAttempts: integer('login_attempts').default(0).notNull(),
-  lockedUntil: timestamp('locked_until'),
-  lastLogin: timestamp('last_login'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at'),
+  lastLoginAt: timestamp('last_login_at'),
+  loginCount: integer('login_count').default(0),
+  failedLoginAttempts: integer('failed_login_attempts').default(0),
+  accountLockedUntil: timestamp('account_locked_until'),
+  passwordChangedAt: timestamp('password_changed_at'),
 });
 
-// User profiles for extended user information
-export const userProfiles = pgTable('user_profiles', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id').references(() => users.id).notNull(),
-  firstName: text('first_name').notNull(),
-  lastName: text('last_name').notNull(),
-  phone: text('phone'),
-  employeeId: text('employee_id').unique(),
-  department: text('department'),
-  emergencyContact: text('emergency_contact'),
-  certifications: jsonb('certifications').default([]),
-  safetyRecords: jsonb('safety_records').default([]),
-  preferences: jsonb('preferences').default({}),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+// User sessions table for session management
+export const userSessions = pgTable('user_sessions', {
+  sid: text('sid').primaryKey(),
+  sess: jsonb('sess').notNull(),
+  expire: timestamp('expire').notNull(),
 });
 
 // Safety checklists
@@ -132,11 +131,7 @@ export const insertUserSchema = createInsertSchema(users).omit({
   updatedAt: true,
 });
 
-export const insertUserProfileSchema = createInsertSchema(userProfiles).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
+
 
 export const insertSafetyChecklistSchema = createInsertSchema(safetyChecklists).omit({
   id: true,
@@ -176,8 +171,7 @@ export const insertTrainingRecordSchema = createInsertSchema(trainingRecords).om
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 
-export type UserProfile = typeof userProfiles.$inferSelect;
-export type InsertUserProfile = z.infer<typeof insertUserProfileSchema>;
+
 
 export type SafetyChecklist = typeof safetyChecklists.$inferSelect;
 export type InsertSafetyChecklist = z.infer<typeof insertSafetyChecklistSchema>;
