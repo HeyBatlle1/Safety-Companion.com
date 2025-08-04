@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import AppLayout from '@/layouts/AppLayout';
 import PrivateRoute from '@/components/auth/PrivateRoute';
 import Login from '@/pages/Login';
-import Signup from '@/pages/Signup';
+
 import Home from '@/pages/Home';
 import Profile from '@/pages/Profile';
 import Chat from '@/pages/Chat';
@@ -43,7 +43,6 @@ function App() {
       <Routes>
         {/* Public routes */}
         <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
         
         {/* Protected routes */}
         <Route path="/" element={

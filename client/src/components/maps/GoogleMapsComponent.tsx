@@ -78,6 +78,21 @@ const GoogleMapsComponent: React.FC = () => {
       return;
     }
 
+    // Check if script already exists to prevent duplicate loading
+    const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+    if (existingScript) {
+      setError('Google Maps already loading...');
+      setTimeout(() => {
+        if (window.google) {
+          initializeMap();
+        } else {
+          setError('Google Maps failed to initialize');
+          setIsLoading(false);
+        }
+      }, 3000);
+      return;
+    }
+
     const apiKey = (window as any).__GOOGLE_MAPS_API_KEY__;
     if (!apiKey) {
       setError('Google Maps API key not configured');
@@ -88,6 +103,7 @@ const GoogleMapsComponent: React.FC = () => {
     window.initMap = initializeMap;
 
     const script = document.createElement('script');
+    script.id = 'google-maps-script';
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMap&libraries=places,geometry&v=weekly`;
     script.async = true;
     script.defer = true;

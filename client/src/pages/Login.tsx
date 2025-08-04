@@ -16,7 +16,7 @@ const Login: React.FC = () => {
     email: '', 
     password: '', 
     confirmPassword: '', 
-    role: '',
+    role: 'field_worker',
     firstName: '',
     lastName: '',
     phone: '',

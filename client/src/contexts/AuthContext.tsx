@@ -33,8 +33,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
-    // Toast functionality will be handled by individual components
-    console.log(`Toast: ${type} - ${message}`);
+    // Use proper toast system
+    const event = new CustomEvent('showToast', { 
+      detail: { message, type }
+    });
+    window.dispatchEvent(event);
   };
 
   // Initialize auth state
