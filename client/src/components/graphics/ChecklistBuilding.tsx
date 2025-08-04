@@ -15,7 +15,7 @@ const ChecklistBuilding: React.FC<ChecklistBuildingProps> = ({
 
   return (
     <motion.div
-      className="w-8 h-8 flex items-center justify-center"
+      className="w-8 h-8 flex items-center justify-center bg-slate-900/80 rounded-md backdrop-blur-sm border border-slate-700/50"
       initial={{ scale: 0.8, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ 

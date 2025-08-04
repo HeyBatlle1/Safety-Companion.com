@@ -148,7 +148,7 @@ const ChecklistSelector: React.FC<ChecklistSelectorProps> = ({ onChecklistClick 
               <div className={`absolute inset-0 bg-gradient-to-r ${template.color} rounded-xl opacity-20 group-hover:opacity-30 transition-all duration-300 blur-md group-hover:blur-lg`} />
               <div className="relative p-6 rounded-xl bg-slate-800/80 backdrop-blur-sm border-2 border-blue-500/30 group-hover:border-blue-400/50 transition-all duration-300">
                 <div className="flex items-start space-x-4">
-                  <div className={`p-3 rounded-lg bg-gradient-to-r ${template.color} shadow-xl group-hover:shadow-2xl transition-all duration-300 flex items-center justify-center`}>
+                  <div className={`p-2 rounded-lg bg-gradient-to-r ${template.color} shadow-xl group-hover:shadow-2xl transition-all duration-300 flex items-center justify-center`}>
                     <ChecklistBuilding delay={index * 0.1} color={template.iconColor} />
                   </div>
                   <div className="flex-1">
@@ -192,7 +192,7 @@ const ChecklistSelector: React.FC<ChecklistSelectorProps> = ({ onChecklistClick 
             >
               <div className="relative p-4 rounded-lg bg-slate-800/40 backdrop-blur-sm border border-gray-600/30 group-hover:border-gray-500/50 transition-all duration-300">
                 <div className="flex items-center space-x-3">
-                  <div className={`p-2 rounded-lg bg-gradient-to-r ${template.color} flex items-center justify-center`}>
+                  <div className={`p-1 rounded-lg bg-gradient-to-r ${template.color} flex items-center justify-center`}>
                     <ChecklistBuilding delay={0.6 + index * 0.05} color={template.iconColor} />
                   </div>
                   <div className="flex-1">
