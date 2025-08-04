@@ -26,9 +26,7 @@ if (!process.env.DATABASE_URL) {
   process.exit(1);
 }
 
-// Session store setup
-const PgSession = ConnectPgSimple(session);
-const sql = neon(process.env.DATABASE_URL);
+// Session store setup - simplified for development
 
 // Security middleware
 app.use(helmet({
