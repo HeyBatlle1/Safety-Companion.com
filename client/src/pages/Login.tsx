@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,8 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Shield, Users, HardHat, ClipboardCheck, Crown } from 'lucide-react';
+import { Loader2, Users, HardHat, ClipboardCheck, Crown } from 'lucide-react';
 import { SiGoogle } from 'react-icons/si';
+import ModernSkyscraper from '@/components/graphics/ModernSkyscraper';
 
 const Login: React.FC = () => {
   const [signInData, setSignInData] = useState({ email: '', password: '' });
@@ -108,9 +110,49 @@ const Login: React.FC = () => {
       <div className="w-full max-w-2xl">
         <Card className="bg-slate-800/95 border-blue-500/20 shadow-2xl">
           <CardHeader className="text-center pb-6">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-500/20 rounded-full mb-4 mx-auto">
-              <Shield className="w-8 h-8 text-blue-400" />
-            </div>
+            <motion.div 
+              className="flex justify-center mb-6"
+              initial={{ scale: 0.8, rotateY: -15 }}
+              animate={{ 
+                scale: 1,
+                rotateY: 0,
+                y: [0, -3, 0],
+                rotateZ: [0, 0.5, -0.5, 0],
+              }}
+              transition={{ 
+                type: "spring", 
+                stiffness: 100, 
+                damping: 15,
+                duration: 0.8,
+                y: {
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                },
+                rotateZ: {
+                  duration: 6,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }
+              }}
+            >
+              <div className="w-20 h-24 relative">
+                {/* Animated glow effect */}
+                <motion.div 
+                  className="absolute inset-0 bg-gradient-to-t from-blue-400/30 via-cyan-400/20 to-transparent rounded-lg blur-xl"
+                  animate={{
+                    opacity: [0.3, 0.6, 0.3],
+                    scale: [1, 1.1, 1],
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                />
+                <ModernSkyscraper />
+              </div>
+            </motion.div>
             <CardTitle className="text-2xl font-bold text-white">Safety Companion</CardTitle>
             <CardDescription className="text-slate-400">
               Enterprise Safety Management Platform
