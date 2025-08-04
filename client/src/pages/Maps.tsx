@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Map } from 'lucide-react';
-import SimpleCityMap from '../components/maps/SimpleCityMap';
+import GoogleMapsComponent from '../components/maps/GoogleMapsComponent';
 import BackButton from '../components/navigation/BackButton';
 
 const Maps = () => {
@@ -36,12 +36,12 @@ const Maps = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            View satellite imagery and get directions to any destination from Indianapolis.
-            Enter an address or landmark in the search box below to calculate the best route.
+            Full Google Maps integration with satellite imagery, street view, and real-time directions.
+            Get your current location and plan trips to any destination in Indianapolis and beyond.
           </motion.p>
         </div>
 
-        <SimpleCityMap />
+        <GoogleMapsComponent />
       </motion.div>
     </div>
   );

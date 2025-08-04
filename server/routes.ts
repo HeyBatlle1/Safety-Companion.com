@@ -120,6 +120,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Configuration endpoint for frontend
+  app.get("/api/config", (req, res) => {
+    try {
+      const config = {
+        googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY || null,
+      };
+      
+      res.json(config);
+    } catch (error) {
+      logError(error, 'config');
+      res.status(500).json({ error: "Failed to get configuration" });
+    }
+  });
+
   // ==================== AUTHENTICATION ROUTES ====================
   
   // Sign up with input validation

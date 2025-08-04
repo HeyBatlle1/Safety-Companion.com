@@ -1,7 +1,5 @@
-import { Loader } from '@googlemaps/js-api-loader';
-
-// Use the non-GenAI Google API key for Maps
-const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
+// Use the Google Maps API key from environment
+const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 // Global tracking variables
 let isLoadingMap = false;
