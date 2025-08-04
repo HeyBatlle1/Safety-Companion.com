@@ -1,4 +1,4 @@
-// Mock service for drawings - no external dependencies
+import supabase, { getCurrentUser } from './supabase';
 import { 
   Drawing, 
   DrawingVersion, 

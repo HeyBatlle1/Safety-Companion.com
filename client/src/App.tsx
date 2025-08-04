@@ -4,7 +4,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import AppLayout from '@/layouts/AppLayout';
 import PrivateRoute from '@/components/auth/PrivateRoute';
 import Login from '@/pages/Login';
-
 import Home from '@/pages/Home';
 import Profile from '@/pages/Profile';
 import Chat from '@/pages/Chat';
