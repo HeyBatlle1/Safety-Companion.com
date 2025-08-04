@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Construction, Zap, Beaker, Wind, HardHat, Stars as Stairs, Box, Flame, AlertTriangle, TestTube, Microscope, ClipboardCheck, Sparkles, Star } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import ChecklistBuilding from '@/components/graphics/ChecklistBuilding';
 
 interface Template {
   id: string;
   title: string;
-  icon: React.ElementType;
+  icon: React.ComponentType<any>;
   description: string;
   color: string;
+  iconColor?: string;
 }
 
 interface ChecklistSelectorProps {
@@ -22,44 +24,50 @@ const primaryTemplates: Template[] = [
   {
     id: 'safety-assessment',
     title: 'Site Safety Assessment',
-    icon: Shield,
+    icon: ChecklistBuilding,
     description: 'AI-powered comprehensive site evaluation with intelligent risk scoring',
-    color: 'from-blue-600 to-cyan-600'
+    color: 'from-blue-600 to-cyan-600',
+    iconColor: '#38BDF8'
   },
   {
     id: 'fall-protection',
     title: 'Fall Protection Systems',
-    icon: AlertTriangle,
+    icon: ChecklistBuilding,
     description: 'Critical height work safety with OSHA compliance tracking',
-    color: 'from-red-500 to-orange-500'
+    color: 'from-red-500 to-orange-500',
+    iconColor: '#EF4444'
   },
   {
     id: 'electrical-safety',
     title: 'Electrical Safety Audit',
-    icon: Zap,
+    icon: ChecklistBuilding,
     description: 'High-voltage and electrical systems hazard assessment',
-    color: 'from-yellow-500 to-amber-500'
+    color: 'from-yellow-500 to-amber-500',
+    iconColor: '#EAB308'
   },
   {
     id: 'hazard-communication',
     title: 'HazCom & Chemical Safety',
-    icon: Beaker,
+    icon: ChecklistBuilding,
     description: 'Material safety with AI chemical analysis integration',
-    color: 'from-purple-500 to-pink-500'
+    color: 'from-purple-500 to-pink-500',
+    iconColor: '#A855F7'
   },
   {
     id: 'emergency-action',
     title: 'Emergency Action Plan',
-    icon: HardHat,
+    icon: ChecklistBuilding,
     description: 'Critical incident protocols with automated alerts',
-    color: 'from-green-500 to-emerald-500'
+    color: 'from-green-500 to-emerald-500',
+    iconColor: '#22C55E'
   },
   {
     id: 'ppe',
     title: 'PPE Compliance Check',
-    icon: Construction,
+    icon: ChecklistBuilding,
     description: 'Personal protective equipment verification system',
-    color: 'from-indigo-500 to-blue-500'
+    color: 'from-indigo-500 to-blue-500',
+    iconColor: '#6366F1'
   }
 ];
 
@@ -68,30 +76,34 @@ const secondaryTemplates: Template[] = [
   {
     id: 'scaffold-safety',
     title: 'Scaffold Safety',
-    icon: Stairs,
+    icon: ChecklistBuilding,
     description: 'Scaffold setup and inspection protocols',
-    color: 'from-gray-500 to-gray-600'
+    color: 'from-gray-500 to-gray-600',
+    iconColor: '#6B7280'
   },
   {
     id: 'respiratory-protection',
     title: 'Respiratory Protection',
-    icon: Wind,
+    icon: ChecklistBuilding,
     description: 'Breathing apparatus and air quality checks',
-    color: 'from-gray-500 to-gray-600'
+    color: 'from-gray-500 to-gray-600',
+    iconColor: '#6B7280'
   },
   {
     id: 'ladder-safety',
     title: 'Ladder Safety',
-    icon: Box,
+    icon: ChecklistBuilding,
     description: 'Ladder inspection and usage protocols',
-    color: 'from-gray-500 to-gray-600'
+    color: 'from-gray-500 to-gray-600',
+    iconColor: '#6B7280'
   },
   {
     id: 'confined-space',
     title: 'Confined Space Entry',
-    icon: Flame,
+    icon: ChecklistBuilding,
     description: 'Confined space procedures and permits',
-    color: 'from-gray-500 to-gray-600'
+    color: 'from-gray-500 to-gray-600',
+    iconColor: '#6B7280'
   }
 ];
 
@@ -136,8 +148,8 @@ const ChecklistSelector: React.FC<ChecklistSelectorProps> = ({ onChecklistClick 
               <div className={`absolute inset-0 bg-gradient-to-r ${template.color} rounded-xl opacity-20 group-hover:opacity-30 transition-all duration-300 blur-md group-hover:blur-lg`} />
               <div className="relative p-6 rounded-xl bg-slate-800/80 backdrop-blur-sm border-2 border-blue-500/30 group-hover:border-blue-400/50 transition-all duration-300">
                 <div className="flex items-start space-x-4">
-                  <div className={`p-4 rounded-lg bg-gradient-to-r ${template.color} shadow-xl group-hover:shadow-2xl transition-all duration-300`}>
-                    <template.icon className="w-8 h-8 text-white" />
+                  <div className={`p-3 rounded-lg bg-gradient-to-r ${template.color} shadow-xl group-hover:shadow-2xl transition-all duration-300 flex items-center justify-center`}>
+                    <ChecklistBuilding delay={index * 0.1} color={template.iconColor} />
                   </div>
                   <div className="flex-1">
                     <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-300 transition-colors">
@@ -180,8 +192,8 @@ const ChecklistSelector: React.FC<ChecklistSelectorProps> = ({ onChecklistClick 
             >
               <div className="relative p-4 rounded-lg bg-slate-800/40 backdrop-blur-sm border border-gray-600/30 group-hover:border-gray-500/50 transition-all duration-300">
                 <div className="flex items-center space-x-3">
-                  <div className={`p-2 rounded-lg bg-gradient-to-r ${template.color}`}>
-                    <template.icon className="w-5 h-5 text-white" />
+                  <div className={`p-2 rounded-lg bg-gradient-to-r ${template.color} flex items-center justify-center`}>
+                    <ChecklistBuilding delay={0.6 + index * 0.05} color={template.iconColor} />
                   </div>
                   <div className="flex-1">
                     <h3 className="text-md font-medium text-gray-300 group-hover:text-white transition-colors">
