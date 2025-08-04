@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Map } from 'lucide-react';
-import CityMap from '../components/maps/CityMap';
+import SimpleCityMap from '../components/maps/SimpleCityMap';
 import BackButton from '../components/navigation/BackButton';
 
 const Maps = () => {
@@ -41,7 +41,7 @@ const Maps = () => {
           </motion.p>
         </div>
 
-        <CityMap />
+        <SimpleCityMap />
       </motion.div>
     </div>
   );
