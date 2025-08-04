@@ -21,8 +21,8 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Validate required environment variables
-if (!process.env.DATABASE_URL) {
-  console.error('DATABASE_URL environment variable is required');
+if (!process.env.VITE_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  console.error('Supabase environment variables are required');
   process.exit(1);
 }
 

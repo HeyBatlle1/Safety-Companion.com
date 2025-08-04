@@ -22,12 +22,95 @@ const requireAuth = (req: any, res: any, next: any) => {
   next();
 };
 
-// Auth routes - using Supabase directly from frontend
+// Auth routes - working with Supabase Auth
+router.post('/auth/signin', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    // Import Supabase directly for auth
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.VITE_SUPABASE_URL, 
+      process.env.VITE_SUPABASE_ANON_KEY
+    );
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    // Create session
+    req.session.userId = data.user.id;
+    req.session.userEmail = data.user.email;
+
+    res.json({
+      user: {
+        id: data.user.id,
+        email: data.user.email,
+        displayName: data.user.user_metadata?.display_name || data.user.email
+      }
+    });
+  } catch (error) {
+    console.error('Signin error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.post('/auth/signup', async (req, res) => {
+  try {
+    const { email, password, ...userData } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.VITE_SUPABASE_URL, 
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+
+    const { data, error } = await supabase.auth.admin.createUser({
+      email,
+      password,
+      user_metadata: userData
+    });
+
+    if (error) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    res.status(201).json({
+      user: {
+        id: data.user.id,
+        email: data.user.email
+      }
+    });
+  } catch (error) {
+    console.error('Signup error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.post('/auth/signout', (req, res) => {
+  req.session.destroy(() => {
+    res.json({ success: true });
+  });
+});
+
 router.get('/auth/user', (req, res) => {
-  // Simple endpoint to check if user has a session
   res.json({ 
     authenticated: !!req.session?.userId,
-    userId: req.session?.userId || null 
+    userId: req.session?.userId || null,
+    email: req.session?.userEmail || null
   });
 });
 
