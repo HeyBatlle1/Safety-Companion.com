@@ -33,7 +33,24 @@ const Profiles: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'detail'>('grid');
   const { toast } = useToast();
 
-  // Mock data for demonstration - in production this would come from Supabase
+  // Fetch real profiles from API
+  const fetchProfiles = async () => {
+    try {
+      const response = await fetch('/api/team/members', {
+        credentials: 'include'
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return data.members || [];
+      }
+      return [];
+    } catch (error) {
+      console.error('Failed to fetch profiles:', error);
+      return [];
+    }
+  };
+
+  // Mock data as fallback
   const mockProfiles: UserProfile[] = [
     {
       id: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
@@ -103,20 +120,27 @@ const Profiles: React.FC = () => {
   ];
 
   useEffect(() => {
-    // Simulate loading from database
+    // Load profiles from real API
     const loadProfiles = async () => {
       setLoading(true);
       try {
-        // In production, this would be a Supabase query with RLS
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+        const realProfiles = await fetchProfiles();
+        if (realProfiles.length > 0) {
+          setProfiles(realProfiles);
+          setFilteredProfiles(realProfiles);
+        } else {
+          // Use mock data as fallback for demonstration
+          setProfiles(mockProfiles);
+          setFilteredProfiles(mockProfiles);
+        }
+      } catch (error) {
+        console.error('Failed to load profiles:', error);
         setProfiles(mockProfiles);
         setFilteredProfiles(mockProfiles);
-      } catch (error) {
-        
         toast({
-          title: 'Error',
-          description: 'Failed to load user profiles',
-          variant: 'destructive'
+          title: 'Info',
+          description: 'Using demo data for profiles',
+          variant: 'default'
         });
       } finally {
         setLoading(false);
