@@ -61,9 +61,9 @@ export class PatternAnalysisService {
 
     try {
       const result = await this.model.generateContent({
-        contents: prompt,
+        contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
-          temperature: 0.2, // Low temperature for consistent analysis
+          temperature: 0.2,
           topK: 1,
           topP: 0.8,
           maxOutputTokens: 2000,
@@ -257,10 +257,7 @@ Base all analysis on actual data patterns, not assumptions.
    */
   async generateExecutiveSummary(patternAnalysis: PatternAnalysisResult): Promise<string> {
     try {
-      const result = await this.model.generateContent([{
-        role: "user",
-        parts: [{
-          text: `Create an executive summary for insurance and safety executives based on this safety pattern analysis:
+      const summaryPrompt = `Create an executive summary for insurance and safety executives based on this safety pattern analysis:
 
 Risk Score: ${patternAnalysis.riskMetrics.avgRiskScore}/100
 Compliance Score: ${patternAnalysis.riskMetrics.complianceScore}%
@@ -270,9 +267,15 @@ Premium Risk Factor: ${patternAnalysis.actuarialData.premiumRiskFactor}x
 
 Key Patterns: ${patternAnalysis.keyPatterns.riskTrends.join(', ')}
 
-Create a concise executive summary covering key findings, financial impact, and recommendations.`
-        }]
-      }]);
+Create a concise executive summary covering key findings, financial impact, and recommendations.`;
+
+      const result = await this.model.generateContent({
+        contents: [{ parts: [{ text: summaryPrompt }] }],
+        generationConfig: {
+          temperature: 0.3,
+          maxOutputTokens: 800
+        }
+      });
 
       return result.response.text();
     } catch (error) {
