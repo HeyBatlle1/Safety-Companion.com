@@ -22,123 +22,13 @@ const requireAuth = (req: any, res: any, next: any) => {
   next();
 };
 
-// User authentication routes
-router.post('/auth/signup', async (req, res) => {
-  try {
-    const validatedData = insertUserSchema.parse(req.body);
-    
-    // Check if user already exists
-    const existingUser = await storage.getUserByEmail(validatedData.email);
-    if (existingUser) {
-      return res.status(400).json({ error: 'User already exists' });
-    }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(validatedData.password, 12);
-    
-    // Create user
-    const user = await storage.createUser({
-      ...validatedData,
-      password: hashedPassword,
-    });
-
-    // Create session
-    req.session.userId = user.id;
-    req.session.userRole = user.role;
-
-    res.status(201).json({ 
-      user: { 
-        id: user.id, 
-        email: user.email, 
-        role: user.role,
-        isActive: user.isActive 
-      } 
-    });
-  } catch (error) {
-    console.error('Signup error:', error);
-    res.status(400).json({ error: 'Invalid signup data' });
-  }
-});
-
-router.post('/auth/signin', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password required' });
-    }
-
-    const user = await storage.getUserByEmail(email);
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    // Check if account is locked
-    if (user.accountLockedUntil && user.accountLockedUntil > new Date()) {
-      return res.status(423).json({ error: 'Account locked. Try again later.' });
-    }
-
-    const isValidPassword = await bcrypt.compare(password, user.password);
-    if (!isValidPassword) {
-      // Increment login attempts
-      const attempts = (user.failedLoginAttempts || 0) + 1;
-      const lockUntil = attempts >= 5 ? new Date(Date.now() + 30 * 60 * 1000) : undefined; // 30 minutes
-      
-      await storage.updateUserLoginAttempts(user.id, attempts, lockUntil);
-      
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    // Reset login attempts and update last login
-    await storage.updateUserLoginAttempts(user.id, 0);
-    await storage.updateUser(user.id, { 
-      lastLoginAt: new Date(),
-      loginCount: (user.loginCount || 0) + 1 
-    });
-
-    // Create session
-    req.session.userId = user.id;
-    req.session.userRole = user.role;
-
-    res.json({ 
-      user: { 
-        id: user.id, 
-        email: user.email, 
-        role: user.role,
-        isActive: user.isActive 
-      } 
-    });
-  } catch (error) {
-    console.error('Signin error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-router.post('/auth/signout', (req, res) => {
-  req.session.destroy(() => {
-    res.json({ success: true });
+// Auth routes - using Supabase directly from frontend
+router.get('/auth/user', (req, res) => {
+  // Simple endpoint to check if user has a session
+  res.json({ 
+    authenticated: !!req.session?.userId,
+    userId: req.session?.userId || null 
   });
-});
-
-router.get('/auth/me', requireAuth, async (req, res) => {
-  try {
-    const user = await storage.getUserById(req.session.userId);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    res.json({ 
-      user: { 
-        id: user.id, 
-        email: user.email, 
-        role: user.role,
-        isActive: user.isActive 
-      } 
-    });
-  } catch (error) {
-    console.error('Get user error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
 });
 
 // User profile routes
