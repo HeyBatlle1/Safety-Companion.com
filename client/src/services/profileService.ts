@@ -101,7 +101,7 @@ export const getUserCertifications = async (): Promise<UserCertification[]> => {
 // Notification Preferences
 export const getNotificationPreferences = async (): Promise<NotificationPreferences | null> => {
   try {
-    const data = await apiRequest('/users/notifications');
+    const data = await apiRequest('/users/notification-preferences');
     return data;
   } catch (error) {
     console.error('Error fetching notification preferences:', error);
@@ -124,7 +124,7 @@ export const getNotificationPreferences = async (): Promise<NotificationPreferen
 
 export const updateNotificationPreferences = async (updates: Partial<NotificationPreferences>): Promise<NotificationPreferences | null> => {
   try {
-    const data = await apiRequest('/users/notifications', {
+    const data = await apiRequest('/users/notification-preferences', {
       method: 'PATCH',
       body: JSON.stringify(updates),
     });
