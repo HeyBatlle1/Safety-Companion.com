@@ -135,26 +135,6 @@ const Home = () => {
           </motion.div>
         </motion.div>
 
-        {/* Call to Action */}
-        <motion.div
-          className="text-center"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 1.2 }}
-        >
-          <motion.button
-            onClick={() => window.location.href = '/checklists'}
-            className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-3 rounded-full font-semibold"
-            whileHover={{ 
-              scale: 1.05,
-              boxShadow: "0 10px 30px rgba(59, 130, 246, 0.5)"
-            }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Shield className="w-5 h-5" />
-            <span>Start Safety Check</span>
-          </motion.button>
-        </motion.div>
       </motion.div>
     </div>
   );
