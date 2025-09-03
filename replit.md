@@ -14,7 +14,7 @@ Database Health Monitoring: Available in Profile > Database tab with detailed co
 Security: Enterprise-grade RLS policies, audit trails, secure file uploads with virus scanning
 Profile System: Tabbed interface with personal info, certifications, safety records, and preferences
 Database Setup: Optimized migration order (tables→RLS→indexes→triggers) with comprehensive testing
-Performance: Strategic indexes for 175+ employee scale with sub-100ms query targets
+Performance: Strategic indexes optimized for mid-sized construction operations with sub-100ms query targets
 Security Testing: Comprehensive RLS policy validation with role isolation verification
 Migration Status: Comprehensive Supabase cleanup completed - removed 20+ outdated migrations, preserved existing data, created safe user_profiles setup
 Authentication Status: Production-ready authentication system with sessionStorage persistence, role-based signup (field_worker, supervisor, project_manager, safety_manager, admin), and eliminated loading loops

@@ -157,7 +157,7 @@ const Profiles: React.FC = () => {
                 Enterprise Team Management
               </h1>
               <p className="text-gray-300 mt-2 text-lg">
-                Secure workforce management for 175+ construction professionals
+                Intelligent workforce management that scales with your construction operation
               </p>
               <div className="flex items-center space-x-4 mt-2 text-sm text-gray-400">
                 <div className="flex items-center">

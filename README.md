@@ -80,7 +80,7 @@ Role: Project Manager
 ### Backend Architecture
 - **Node.js + Express** with TypeScript for full-stack type safety
 - **Drizzle ORM** for type-safe database operations and migrations
-- **PostgreSQL** with advanced indexing for 175+ employee scale
+- **PostgreSQL** with advanced indexing optimized for scalable construction operations
 - **Session-based Authentication** with PostgreSQL session storage
 - **Google Gemini AI** integration for intelligent safety analysis
 
@@ -192,7 +192,7 @@ LOG_LEVEL=info
 
 ### ✅ Database & Performance
 - **Schema Optimization** - Added insurance analytics columns to analysis_history table
-- **Strategic Indexing** - Performance optimization for 175+ employee scale
+- **Strategic Indexing** - Performance optimization for mid-sized construction operations
 - **Data Integrity** - Comprehensive validation and error handling
 - **Real-time Analytics** - Sub-100ms query response times
 
@@ -236,4 +236,4 @@ For technical support, deployment assistance, or feature requests, please contac
 
 ---
 
-**Built for construction companies with 175+ employees seeking competitive advantage through comprehensive safety management, AI-powered risk analysis, and insurance optimization.**
+**Built for mid-sized construction professionals seeking competitive advantage through comprehensive safety management, AI-powered risk analysis, and insurance optimization that scales up or down with your operation.**

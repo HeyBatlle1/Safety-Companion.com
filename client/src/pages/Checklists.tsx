@@ -30,7 +30,7 @@ const Checklists: React.FC = () => {
           </div>
           <p className="text-gray-300 text-lg max-w-2xl mx-auto">
             Enterprise-grade safety management system integrated with AI analysis and railway operations. 
-            Designed for 175+ employees with tablet-optimized professional components.
+            Built for mid-sized construction professionals with tablet-optimized components that scale up or down.
           </p>
         </motion.div>
 
@@ -69,7 +69,7 @@ const Checklists: React.FC = () => {
             </div>
             <div>
               <h3 className="font-semibold text-cyan-400 mb-2">Real-time Sync</h3>
-              <p className="text-sm">Instant synchronization across all 175+ employees with offline capability for field work.</p>
+              <p className="text-sm">Instant synchronization across your entire workforce with offline capability for field work.</p>
             </div>
           </div>
         </motion.div>
