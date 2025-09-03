@@ -19,15 +19,23 @@ interface ChecklistSelectorProps {
   onChecklistClick: (templateId: string) => void;
 }
 
-// First 6 priority checklists for railway & AI integration
+// Master JHA - Consolidated checklist with weather integration
 const primaryTemplates: Template[] = [
   {
-    id: 'safety-assessment',
-    title: 'Site Safety Assessment',
+    id: 'master-jha',
+    title: 'Master Job Hazard Analysis (JHA)',
     icon: ChecklistBuilding,
-    description: 'AI-powered comprehensive site evaluation with intelligent risk scoring',
-    color: 'from-blue-600 to-cyan-600',
-    iconColor: '#38BDF8'
+    description: 'Comprehensive OSHA-compliant safety analysis with automatic weather integration',
+    color: 'from-gradient-to-r from-blue-600 via-purple-600 to-cyan-600',
+    iconColor: '#8B5CF6'
+  },
+  {
+    id: 'safety-assessment',
+    title: '(BACKUP) Site Safety Assessment',
+    icon: ChecklistBuilding,
+    description: 'Original checklist - backup version',
+    color: 'from-gray-600 to-gray-700',
+    iconColor: '#6B7280'
   },
   {
     id: 'fall-protection',
