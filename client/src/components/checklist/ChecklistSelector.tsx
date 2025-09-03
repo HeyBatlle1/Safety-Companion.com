@@ -17,7 +17,7 @@ interface ChecklistSelectorProps {
   onChecklistClick: (templateId: string) => void;
 }
 
-// Clean, professional checklist templates - no backup trash
+// Master JHA - Consolidated checklist with weather integration
 const primaryTemplates: Template[] = [
   {
     id: 'master-jha',
@@ -28,12 +28,12 @@ const primaryTemplates: Template[] = [
     iconColor: '#1E40AF'
   },
   {
-    id: 'electrical-safety',
-    title: 'Electrical Safety Audit',
+    id: 'safety-assessment',
+    title: 'Site Safety Assessment',
     icon: ChecklistBuilding,
-    description: 'High-voltage and electrical systems hazard assessment',
-    color: 'from-slate-800 to-slate-900',
-    iconColor: '#1E40AF'
+    description: 'Complete evaluation of workplace hazards and safety protocols',
+    color: 'from-slate-700 to-slate-800',
+    iconColor: '#374151'
   },
   {
     id: 'fall-protection',
@@ -42,6 +42,65 @@ const primaryTemplates: Template[] = [
     description: 'Critical height work safety with OSHA compliance tracking',
     color: 'from-slate-700 to-slate-800',
     iconColor: '#374151'
+  },
+  {
+    id: 'electrical-safety',
+    title: 'Electrical Safety Audit',
+    icon: ChecklistBuilding,
+    description: 'High-voltage and electrical systems hazard assessment',
+    color: 'from-slate-800 to-slate-900',
+    iconColor: '#1E40AF'
+  },
+  {
+    id: 'hazard-communication',
+    title: 'HazCom & Chemical Safety',
+    icon: ChecklistBuilding,
+    description: 'Material safety with AI chemical analysis integration',
+    color: 'from-slate-700 to-slate-800',
+    iconColor: '#374151'
+  },
+  {
+    id: 'emergency-action',
+    title: 'Emergency Action Plan',
+    icon: ChecklistBuilding,
+    description: 'Critical incident protocols with automated alerts',
+    color: 'from-slate-800 to-slate-900',
+    iconColor: '#1E40AF'
+  }
+];
+
+const secondaryTemplates: Template[] = [
+  {
+    id: 'scaffold-safety',
+    title: 'Scaffold Safety',
+    icon: ChecklistBuilding,
+    description: 'Scaffold setup and inspection protocols',
+    color: 'from-slate-600 to-slate-700',
+    iconColor: '#4B5563'
+  },
+  {
+    id: 'respiratory-protection',
+    title: 'Respiratory Protection',
+    icon: ChecklistBuilding,
+    description: 'Breathing apparatus and air quality checks',
+    color: 'from-slate-600 to-slate-700',
+    iconColor: '#4B5563'
+  },
+  {
+    id: 'ladder-safety',
+    title: 'Ladder Safety',
+    icon: ChecklistBuilding,
+    description: 'Ladder inspection and usage protocols',
+    color: 'from-slate-600 to-slate-700',
+    iconColor: '#4B5563'
+  },
+  {
+    id: 'confined-space',
+    title: 'Confined Space Entry',
+    icon: ChecklistBuilding,
+    description: 'Confined space procedures and permits',
+    color: 'from-slate-600 to-slate-700',
+    iconColor: '#4B5563'
   }
 ];
 
@@ -67,43 +126,80 @@ const ChecklistSelector: React.FC<ChecklistSelectorProps> = ({ onChecklistClick 
         </p>
       </motion.div>
 
-      {/* Clean checklist grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {primaryTemplates.map((template, index) => (
-          <motion.div
-            key={template.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            whileHover={{ scale: 1.02, y: -3 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => onChecklistClick(template.id)}
-            className="relative group cursor-pointer"
-          >
-            <div className="relative p-6 rounded-lg bg-slate-200 dark:bg-slate-700 backdrop-blur-sm border-2 border-slate-400 dark:border-slate-500 group-hover:border-blue-400 dark:group-hover:border-blue-400 transition-all duration-300 shadow-lg group-hover:shadow-xl">
-              <div className="flex items-start space-x-4">
-                <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/50 border border-blue-200/50 dark:border-blue-800/50 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/60 transition-all duration-300 flex items-center justify-center">
-                  <ChecklistBuilding delay={index * 0.1} color={template.iconColor} />
+      {/* Priority Checklists - First 6 */}
+      <div className="mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {primaryTemplates.map((template, index) => (
+            <motion.div
+              key={template.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              whileHover={{ scale: 1.02, y: -3 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => onChecklistClick(template.id)}
+              className="relative group cursor-pointer"
+            >
+              <div className="relative p-6 rounded-lg bg-slate-200 dark:bg-slate-700 backdrop-blur-sm border-2 border-slate-400 dark:border-slate-500 group-hover:border-blue-400 dark:group-hover:border-blue-400 transition-all duration-300 shadow-lg group-hover:shadow-xl">
+                <div className="flex items-start space-x-4">
+                  <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/50 border border-blue-200/50 dark:border-blue-800/50 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/60 transition-all duration-300 flex items-center justify-center">
+                    <ChecklistBuilding delay={index * 0.1} color={template.iconColor} />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-2 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
+                      {template.title}
+                    </h3>
+                    <p className="text-sm text-slate-700 dark:text-slate-200 group-hover:text-slate-800 dark:group-hover:text-slate-100 transition-colors leading-relaxed">
+                      {template.description}
+                    </p>
+                    <div className="mt-4 flex items-center space-x-2">
+                      <Badge className="bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 border-blue-200/50 dark:border-blue-800/50 text-xs font-medium">AI Analysis</Badge>
+                      <Badge className="bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-300 border-green-200/50 dark:border-green-800/50 text-xs font-medium">Submit</Badge>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-2 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
-                    {template.title}
-                  </h3>
-                  <p className="text-sm text-slate-700 dark:text-slate-200 group-hover:text-slate-800 dark:group-hover:text-slate-100 transition-colors leading-relaxed">
-                    {template.description}
-                  </p>
-                  <div className="mt-4 flex items-center space-x-2">
-                    <Badge className="bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 border-blue-200/50 dark:border-blue-800/50 text-xs font-medium">AI Analysis</Badge>
-                    <Badge className="bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-300 border-green-200/50 dark:border-green-800/50 text-xs font-medium">Submit</Badge>
+                
+                {/* Professional accent line */}
+                <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      {/* Secondary Checklists */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-400 mb-4 text-center">Additional Safety Checklists</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {secondaryTemplates.map((template, index) => (
+            <motion.div
+              key={template.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 + index * 0.05 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => onChecklistClick(template.id)}
+              className="relative group cursor-pointer"
+            >
+              <div className="relative p-4 rounded-lg bg-slate-200 dark:bg-slate-600 backdrop-blur-sm border-2 border-slate-400 dark:border-slate-500 group-hover:border-slate-500 dark:group-hover:border-slate-400 transition-all duration-300 shadow-md group-hover:shadow-lg">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 rounded-lg bg-gray-50 dark:bg-slate-700/50 border border-gray-200/50 dark:border-slate-600/50 group-hover:bg-gray-100 dark:group-hover:bg-slate-600/60 transition-all duration-300 flex items-center justify-center">
+                    <ChecklistBuilding delay={0.6 + index * 0.05} color={template.iconColor} />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-medium text-slate-800 dark:text-slate-100 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
+                      {template.title}
+                    </h3>
+                    <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+                      {template.description}
+                    </p>
                   </div>
                 </div>
               </div>
-              
-              {/* Professional accent line */}
-              <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          ))}
+        </div>
       </div>
     </div>
   );
