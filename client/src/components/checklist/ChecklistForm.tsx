@@ -60,7 +60,7 @@ const ChecklistForm = () => {
   const [aiResponse, setAiResponse] = useState<string | null>(null);
   const [riskProfile, setRiskProfile] = useState<RiskProfile | null>(null);
   const [safetyAnalysis, setSafetyAnalysis] = useState<SafetyAnalysis | null>(null);
-  const [analysisMode, setAnalysisMode] = useState<'standard' | 'intelligent'>('intelligent');
+  const [analysisMode] = useState<'standard'>('standard');
   const [uploadingBlueprints, setUploadingBlueprints] = useState<Record<string, boolean>>({});
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -221,7 +221,25 @@ const ChecklistForm = () => {
         }))
       };
 
-      if (analysisMode === 'intelligent') {
+      // Use Master JHA weather-enabled analysis for all checklists
+      if (templateId === 'master-jha') {
+        // Master JHA route with weather integration
+        const response = await fetch('/api/checklist-analysis', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(checklistData)
+        });
+
+        if (!response.ok) {
+          throw new Error('Analysis failed');
+        }
+
+        const analysisResult = await response.text();
+        setAiResponse(analysisResult);
+        showToast('Weather-integrated Master JHA analysis completed!', 'success');
+      } else {
         // Collect all blueprints and images for multi-modal analysis
         const allBlueprints: BlueprintUpload[] = [];
         const allImages: string[] = [];
@@ -1207,35 +1225,6 @@ Progress: ${Math.round(calculateProgress())}% complete
           </motion.div>
         ))}
 
-        {/* Analysis Mode Toggle */}
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between p-4 bg-slate-800/60 rounded-xl border border-blue-500/20 mb-6"
-        >
-          <div className="flex items-center space-x-3">
-            <Sparkles className="w-5 h-5 text-cyan-400" />
-            <span className="text-white font-medium">Analysis Mode:</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => setAnalysisMode(analysisMode === 'standard' ? 'intelligent' : 'standard')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-              analysisMode === 'intelligent'
-                ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg'
-                : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'
-            }`}
-          >
-            {analysisMode === 'intelligent' ? (
-              <>
-                <Sparkles className="w-4 h-4 inline mr-2" />
-                Intelligent Analysis (OSHA Data)
-              </>
-            ) : (
-              'Standard Analysis'
-            )}
-          </button>
-        </motion.div>
 
         {/* Submit Button */}
         <motion.button
@@ -1252,223 +1241,16 @@ Progress: ${Math.round(calculateProgress())}% complete
           ) : (
             <>
               <Send className="w-6 h-6" />
-              <span>
-                {analysisMode === 'intelligent' ? 'Smart AI Analysis with OSHA Data' : 'Submit for AI Analysis'}
-              </span>
+              <span>Submit for AI Analysis</span>
               <Sparkles className="w-5 h-5 animate-pulse" />
             </>
           )}
         </motion.button>
 
-        {/* OSHA Risk Profile Display */}
-        {riskProfile && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-8 bg-gradient-to-r from-slate-800/80 to-slate-700/80 backdrop-blur-sm rounded-2xl p-6 border border-blue-500/20 shadow-2xl"
-          >
-            <div className="flex items-center mb-4">
-              <FileText className="w-6 h-6 text-cyan-400 mr-3" />
-              <h3 className="text-xl font-bold text-white">OSHA Industry Risk Profile</h3>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <div className="bg-blue-500/10 rounded-xl p-4 border border-blue-500/20">
-                <div className="text-sm text-gray-300 mb-1">Industry</div>
-                <div className="text-lg font-semibold text-white">{riskProfile.industry}</div>
-              </div>
-              <div className="bg-orange-500/10 rounded-xl p-4 border border-orange-500/20">
-                <div className="text-sm text-gray-300 mb-1">Injury Rate</div>
-                <div className="text-lg font-semibold text-orange-300">{riskProfile.injury_rate}/100 workers</div>
-              </div>
-              <div className="bg-red-500/10 rounded-xl p-4 border border-red-500/20">
-                <div className="text-sm text-gray-300 mb-1">2023 Fatalities</div>
-                <div className="text-lg font-semibold text-red-300">{riskProfile.fatalities_2023}</div>
-              </div>
-              <div className={`${
-                riskProfile.risk_category === 'CRITICAL' ? 'bg-red-500/10 border-red-500/20' :
-                riskProfile.risk_category === 'HIGH' ? 'bg-orange-500/10 border-orange-500/20' :
-                'bg-yellow-500/10 border-yellow-500/20'
-              } rounded-xl p-4 border`}>
-                <div className="text-sm text-gray-300 mb-1">Risk Category</div>
-                <div className={`text-lg font-semibold ${
-                  riskProfile.risk_category === 'CRITICAL' ? 'text-red-300' :
-                  riskProfile.risk_category === 'HIGH' ? 'text-orange-300' :
-                  'text-yellow-300'
-                }`}>
-                  {riskProfile.risk_category}
-                </div>
-              </div>
-            </div>
 
-            {riskProfile.recommendations.length > 0 && (
-              <div>
-                <h4 className="font-semibold text-cyan-400 mb-3">Industry-Specific Recommendations:</h4>
-                <ul className="space-y-2">
-                  {riskProfile.recommendations.map((rec, idx) => (
-                    <li key={idx} className="flex items-start space-x-2">
-                      <div className="w-2 h-2 bg-cyan-400 rounded-full mt-2 flex-shrink-0"></div>
-                      <span className="text-gray-300 text-sm">{rec}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </motion.div>
-        )}
-
-        {/* Intelligent Analysis Results */}
-        {safetyAnalysis && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-8 bg-gradient-to-r from-slate-800/80 to-slate-700/80 backdrop-blur-sm rounded-2xl p-6 border border-blue-500/20 shadow-2xl"
-          >
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center">
-                <Sparkles className="w-6 h-6 text-cyan-400 mr-3 animate-pulse" />
-                <h3 className="text-xl font-bold text-white">Professional Safety Report</h3>
-              </div>
-              <div className="flex space-x-2">
-                <button
-                  onClick={shareReport}
-                  className="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded-lg transition-colors duration-200 flex items-center space-x-2 text-sm"
-                >
-                  <Share2 className="w-4 h-4" />
-                  <span>Share</span>
-                </button>
-                <button
-                  onClick={emailReport}
-                  className="px-3 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-300 rounded-lg transition-colors duration-200 flex items-center space-x-2 text-sm"
-                >
-                  <Send className="w-4 h-4" />
-                  <span>Email</span>
-                </button>
-                <button
-                  onClick={saveReportToDatabase}
-                  className="px-3 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 rounded-lg transition-colors duration-200 flex items-center space-x-2 text-sm"
-                >
-                  <Save className="w-4 h-4" />
-                  <span>Save</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div className="flex items-center space-x-3 p-4 bg-slate-700/50 rounded-xl">
-                {getComplianceIcon(safetyAnalysis.compliance_status)}
-                <div>
-                  <div className="text-sm text-gray-300">Compliance Status</div>
-                  <div className="font-semibold text-white">
-                    {safetyAnalysis.compliance_status.replace('_', ' ').toUpperCase()}
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3 p-4 bg-slate-700/50 rounded-xl">
-                <AlertTriangle className={`w-5 h-5 ${getRiskColor(safetyAnalysis.risk_level)}`} />
-                <div>
-                  <div className="text-sm text-gray-300">Risk Level</div>
-                  <div className={`font-semibold ${getRiskColor(safetyAnalysis.risk_level)}`}>
-                    {safetyAnalysis.risk_level.toUpperCase()}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {safetyAnalysis.specific_violations.length > 0 && (
-              <div className="mb-6 p-4 bg-red-500/10 rounded-xl border border-red-500/20">
-                <h4 className="font-semibold text-red-300 mb-3 flex items-center">
-                  <XCircle className="w-5 h-5 mr-2" />
-                  OSHA Violations Identified:
-                </h4>
-                <ul className="space-y-2">
-                  {safetyAnalysis.specific_violations.map((violation, idx) => (
-                    <li key={idx} className="flex items-start space-x-2">
-                      <div className="w-2 h-2 bg-red-400 rounded-full mt-2 flex-shrink-0"></div>
-                      <span className="text-red-200 text-sm">{violation}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {safetyAnalysis.immediate_hazards.length > 0 && (
-              <div className="mb-6 p-4 bg-orange-500/10 rounded-xl border border-orange-500/20">
-                <h4 className="font-semibold text-orange-300 mb-3 flex items-center">
-                  <AlertTriangle className="w-5 h-5 mr-2" />
-                  Immediate Hazards:
-                </h4>
-                <ul className="space-y-2">
-                  {safetyAnalysis.immediate_hazards.map((hazard, idx) => (
-                    <li key={idx} className="flex items-start space-x-2">
-                      <div className="w-2 h-2 bg-orange-400 rounded-full mt-2 flex-shrink-0"></div>
-                      <span className="text-orange-200 text-sm">{hazard}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            <div className="mb-6">
-              <h4 className="font-semibold text-blue-300 mb-4 flex items-center">
-                <CheckCircle className="w-5 h-5 mr-2" />
-                Required Corrective Actions:
-              </h4>
-              <div className="space-y-3">
-                {safetyAnalysis.corrective_actions.map((action, idx) => (
-                  <div key={idx} className="p-4 bg-slate-700/50 rounded-xl border-l-4 border-blue-400">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="font-medium text-white text-sm">{action.action}</span>
-                      <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                        action.priority === 'immediate' ? 'bg-red-500/20 text-red-300' :
-                        action.priority === 'high' ? 'bg-orange-500/20 text-orange-300' :
-                        'bg-yellow-500/20 text-yellow-300'
-                      }`}>
-                        {action.priority.toUpperCase()}
-                      </span>
-                    </div>
-                    <div className="text-xs text-gray-400">
-                      <span className="font-medium">{action.osha_standard}</span> • {action.implementation_timeframe}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {safetyAnalysis.additional_recommendations.length > 0 && (
-                <div className="p-4 bg-green-500/10 rounded-xl border border-green-500/20">
-                  <h4 className="font-semibold text-green-300 mb-3">Additional Recommendations:</h4>
-                  <ul className="space-y-2">
-                    {safetyAnalysis.additional_recommendations.map((rec, idx) => (
-                      <li key={idx} className="flex items-start space-x-2">
-                        <div className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0"></div>
-                        <span className="text-green-200 text-sm">{rec}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {safetyAnalysis.insurance_risk_factors.length > 0 && (
-                <div className="p-4 bg-purple-500/10 rounded-xl border border-purple-500/20">
-                  <h4 className="font-semibold text-purple-300 mb-3">Insurance Risk Factors:</h4>
-                  <ul className="space-y-2">
-                    {safetyAnalysis.insurance_risk_factors.map((factor, idx) => (
-                      <li key={idx} className="flex items-start space-x-2">
-                        <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 flex-shrink-0"></div>
-                        <span className="text-purple-200 text-sm">{factor}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-
-        {/* Standard AI Response */}
-        {aiResponse && !safetyAnalysis && (
+        {/* AI Analysis Response */}
+        {aiResponse && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
