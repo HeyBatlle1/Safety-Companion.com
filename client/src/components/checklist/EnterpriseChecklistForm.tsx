@@ -469,14 +469,17 @@ export default function EnterpriseChecklistForm() {
 
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Additional Hazard Notes
+                  Additional Hazard Notes & Weather Data
                 </label>
                 <Textarea
-                  placeholder="Describe any additional hazards or concerns..."
-                  rows={4}
+                  placeholder="Describe any additional hazards or concerns...&#10;&#10;💡 WEATHER DATA: Copy weather report from Weather Center and paste here for AI analysis&#10;Example: Temperature: 78°F, Humidity: 35%, Wind: 14 mph (gusts 22 mph), Pressure: 1008 hPa"
+                  rows={6}
                   value={responses.additionalNotes || ''}
                   onChange={(e) => setResponses({...responses, additionalNotes: e.target.value})}
                 />
+                <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                  ⚡ Pro Tip: Navigate to Weather Center → Copy complete weather report → Paste above for detailed safety analysis
+                </p>
               </div>
             </SafetyCard>
           </TabsContent>
