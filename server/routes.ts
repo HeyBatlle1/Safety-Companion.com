@@ -18,6 +18,7 @@ import connectPgSimple from "connect-pg-simple";
 import { pool, db } from "./db";
 import { sql } from "drizzle-orm";
 import { body, validationResult } from "express-validator";
+import checklistAnalysisRoutes from './routes/checklistAnalysis';
 import { logError } from "./utils/logger";
 import './types/session';
 import { geminiAnalytics } from "./services/geminiAnalytics";
@@ -1190,5 +1191,8 @@ Please provide a comprehensive, grounded response that helps ensure workplace sa
   });
 
   const httpServer = createServer(app);
+  // Add checklist analysis routes with weather integration
+  app.use('/api', checklistAnalysisRoutes);
+
   return httpServer;
 }
