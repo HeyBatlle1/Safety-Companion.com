@@ -39,43 +39,43 @@ const primaryTemplates: Template[] = [
   },
   {
     id: 'fall-protection',
-    title: 'Fall Protection Systems',
+    title: '(BACKUP) Fall Protection Systems',
     icon: ChecklistBuilding,
     description: 'Critical height work safety with OSHA compliance tracking',
-    color: 'from-red-500 to-orange-500',
-    iconColor: '#EF4444'
+    color: 'from-gray-600 to-gray-700',
+    iconColor: '#6B7280'
   },
   {
     id: 'electrical-safety',
-    title: 'Electrical Safety Audit',
+    title: '(BACKUP) Electrical Safety Audit',
     icon: ChecklistBuilding,
     description: 'High-voltage and electrical systems hazard assessment',
-    color: 'from-yellow-500 to-amber-500',
-    iconColor: '#EAB308'
+    color: 'from-blue-600 via-purple-600 to-cyan-600',
+    iconColor: '#8B5CF6'
   },
   {
     id: 'hazard-communication',
-    title: 'HazCom & Chemical Safety',
+    title: '(BACKUP) HazCom & Chemical Safety',
     icon: ChecklistBuilding,
     description: 'Material safety with AI chemical analysis integration',
-    color: 'from-purple-500 to-pink-500',
-    iconColor: '#A855F7'
+    color: 'from-gray-600 to-gray-700',
+    iconColor: '#6B7280'
   },
   {
     id: 'emergency-action',
-    title: 'Emergency Action Plan',
+    title: '(BACKUP) Emergency Action Plan',
     icon: ChecklistBuilding,
     description: 'Critical incident protocols with automated alerts',
-    color: 'from-green-500 to-emerald-500',
-    iconColor: '#22C55E'
+    color: 'from-blue-600 via-purple-600 to-cyan-600',
+    iconColor: '#8B5CF6'
   },
   {
     id: 'ppe',
-    title: 'PPE Compliance Check',
+    title: '(BACKUP) PPE Compliance Check',
     icon: ChecklistBuilding,
     description: 'Personal protective equipment verification system',
-    color: 'from-indigo-500 to-blue-500',
-    iconColor: '#6366F1'
+    color: 'from-gray-600 to-gray-700',
+    iconColor: '#6B7280'
   }
 ];
 
@@ -148,8 +148,9 @@ const ChecklistSelector: React.FC<ChecklistSelectorProps> = ({ onChecklistClick 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              whileHover={{ scale: 1.02, y: -4 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{ scale: 1.01, y: -2 }}
+              whileTap={{ scale: 0.99 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
               onClick={() => onChecklistClick(template.id)}
               className="relative group cursor-pointer"
             >

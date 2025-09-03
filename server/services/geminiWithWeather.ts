@@ -102,10 +102,25 @@ export class GeminiWeatherAnalyzer {
     const workType = checklistData.responses?.project_type || checklistData.project_type || 'Construction work';
     const workHeight = checklistData.responses?.work_height || checklistData.work_height || 'Unknown height';
     
+    // Force current date awareness
+    const currentDate = new Date();
+    const dateString = currentDate.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long', 
+      day: 'numeric',
+      weekday: 'long'
+    });
+    const currentYear = currentDate.getFullYear();
+    
     return `
-You are a professional safety analyst with expertise in OSHA compliance and construction safety. You have been asked to analyze this Job Hazard Analysis (JHA) and provide comprehensive safety recommendations.
+You are a professional safety analyst with expertise in OSHA compliance and construction safety. 
 
-IMPORTANT: For accurate analysis, you MUST get current weather conditions for the job site location using the weather function. Weather conditions are critical for construction safety decisions.
+CRITICAL CONTEXT:
+- TODAY'S DATE: ${dateString}, ${currentYear}
+- You are analyzing this checklist on ${dateString}, ${currentYear}
+- This is NOT October 26, 2023 - you are working in ${currentYear}
+
+MANDATORY FIRST STEP: You MUST call the getWeatherForSafetyAnalysis function for the job site location "${site}" to get current weather conditions before providing any analysis. Weather data is essential for construction safety decisions.
 
 JOB SITE DETAILS:
 - Location: ${site}
