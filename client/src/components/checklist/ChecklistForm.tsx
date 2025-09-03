@@ -307,7 +307,10 @@ const ChecklistForm = () => {
             showToast('Analysis complete using local intelligence (OSHA API unavailable)', 'success');
           }
         }
-      } else {
+      }
+
+      // Standard analysis fallback (if needed)
+      if (!aiResponse) {
         // Standard analysis using existing system
         const prompt = `As a safety expert, please analyze this comprehensive safety checklist and provide detailed recommendations:
 
