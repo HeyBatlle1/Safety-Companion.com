@@ -160,10 +160,10 @@ const ChecklistSelector: React.FC<ChecklistSelectorProps> = ({ onChecklistClick 
                     <ChecklistBuilding delay={index * 0.1} color={template.iconColor} />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
+                    <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-2 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
                       {template.title}
                     </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors leading-relaxed">
+                    <p className="text-sm text-slate-700 dark:text-slate-200 group-hover:text-slate-800 dark:group-hover:text-slate-100 transition-colors leading-relaxed">
                       {template.description}
                     </p>
                     <div className="mt-4 flex items-center space-x-2">
@@ -202,10 +202,10 @@ const ChecklistSelector: React.FC<ChecklistSelectorProps> = ({ onChecklistClick 
                     <ChecklistBuilding delay={0.6 + index * 0.05} color={template.iconColor} />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-sm font-medium text-gray-900 dark:text-gray-200 group-hover:text-gray-800 dark:group-hover:text-white transition-colors">
+                    <h3 className="text-sm font-medium text-slate-800 dark:text-slate-100 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
                       {template.title}
                     </h3>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                    <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
                       {template.description}
                     </p>
                   </div>
