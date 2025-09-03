@@ -23,7 +23,8 @@ import {
   Building2,
   Calendar,
   Camera,
-  FileText
+  FileText,
+  Cloud
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SafetyCard } from '@/components/ui/safety-card';
@@ -331,16 +332,21 @@ export default function EnterpriseChecklistForm() {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Weather Conditions
+                {/* Weather Information Section */}
+                <div className="space-y-4">
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center space-x-2">
+                    <Cloud className="h-4 w-4 text-blue-500" />
+                    <span>Weather Conditions</span>
                   </label>
+                  
+                  {/* Quick Weather Selection */}
                   <div className="space-y-2">
+                    <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Basic Weather Type</label>
                     <Select
                       value={responses.weatherCondition}
                       onValueChange={(value) => setResponses({...responses, weatherCondition: value})}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="border-2 border-gray-200 dark:border-gray-700 focus:border-blue-500 dark:focus:border-blue-400 rounded-xl">
                         <SelectValue placeholder="Select basic weather" />
                       </SelectTrigger>
                       <SelectContent>
@@ -370,15 +376,32 @@ export default function EnterpriseChecklistForm() {
                         </SelectItem>
                       </SelectContent>
                     </Select>
-                    <Input
-                      placeholder="Paste detailed weather data here or enter manually"
-                      value={responses.detailedWeather || ''}
-                      onChange={(e) => setResponses({...responses, detailedWeather: e.target.value})}
-                      className="text-sm"
-                    />
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      💡 Copy weather data from the Weather Center and paste here for detailed conditions
-                    </p>
+                  </div>
+
+                  {/* Detailed Weather Data Box */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                      📊 Detailed Weather Data (Copy from Weather Center)
+                    </label>
+                    <div className="relative">
+                      <Textarea
+                        placeholder="PASTE WEATHER DATA HERE → Go to Weather Center, copy the weather report, and paste it here for AI analysis&#10;&#10;Example:&#10;Temperature: 78°F&#10;Humidity: 35%&#10;Wind: 14 mph (gusts 22 mph)&#10;Pressure: 1008 hPa&#10;Conditions: Clear skies"
+                        value={responses.detailedWeather || ''}
+                        onChange={(e) => setResponses({...responses, detailedWeather: e.target.value})}
+                        className="min-h-[120px] text-sm border-2 border-blue-200 dark:border-blue-800 focus:border-blue-500 dark:focus:border-blue-400 rounded-xl bg-blue-50/30 dark:bg-blue-950/30 resize-none"
+                        rows={6}
+                      />
+                      <div className="absolute top-2 right-2">
+                        <div className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-md font-medium">
+                          Weather Center → Copy → Paste Here
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                      <p className="text-xs text-blue-700 dark:text-blue-300 font-medium">
+                        ⚡ Pro Tip: Navigate to Weather Center → Copy the complete weather report → Paste above for detailed AI safety analysis
+                      </p>
+                    </div>
                   </div>
                 </div>
 
