@@ -38,25 +38,26 @@ interface AdminMetrics {
 }
 
 const EnhancedAdminDashboard: React.FC = () => {
-  // Mock metrics for demonstration
-  const metrics: AdminMetrics = {
-    totalEmployees: 175,
-    activeProjects: 12,
-    safetyScore: 94.2,
-    incidentRate: 0.8,
-    trainingCompliance: 87,
+  // Real metrics will be loaded from API
+  const [metrics, setMetrics] = React.useState<AdminMetrics>({
+    totalEmployees: 0,
+    activeProjects: 0,
+    safetyScore: 0,
+    incidentRate: 0,
+    trainingCompliance: 0,
     certificationStatus: {
-      current: 156,
-      expiringSoon: 12,
-      expired: 7
+      current: 0,
+      expiringSoon: 0,
+      expired: 0
     },
-    budgetUtilization: 78,
-    recentIncidents: [
-      { id: '1', date: '2025-01-02', severity: 'low', location: 'Site A', status: 'resolved' },
-      { id: '2', date: '2025-01-01', severity: 'medium', location: 'Site B', status: 'investigating' },
-      { id: '3', date: '2024-12-30', severity: 'high', location: 'Site C', status: 'open' }
-    ]
-  };
+    budgetUtilization: 0,
+    recentIncidents: []
+  });
+
+  React.useEffect(() => {
+    // TODO: Load real metrics from API
+    // loadAdminMetrics().then(setMetrics);
+  }, []);
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {

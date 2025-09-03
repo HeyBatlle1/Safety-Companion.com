@@ -11,7 +11,7 @@ const BottomNav = () => {
     { icon: Home, label: 'Home', path: '/' },
     { icon: Map, label: 'Maps', path: '/maps' },
     { icon: MessageCircle, label: 'Chat', path: '/chat' },
-    { icon: ClipboardCheck, label: 'Checklists', path: '/checklists' },
+    { icon: ClipboardCheck, label: 'JHA', path: '/checklists' },
     { icon: Layout, label: 'Drawings', path: '/drawings' },
 
     { icon: Clock, label: 'History', path: '/history' },

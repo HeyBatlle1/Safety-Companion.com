@@ -50,74 +50,7 @@ const Profiles: React.FC = () => {
     }
   };
 
-  // Mock data as fallback
-  const mockProfiles: UserProfile[] = [
-    {
-      id: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
-      firstName: 'Demo',
-      lastName: 'User',
-      email: 'demo@safety-companion.com',
-      phone: '+1 (555) 000-0001',
-      role: 'field_worker',
-      employeeId: 'EMP001',
-      department: 'Construction',
-      hireDate: '2024-01-15',
-      lastLogin: '2025-08-02',
-      isActive: true
-    },
-    {
-      id: '22222222-3333-4444-5555-666666666666',
-      firstName: 'Sarah',
-      lastName: 'Johnson',
-      email: 'sarah.johnson@company.com',
-      phone: '+1 (555) 000-0002',
-      role: 'safety_manager',
-      employeeId: 'EMP002',
-      department: 'Safety',
-      hireDate: '2023-03-10',
-      lastLogin: '2025-08-01',
-      isActive: true
-    },
-    {
-      id: '33333333-4444-5555-6666-777777777777',
-      firstName: 'Mike',
-      lastName: 'Rodriguez',
-      email: 'mike.rodriguez@company.com',
-      phone: '+1 (555) 000-0003',
-      role: 'project_manager',
-      employeeId: 'EMP003',
-      department: 'Project Management',
-      hireDate: '2022-08-20',
-      lastLogin: '2025-07-31',
-      isActive: true
-    },
-    {
-      id: '44444444-5555-6666-7777-888888888888',
-      firstName: 'Emily',
-      lastName: 'Chen',
-      email: 'emily.chen@company.com',
-      phone: '+1 (555) 000-0004',
-      role: 'supervisor',
-      employeeId: 'EMP004',
-      department: 'Construction',
-      hireDate: '2023-11-05',
-      lastLogin: '2025-08-02',
-      isActive: true
-    },
-    {
-      id: '55555555-6666-7777-8888-999999999999',
-      firstName: 'David',
-      lastName: 'Wilson',
-      email: 'david.wilson@company.com',
-      phone: '+1 (555) 000-0005',
-      role: 'field_worker',
-      employeeId: 'EMP005',
-      department: 'Electrical',
-      hireDate: '2024-05-12',
-      lastLogin: '2025-07-30',
-      isActive: false
-    }
-  ];
+  // No mock data - use real API data only
 
   useEffect(() => {
     // Load profiles from real API
@@ -125,22 +58,16 @@ const Profiles: React.FC = () => {
       setLoading(true);
       try {
         const realProfiles = await fetchProfiles();
-        if (realProfiles.length > 0) {
-          setProfiles(realProfiles);
-          setFilteredProfiles(realProfiles);
-        } else {
-          // Use mock data as fallback for demonstration
-          setProfiles(mockProfiles);
-          setFilteredProfiles(mockProfiles);
-        }
+        setProfiles(realProfiles);
+        setFilteredProfiles(realProfiles);
       } catch (error) {
         console.error('Failed to load profiles:', error);
-        setProfiles(mockProfiles);
-        setFilteredProfiles(mockProfiles);
+        setProfiles([]);
+        setFilteredProfiles([]);
         toast({
-          title: 'Info',
-          description: 'Using demo data for profiles',
-          variant: 'default'
+          title: 'Error',
+          description: 'Failed to load team member profiles',
+          variant: 'destructive'
         });
       } finally {
         setLoading(false);

@@ -77,8 +77,9 @@ const AdminPanel: React.FC = () => {
         
         setUsers(teamData);
         
-        // Use mock data for expiry alerts since we're only checking every 14 days
-        setExpiryAlerts(getMockExpiryAlerts());
+        // Load real certification expiry alerts from API
+        // setExpiryAlerts(await getCertificationExpiryAlerts());
+        setExpiryAlerts([]); // No mock data - implement API call
       }
     } catch (error) {
       
@@ -88,46 +89,7 @@ const AdminPanel: React.FC = () => {
     }
   };
   
-  // Mock certification expiry alerts as fallback
-  const getMockExpiryAlerts = (): CertificationExpiryAlert[] => {
-    const today = new Date();
-    
-    return [
-      {
-        id: 'alert-1',
-        user_id: 'user-1',
-        first_name: 'John',
-        last_name: 'Smith',
-        employee_id: 'EMP001',
-        certification_name: 'First Aid/CPR',
-        expiry_date: new Date(today.getTime() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        days_until_expiry: 15,
-        certification_alert_days: 30
-      },
-      {
-        id: 'alert-2',
-        user_id: 'user-2',
-        first_name: 'Jane',
-        last_name: 'Doe',
-        employee_id: 'EMP002',
-        certification_name: 'OSHA 10-Hour',
-        expiry_date: new Date(today.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        days_until_expiry: 5,
-        certification_alert_days: 30
-      },
-      {
-        id: 'alert-3',
-        user_id: 'user-3',
-        first_name: 'Mike',
-        last_name: 'Johnson',
-        employee_id: 'EMP003',
-        certification_name: 'Forklift Operation',
-        expiry_date: new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        days_until_expiry: -2,
-        certification_alert_days: 30
-      }
-    ];
-  };
+  // Certification expiry alerts will be loaded from API
 
   const handleRoleChange = async (userId: string, newRole: UserProfile['role']) => {
     try {

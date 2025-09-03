@@ -25,35 +25,8 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({ profile, isCurrentUser, onSav
     setIsEditing(false);
   };
 
-  const mockCertifications = [
-    {
-      id: 1,
-      name: 'OSHA 30-Hour Construction',
-      authority: 'OSHA',
-      issueDate: '2024-01-15',
-      expiryDate: '2027-01-15',
-      status: 'active',
-      documentUrl: '#'
-    },
-    {
-      id: 2,
-      name: 'First Aid/CPR',
-      authority: 'American Red Cross',
-      issueDate: '2023-06-10',
-      expiryDate: '2025-06-10',
-      status: 'expiring_soon',
-      documentUrl: '#'
-    },
-    {
-      id: 3,
-      name: 'Confined Space Entry',
-      authority: 'National Safety Council',
-      issueDate: '2023-03-20',
-      expiryDate: '2024-03-20',
-      status: 'expired',
-      documentUrl: '#'
-    }
-  ];
+  // Certifications will be loaded from API
+  const certifications = profile?.certifications || [];
 
   const getCertificationStatusColor = (status: string) => {
     switch (status) {
@@ -254,7 +227,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({ profile, isCurrentUser, onSav
               </div>
 
               <div className="space-y-4">
-                {mockCertifications.map((cert) => {
+                {certifications.map((cert) => {
                   const StatusIcon = getCertificationIcon(cert.status);
                   return (
                     <div
