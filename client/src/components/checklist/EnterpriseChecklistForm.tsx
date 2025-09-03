@@ -109,8 +109,13 @@ interface ChecklistResponse {
   toolboxTalkConducted?: ToggleState;
 }
 
-export default function EnterpriseChecklistForm() {
-  const { templateId } = useParams<{ templateId: string }>();
+interface EnterpriseChecklistFormProps {
+  templateId: string;
+}
+
+export default function EnterpriseChecklistForm({ templateId: propTemplateId }: EnterpriseChecklistFormProps) {
+  const { templateId: paramTemplateId } = useParams<{ templateId: string }>();
+  const templateId = propTemplateId || paramTemplateId;
   const navigate = useNavigate();
   
   const [responses, setResponses] = useState<ChecklistResponse>({
