@@ -19,12 +19,7 @@ import {
   Sun,
   CloudRain,
   Snowflake,
-  ThermometerSun,
-  Building2,
-  Calendar,
-  Camera,
-  FileText,
-  Cloud
+  ThermometerSun
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SafetyCard } from '@/components/ui/safety-card';
@@ -109,13 +104,8 @@ interface ChecklistResponse {
   toolboxTalkConducted?: ToggleState;
 }
 
-interface EnterpriseChecklistFormProps {
-  templateId: string;
-}
-
-export default function EnterpriseChecklistForm({ templateId: propTemplateId }: EnterpriseChecklistFormProps) {
-  const { templateId: paramTemplateId } = useParams<{ templateId: string }>();
-  const templateId = propTemplateId || paramTemplateId;
+export default function EnterpriseChecklistForm() {
+  const { templateId } = useParams<{ templateId: string }>();
   const navigate = useNavigate();
   
   const [responses, setResponses] = useState<ChecklistResponse>({
@@ -175,65 +165,50 @@ export default function EnterpriseChecklistForm({ templateId: propTemplateId }: 
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-slate-900 dark:to-blue-900">
-      {/* Professional Header with Enterprise Styling */}
-      <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border-b border-gray-200/80 dark:border-gray-700/80 sticky top-0 z-50 shadow-sm">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Professional Header */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            <div className="flex items-center space-x-6">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-4">
               <BackButton />
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
-                  <Building2 className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
-                    Job Hazard Analysis (JHA)
-                  </h1>
-                  <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-                    <Calendar className="w-4 h-4" />
-                    <span>{new Date().toLocaleDateString('en-US', { 
-                      weekday: 'long', 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    })}</span>
-                  </div>
-                </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                  Daily Safety Inspection
+                </h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {new Date().toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })}
+                </p>
               </div>
             </div>
             
-            <div className="flex items-center space-x-6">
-              <div className="flex items-center space-x-3 bg-gray-50 dark:bg-gray-800 px-4 py-2 rounded-xl border">
-                <div className="text-xs font-medium text-gray-500 dark:text-gray-400">COMPLETION</div>
-                <ProgressBar 
-                  value={calculateCompletion()} 
-                  className="w-24"
-                  showPercentage={true}
-                />
-              </div>
-              <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-4">
+              <ProgressBar 
+                value={calculateCompletion()} 
+                className="w-32"
+                showPercentage={true}
+              />
+              <div className="flex items-center space-x-2">
                 <Button
                   variant="outline"
-                  size="sm"
-                  className="shadow-sm"
+                  size="icon"
                   onClick={() => window.print()}
                 >
-                  <Printer className="h-4 w-4 mr-2" />
-                  Print
+                  <Printer className="h-4 w-4" />
                 </Button>
                 <Button
                   variant="outline"
-                  size="sm"
-                  className="shadow-sm"
+                  size="icon"
                 >
-                  <Share2 className="h-4 w-4 mr-2" />
-                  Share
+                  <Share2 className="h-4 w-4" />
                 </Button>
                 <Button
                   variant="outline"
-                  size="sm"
-                  className="shadow-sm"
                   onClick={handleSave}
                   disabled={isLoading}
                 >
@@ -243,10 +218,9 @@ export default function EnterpriseChecklistForm({ templateId: propTemplateId }: 
                 <Button
                   onClick={handleSubmit}
                   disabled={isLoading || calculateCompletion() < 100}
-                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg"
                 >
                   <CheckCircle className="h-4 w-4 mr-2" />
-                  Submit JHA
+                  Submit
                 </Button>
               </div>
             </div>
@@ -254,76 +228,48 @@ export default function EnterpriseChecklistForm({ templateId: propTemplateId }: 
         </div>
       </div>
 
-      {/* Main Content with Enhanced Styling */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <div className="flex justify-center">
-            <TabsList className="grid grid-cols-4 w-full max-w-3xl mx-auto bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg border border-gray-200/50 dark:border-gray-700/50 p-2 rounded-2xl">
-              <TabsTrigger value="site-info" className="rounded-xl font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg">
-                <div className="flex items-center space-x-2">
-                  <MapPin className="w-4 h-4" />
-                  <span>Site Info</span>
-                </div>
-              </TabsTrigger>
-              <TabsTrigger value="hazards" className="rounded-xl font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-600 data-[state=active]:text-white data-[state=active]:shadow-lg">
-                <div className="flex items-center space-x-2">
-                  <AlertTriangle className="w-4 h-4" />
-                  <span>Hazards</span>
-                </div>
-              </TabsTrigger>
-              <TabsTrigger value="ppe" className="rounded-xl font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-lg">
-                <div className="flex items-center space-x-2">
-                  <Shield className="w-4 h-4" />
-                  <span>PPE & Safety</span>
-                </div>
-              </TabsTrigger>
-              <TabsTrigger value="documentation" className="rounded-xl font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg">
-                <div className="flex items-center space-x-2">
-                  <FileText className="w-4 h-4" />
-                  <span>Documentation</span>
-                </div>
-              </TabsTrigger>
-            </TabsList>
-          </div>
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid grid-cols-4 w-full max-w-2xl mx-auto">
+            <TabsTrigger value="site-info">Site Info</TabsTrigger>
+            <TabsTrigger value="hazards">Hazards</TabsTrigger>
+            <TabsTrigger value="ppe">PPE & Safety</TabsTrigger>
+            <TabsTrigger value="documentation">Documentation</TabsTrigger>
+          </TabsList>
 
-          {/* Site Information Tab with Enhanced Design */}
-          <TabsContent value="site-info" className="space-y-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
+          {/* Site Information Tab */}
+          <TabsContent value="site-info" className="space-y-6">
+            <SafetyCard
+              title="Site Information"
+              description="Basic project and environmental details"
+              status="in-progress"
             >
-              <SafetyCard
-                title="Project & Site Details"
-                description="Core project information and environmental conditions"
-                status="in-progress"
-                className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-2 border-blue-100 dark:border-blue-900/50 shadow-xl"
-              >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-3">
-                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center space-x-2">
-                    <MapPin className="h-4 w-4 text-blue-500" />
-                    <span>Site Location</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Site Location
                   </label>
-                  <Input
-                    placeholder="Enter complete site address or project area"
-                    value={responses.siteLocation || ''}
-                    onChange={(e) => setResponses({...responses, siteLocation: e.target.value})}
-                    className="border-2 border-gray-200 dark:border-gray-700 focus:border-blue-500 dark:focus:border-blue-400 rounded-xl shadow-sm transition-all duration-200"
-                  />
+                  <div className="flex items-center space-x-2">
+                    <MapPin className="h-4 w-4 text-gray-400" />
+                    <Input
+                      placeholder="Enter site address or area"
+                      value={responses.siteLocation || ''}
+                      onChange={(e) => setResponses({...responses, siteLocation: e.target.value})}
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-3">
-                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center space-x-2">
-                    <Building2 className="h-4 w-4 text-blue-500" />
-                    <span>Project Phase</span>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Project Phase
                   </label>
                   <Select
                     value={responses.projectPhase}
                     onValueChange={(value) => setResponses({...responses, projectPhase: value})}
                   >
-                    <SelectTrigger className="border-2 border-gray-200 dark:border-gray-700 focus:border-blue-500 dark:focus:border-blue-400 rounded-xl shadow-sm transition-all duration-200">
-                      <SelectValue placeholder="Select current construction phase" />
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select project phase" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="site-prep">Site Preparation</SelectItem>
@@ -337,21 +283,16 @@ export default function EnterpriseChecklistForm({ templateId: propTemplateId }: 
                   </Select>
                 </div>
 
-                {/* Weather Information Section */}
-                <div className="space-y-4">
-                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center space-x-2">
-                    <Cloud className="h-4 w-4 text-blue-500" />
-                    <span>Weather Conditions</span>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Weather Conditions
                   </label>
-                  
-                  {/* Quick Weather Selection */}
                   <div className="space-y-2">
-                    <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Basic Weather Type</label>
                     <Select
                       value={responses.weatherCondition}
                       onValueChange={(value) => setResponses({...responses, weatherCondition: value})}
                     >
-                      <SelectTrigger className="border-2 border-gray-200 dark:border-gray-700 focus:border-blue-500 dark:focus:border-blue-400 rounded-xl">
+                      <SelectTrigger>
                         <SelectValue placeholder="Select basic weather" />
                       </SelectTrigger>
                       <SelectContent>
@@ -381,32 +322,15 @@ export default function EnterpriseChecklistForm({ templateId: propTemplateId }: 
                         </SelectItem>
                       </SelectContent>
                     </Select>
-                  </div>
-
-                  {/* Detailed Weather Data Box */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                      📊 Detailed Weather Data (Copy from Weather Center)
-                    </label>
-                    <div className="relative">
-                      <Textarea
-                        placeholder="PASTE WEATHER DATA HERE → Go to Weather Center, copy the weather report, and paste it here for AI analysis&#10;&#10;Example:&#10;Temperature: 78°F&#10;Humidity: 35%&#10;Wind: 14 mph (gusts 22 mph)&#10;Pressure: 1008 hPa&#10;Conditions: Clear skies"
-                        value={responses.detailedWeather || ''}
-                        onChange={(e) => setResponses({...responses, detailedWeather: e.target.value})}
-                        className="min-h-[120px] text-sm border-2 border-blue-200 dark:border-blue-800 focus:border-blue-500 dark:focus:border-blue-400 rounded-xl bg-blue-50/30 dark:bg-blue-950/30 resize-none"
-                        rows={6}
-                      />
-                      <div className="absolute top-2 right-2">
-                        <div className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-md font-medium">
-                          Weather Center → Copy → Paste Here
-                        </div>
-                      </div>
-                    </div>
-                    <div className="bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-                      <p className="text-xs text-blue-700 dark:text-blue-300 font-medium">
-                        ⚡ Pro Tip: Navigate to Weather Center → Copy the complete weather report → Paste above for detailed AI safety analysis
-                      </p>
-                    </div>
+                    <Input
+                      placeholder="Paste detailed weather data here or enter manually"
+                      value={responses.detailedWeather || ''}
+                      onChange={(e) => setResponses({...responses, detailedWeather: e.target.value})}
+                      className="text-sm"
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      💡 Copy weather data from the Weather Center and paste here for detailed conditions
+                    </p>
                   </div>
                 </div>
 
@@ -441,7 +365,6 @@ export default function EnterpriseChecklistForm({ templateId: propTemplateId }: 
                 />
               </div>
             </SafetyCard>
-            </motion.div>
           </TabsContent>
 
           {/* Hazards Tab */}
@@ -474,17 +397,14 @@ export default function EnterpriseChecklistForm({ templateId: propTemplateId }: 
 
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Additional Hazard Notes & Weather Data
+                  Additional Hazard Notes
                 </label>
                 <Textarea
-                  placeholder="Describe any additional hazards or concerns...&#10;&#10;💡 WEATHER DATA: Copy weather report from Weather Center and paste here for AI analysis&#10;Example: Temperature: 78°F, Humidity: 35%, Wind: 14 mph (gusts 22 mph), Pressure: 1008 hPa"
-                  rows={6}
+                  placeholder="Describe any additional hazards or concerns..."
+                  rows={4}
                   value={responses.additionalNotes || ''}
                   onChange={(e) => setResponses({...responses, additionalNotes: e.target.value})}
                 />
-                <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
-                  ⚡ Pro Tip: Navigate to Weather Center → Copy complete weather report → Paste above for detailed safety analysis
-                </p>
               </div>
             </SafetyCard>
           </TabsContent>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { checklistData } from '../components/checklist/checklistData';
-import WorkingChecklistForm from '../components/checklist/WorkingChecklistForm';
+import ChecklistForm from '../components/checklist/ChecklistForm';
 
 const ChecklistView: React.FC = () => {
   const { templateId } = useParams<{ templateId: string }>();
@@ -16,7 +16,7 @@ const ChecklistView: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900/20 to-slate-900">
-      <WorkingChecklistForm templateId={templateId} />
+      <ChecklistForm templateId={templateId} />
     </div>
   );
 };

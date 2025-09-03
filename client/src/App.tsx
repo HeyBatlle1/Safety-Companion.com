@@ -14,6 +14,7 @@ import Drawings from '@/pages/Drawings';
 
 import Checklists from '@/pages/Checklists';
 import ChecklistView from '@/pages/ChecklistView';
+import EnterpriseChecklistForm from '@/components/checklist/EnterpriseChecklistForm';
 import Profiles from '@/pages/Profiles';
 import { InsuranceAnalytics } from '@/pages/InsuranceAnalytics';
 import PatternAnalysisPage from '@/pages/PatternAnalysis';
@@ -111,6 +112,13 @@ function App() {
           <PrivateRoute>
             <AppLayout>
               <ChecklistView />
+            </AppLayout>
+          </PrivateRoute>
+        } />
+        <Route path="/checklist-enterprise/:templateId" element={
+          <PrivateRoute>
+            <AppLayout>
+              <EnterpriseChecklistForm />
             </AppLayout>
           </PrivateRoute>
         } />
