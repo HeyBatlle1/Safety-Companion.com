@@ -153,7 +153,7 @@ const ChecklistSelector: React.FC<ChecklistSelectorProps> = ({ onChecklistClick 
               onClick={() => onChecklistClick(template.id)}
               className="relative group cursor-pointer"
             >
-              <div className="relative p-6 rounded-lg bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border border-gray-200/80 dark:border-slate-700/80 group-hover:border-blue-300/60 dark:group-hover:border-blue-500/60 transition-all duration-300 shadow-lg group-hover:shadow-xl">
+              <div className="relative p-6 rounded-lg bg-slate-100/95 dark:bg-slate-800/95 backdrop-blur-sm border border-slate-300/60 dark:border-slate-600/60 group-hover:border-blue-400/70 dark:group-hover:border-blue-400/70 transition-all duration-300 shadow-lg group-hover:shadow-xl">
                 <div className="flex items-start space-x-4">
                   <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/50 border border-blue-200/50 dark:border-blue-800/50 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/60 transition-all duration-300 flex items-center justify-center">
                     <ChecklistBuilding delay={index * 0.1} color={template.iconColor} />
@@ -195,7 +195,7 @@ const ChecklistSelector: React.FC<ChecklistSelectorProps> = ({ onChecklistClick 
               onClick={() => onChecklistClick(template.id)}
               className="relative group cursor-pointer"
             >
-              <div className="relative p-4 rounded-lg bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border border-gray-200/60 dark:border-slate-700/60 group-hover:border-gray-300/80 dark:group-hover:border-slate-600/80 transition-all duration-300 shadow-md group-hover:shadow-lg">
+              <div className="relative p-4 rounded-lg bg-slate-100/90 dark:bg-slate-700/90 backdrop-blur-sm border border-slate-300/50 dark:border-slate-600/50 group-hover:border-slate-400/70 dark:group-hover:border-slate-500/70 transition-all duration-300 shadow-md group-hover:shadow-lg">
                 <div className="flex items-center space-x-3">
                   <div className="p-2 rounded-lg bg-gray-50 dark:bg-slate-700/50 border border-gray-200/50 dark:border-slate-600/50 group-hover:bg-gray-100 dark:group-hover:bg-slate-600/60 transition-all duration-300 flex items-center justify-center">
                     <ChecklistBuilding delay={0.6 + index * 0.05} color={template.iconColor} />
