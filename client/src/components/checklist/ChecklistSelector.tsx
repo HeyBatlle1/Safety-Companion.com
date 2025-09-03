@@ -153,6 +153,7 @@ const ChecklistSelector: React.FC<ChecklistSelectorProps> = ({ onChecklistClick 
               onClick={() => onChecklistClick(template.id)}
               className="relative group cursor-pointer"
             >
+              {/* Updated to slate grey for better battery life */}
               <div className="relative p-6 rounded-lg bg-slate-100/95 dark:bg-slate-800/95 backdrop-blur-sm border border-slate-300/60 dark:border-slate-600/60 group-hover:border-blue-400/70 dark:group-hover:border-blue-400/70 transition-all duration-300 shadow-lg group-hover:shadow-xl">
                 <div className="flex items-start space-x-4">
                   <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/50 border border-blue-200/50 dark:border-blue-800/50 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/60 transition-all duration-300 flex items-center justify-center">
