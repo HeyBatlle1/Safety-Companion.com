@@ -26,56 +26,56 @@ const primaryTemplates: Template[] = [
     title: 'Master Job Hazard Analysis (JHA)',
     icon: ChecklistBuilding,
     description: 'Comprehensive OSHA-compliant safety analysis with automatic weather integration',
-    color: 'from-gradient-to-r from-blue-600 via-purple-600 to-cyan-600',
-    iconColor: '#8B5CF6'
+    color: 'from-slate-800 to-slate-900',
+    iconColor: '#1E40AF'
   },
   {
     id: 'safety-assessment',
     title: '(BACKUP) Site Safety Assessment',
     icon: ChecklistBuilding,
     description: 'Original checklist - backup version',
-    color: 'from-gray-600 to-gray-700',
-    iconColor: '#6B7280'
+    color: 'from-slate-700 to-slate-800',
+    iconColor: '#374151'
   },
   {
     id: 'fall-protection',
     title: '(BACKUP) Fall Protection Systems',
     icon: ChecklistBuilding,
     description: 'Critical height work safety with OSHA compliance tracking',
-    color: 'from-gray-600 to-gray-700',
-    iconColor: '#6B7280'
+    color: 'from-slate-700 to-slate-800',
+    iconColor: '#374151'
   },
   {
     id: 'electrical-safety',
     title: '(BACKUP) Electrical Safety Audit',
     icon: ChecklistBuilding,
     description: 'High-voltage and electrical systems hazard assessment',
-    color: 'from-blue-600 via-purple-600 to-cyan-600',
-    iconColor: '#8B5CF6'
+    color: 'from-slate-800 to-slate-900',
+    iconColor: '#1E40AF'
   },
   {
     id: 'hazard-communication',
     title: '(BACKUP) HazCom & Chemical Safety',
     icon: ChecklistBuilding,
     description: 'Material safety with AI chemical analysis integration',
-    color: 'from-gray-600 to-gray-700',
-    iconColor: '#6B7280'
+    color: 'from-slate-700 to-slate-800',
+    iconColor: '#374151'
   },
   {
     id: 'emergency-action',
     title: '(BACKUP) Emergency Action Plan',
     icon: ChecklistBuilding,
     description: 'Critical incident protocols with automated alerts',
-    color: 'from-blue-600 via-purple-600 to-cyan-600',
-    iconColor: '#8B5CF6'
+    color: 'from-slate-800 to-slate-900',
+    iconColor: '#1E40AF'
   },
   {
     id: 'ppe',
     title: '(BACKUP) PPE Compliance Check',
     icon: ChecklistBuilding,
     description: 'Personal protective equipment verification system',
-    color: 'from-gray-600 to-gray-700',
-    iconColor: '#6B7280'
+    color: 'from-slate-700 to-slate-800',
+    iconColor: '#374151'
   }
 ];
 
@@ -86,32 +86,32 @@ const secondaryTemplates: Template[] = [
     title: 'Scaffold Safety',
     icon: ChecklistBuilding,
     description: 'Scaffold setup and inspection protocols',
-    color: 'from-gray-500 to-gray-600',
-    iconColor: '#6B7280'
+    color: 'from-slate-600 to-slate-700',
+    iconColor: '#4B5563'
   },
   {
     id: 'respiratory-protection',
     title: 'Respiratory Protection',
     icon: ChecklistBuilding,
     description: 'Breathing apparatus and air quality checks',
-    color: 'from-gray-500 to-gray-600',
-    iconColor: '#6B7280'
+    color: 'from-slate-600 to-slate-700',
+    iconColor: '#4B5563'
   },
   {
     id: 'ladder-safety',
     title: 'Ladder Safety',
     icon: ChecklistBuilding,
     description: 'Ladder inspection and usage protocols',
-    color: 'from-gray-500 to-gray-600',
-    iconColor: '#6B7280'
+    color: 'from-slate-600 to-slate-700',
+    iconColor: '#4B5563'
   },
   {
     id: 'confined-space',
     title: 'Confined Space Entry',
     icon: ChecklistBuilding,
     description: 'Confined space procedures and permits',
-    color: 'from-gray-500 to-gray-600',
-    iconColor: '#6B7280'
+    color: 'from-slate-600 to-slate-700',
+    iconColor: '#4B5563'
   }
 ];
 
@@ -148,36 +148,32 @@ const ChecklistSelector: React.FC<ChecklistSelectorProps> = ({ onChecklistClick 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              whileHover={{ scale: 1.01, y: -2 }}
-              whileTap={{ scale: 0.99 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              whileHover={{ scale: 1.02, y: -3 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => onChecklistClick(template.id)}
               className="relative group cursor-pointer"
             >
-              <div className={`absolute inset-0 bg-gradient-to-r ${template.color} rounded-xl opacity-20 group-hover:opacity-30 transition-all duration-300 blur-md group-hover:blur-lg`} />
-              <div className="relative p-6 rounded-xl bg-slate-800/80 backdrop-blur-sm border-2 border-blue-500/30 group-hover:border-blue-400/50 transition-all duration-300">
+              <div className="relative p-6 rounded-lg bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border border-gray-200/80 dark:border-slate-700/80 group-hover:border-blue-300/60 dark:group-hover:border-blue-500/60 transition-all duration-300 shadow-lg group-hover:shadow-xl">
                 <div className="flex items-start space-x-4">
-                  <div className={`p-2 rounded-lg bg-gradient-to-r ${template.color} shadow-xl group-hover:shadow-2xl transition-all duration-300 flex items-center justify-center`}>
+                  <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/50 border border-blue-200/50 dark:border-blue-800/50 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/60 transition-all duration-300 flex items-center justify-center">
                     <ChecklistBuilding delay={index * 0.1} color={template.iconColor} />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-300 transition-colors">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
                       {template.title}
                     </h3>
-                    <p className="text-sm text-gray-300 group-hover:text-gray-200 transition-colors">
+                    <p className="text-sm text-gray-600 dark:text-gray-300 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors leading-relaxed">
                       {template.description}
                     </p>
-                    <div className="mt-3 flex items-center space-x-2">
-                      <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30">AI Analysis</Badge>
-                      <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Submit</Badge>
+                    <div className="mt-4 flex items-center space-x-2">
+                      <Badge className="bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 border-blue-200/50 dark:border-blue-800/50 text-xs font-medium">AI Analysis</Badge>
+                      <Badge className="bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-300 border-green-200/50 dark:border-green-800/50 text-xs font-medium">Submit</Badge>
                     </div>
                   </div>
                 </div>
                 
-                {/* Shimmer effect on hover */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000" />
-                </div>
+                {/* Professional accent line */}
+                <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>
             </motion.div>
           ))}
@@ -194,21 +190,21 @@ const ChecklistSelector: React.FC<ChecklistSelectorProps> = ({ onChecklistClick 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 + index * 0.05 }}
-              whileHover={{ scale: 1.01 }}
+              whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => onChecklistClick(template.id)}
               className="relative group cursor-pointer"
             >
-              <div className="relative p-4 rounded-lg bg-slate-800/40 backdrop-blur-sm border border-gray-600/30 group-hover:border-gray-500/50 transition-all duration-300">
+              <div className="relative p-4 rounded-lg bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border border-gray-200/60 dark:border-slate-700/60 group-hover:border-gray-300/80 dark:group-hover:border-slate-600/80 transition-all duration-300 shadow-md group-hover:shadow-lg">
                 <div className="flex items-center space-x-3">
-                  <div className={`p-1 rounded-lg bg-gradient-to-r ${template.color} flex items-center justify-center`}>
+                  <div className="p-2 rounded-lg bg-gray-50 dark:bg-slate-700/50 border border-gray-200/50 dark:border-slate-600/50 group-hover:bg-gray-100 dark:group-hover:bg-slate-600/60 transition-all duration-300 flex items-center justify-center">
                     <ChecklistBuilding delay={0.6 + index * 0.05} color={template.iconColor} />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-md font-medium text-gray-300 group-hover:text-white transition-colors">
+                    <h3 className="text-sm font-medium text-gray-900 dark:text-gray-200 group-hover:text-gray-800 dark:group-hover:text-white transition-colors">
                       {template.title}
                     </h3>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
                       {template.description}
                     </p>
                   </div>
