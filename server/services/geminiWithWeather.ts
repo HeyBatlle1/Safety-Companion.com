@@ -120,7 +120,14 @@ CRITICAL CONTEXT:
 - You are analyzing this checklist on ${dateString}, ${currentYear}
 - This is NOT October 26, 2023 - you are working in ${currentYear}
 
-MANDATORY FIRST STEP: You MUST call the getWeatherForSafetyAnalysis function for the job site location "${site}" to get current weather conditions before providing any analysis. Weather data is essential for construction safety decisions.
+🚨 MANDATORY REQUIREMENT - DO THIS FIRST:
+Before writing ANY analysis, you MUST call the getWeatherForSafetyAnalysis function with the exact location: "${site}"
+
+This is not optional. Weather conditions directly impact construction safety (wind speeds for crane operations, temperature for PPE requirements, precipitation for slip hazards, etc.). You cannot provide accurate safety recommendations without current weather data.
+
+STEP 1: Call getWeatherForSafetyAnalysis("${site}")
+STEP 2: Wait for weather response  
+STEP 3: Then write your analysis incorporating the weather data
 
 JOB SITE DETAILS:
 - Location: ${site}
