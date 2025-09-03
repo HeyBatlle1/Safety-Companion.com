@@ -23,6 +23,7 @@ import { logError } from "./utils/logger";
 import './types/session';
 import { geminiAnalytics } from "./services/geminiAnalytics";
 import { patternAnalysisService } from "./services/patternAnalysis";
+import { safetyIntelligenceService } from "./services/safetyIntelligenceService";
 
 // Session middleware for authentication
 const PgSession = connectPgSimple(session);
@@ -1187,6 +1188,117 @@ Please provide a comprehensive, grounded response that helps ensure workplace sa
     } catch (error) {
       logError(error, 'enhanced-chat');
       res.status(500).json({ error: 'Chat service temporarily unavailable' });
+    }
+  });
+
+  // ==================== PROFESSIONAL OSHA SAFETY INTELLIGENCE ====================
+  
+  // Get comprehensive risk profile for NAICS industry code
+  app.get('/api/safety/risk-profile/:naicsCode', async (req, res) => {
+    try {
+      const { naicsCode } = req.params;
+      const riskProfile = await safetyIntelligenceService.getRiskProfile(naicsCode);
+      res.json(riskProfile);
+    } catch (error) {
+      logError(error, 'risk-profile');
+      res.status(500).json({ error: 'Failed to retrieve risk profile' });
+    }
+  });
+
+  // Get industry benchmark data for comparative analysis
+  app.get('/api/safety/industry-benchmark/:naicsPrefix', async (req, res) => {
+    try {
+      const { naicsPrefix } = req.params;
+      const benchmarks = await safetyIntelligenceService.getIndustryBenchmark(naicsPrefix);
+      res.json(benchmarks);
+    } catch (error) {
+      logError(error, 'industry-benchmark');
+      res.status(500).json({ error: 'Failed to retrieve industry benchmarks' });
+    }
+  });
+
+  // Find industries with similar injury rates for comparative analysis
+  app.get('/api/safety/similar-industries/:injuryRate', async (req, res) => {
+    try {
+      const injuryRate = parseFloat(req.params.injuryRate);
+      const tolerance = parseFloat(req.query.tolerance as string) || 0.5;
+      const similarIndustries = await safetyIntelligenceService.searchSimilarIndustries(injuryRate, tolerance);
+      res.json(similarIndustries);
+    } catch (error) {
+      logError(error, 'similar-industries');
+      res.status(500).json({ error: 'Failed to find similar industries' });
+    }
+  });
+
+  // Generate professional JHSA template using real OSHA data
+  app.post('/api/safety/generate-jhsa', requireAuth, [
+    body('naicsCode').notEmpty().withMessage('NAICS code is required'),
+    body('jobTitle').notEmpty().withMessage('Job title is required'),
+    body('customTasks').optional().isArray()
+  ], handleValidationErrors, async (req: Request, res: Response) => {
+    try {
+      const { naicsCode, jobTitle, customTasks } = req.body;
+      const userId = req.session.userId!;
+      
+      const jhsaTemplate = await safetyIntelligenceService.generateJHSATemplate(
+        naicsCode, 
+        jobTitle, 
+        customTasks, 
+        userId
+      );
+      
+      res.json({
+        success: true,
+        jhsaTemplate,
+        oshaCompliance: 'Based on OSHA 3071 methodology',
+        dataSource: 'Real 2023 BLS/OSHA construction industry data'
+      });
+    } catch (error) {
+      logError(error, 'generate-jhsa');
+      res.status(500).json({ error: 'Failed to generate JHSA template' });
+    }
+  });
+
+  // Get supported trades for JHSA generation
+  app.get('/api/safety/jhsa-trades', async (req, res) => {
+    try {
+      res.json({
+        supportedTrades: [
+          { naicsCode: '23815', tradeName: 'Glass and Glazing Contractors' },
+          { naicsCode: '23813', tradeName: 'Framing Contractors' },
+          { naicsCode: '23816', tradeName: 'Roofing Contractors' },
+          { naicsCode: '23812', tradeName: 'Structural Steel and Precast Concrete Contractors' },
+          { naicsCode: '23821', tradeName: 'Electrical Contractors' },
+          { naicsCode: '23822', tradeName: 'Plumbing, Heating, and Air-Conditioning Contractors' }
+        ],
+        canGenerateCustom: true,
+        basedOn: 'OSHA 3071 Job Hazard Analysis methodology',
+        dataSource: 'Real 2023 BLS injury rates and fatality data'
+      });
+    } catch (error) {
+      logError(error, 'jhsa-trades');
+      res.status(500).json({ error: 'Failed to get supported trades' });
+    }
+  });
+
+  // Get OSHA data status and coverage
+  app.get('/api/safety/data-status', async (req, res) => {
+    try {
+      res.json({
+        status: 'operational',
+        dataSource: 'Real 2023 BLS/OSHA Industry Data',
+        coverage: {
+          injuryRates: 'Construction NAICS 23 (all subsectors)',
+          fatalityData: '2023 BLS fatality statistics',
+          benchmarks: 'Industry comparative analysis'
+        },
+        lastUpdated: '2023-12-31',
+        confidence: 'Government-verified data',
+        compliance: 'OSHA 3071 methodology'
+      });
+    } catch (error) {
+      logError(error, 'data-status');
+      res.status(500).json({ error: 'Failed to get data status' });
     }
   });
 

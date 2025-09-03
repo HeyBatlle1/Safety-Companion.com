@@ -228,6 +228,99 @@ export const insertProjectSchema = createInsertSchema(projects).omit({
   updatedAt: true,
 });
 
+// OSHA Safety Intelligence Tables - Professional Cloud Integration
+export const oshaInjuryRates = pgTable("osha_injury_rates", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  naicsCode: text("naics_code").notNull(),
+  industryName: text("industry_name").notNull(),
+  injuryRate: integer("injury_rate"), // Per 100 workers
+  totalCases: integer("total_cases"),
+  dataSource: text("data_source").notNull(), // 'BLS_Table_1_2023', 'BLS_FATALITIES_A1_2023'
+  year: integer("year").notNull().default(2023),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  naicsCodeIdx: index("osha_injury_rates_naics_code_idx").on(table.naicsCode),
+  dataSourceIdx: index("osha_injury_rates_data_source_idx").on(table.dataSource),
+  injuryRateIdx: index("osha_injury_rates_injury_rate_idx").on(table.injuryRate),
+}));
+
+// Job Hazard Safety Assessment (JHSA) - OSHA 3071 Compliant
+export const jhsaTemplates = pgTable("jhsa_templates", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  naicsCode: text("naics_code").notNull(),
+  jobTitle: text("job_title").notNull(),
+  industryName: text("industry_name").notNull(),
+  riskScore: integer("risk_score"), // From OSHA data
+  riskCategory: text("risk_category"), // 'LOW', 'MODERATE', 'HIGH', 'CRITICAL'
+  jobSteps: jsonb("job_steps").notNull(), // Array of step objects
+  hazardAnalysis: jsonb("hazard_analysis"), // Comprehensive hazard breakdown
+  oshaCompliance: text("osha_compliance").default("OSHA 3071 Methodology"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at"),
+}, (table) => ({
+  userIdIdx: index("jhsa_templates_user_id_idx").on(table.userId),
+  naicsCodeIdx: index("jhsa_templates_naics_code_idx").on(table.naicsCode),
+  riskScoreIdx: index("jhsa_templates_risk_score_idx").on(table.riskScore),
+}));
+
+// Industry Benchmarking Data
+export const industryBenchmarks = pgTable("industry_benchmarks", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  naicsCode: text("naics_code").notNull(),
+  industryName: text("industry_name").notNull(),
+  avgInjuryRate: integer("avg_injury_rate"),
+  avgFatalityRate: integer("avg_fatality_rate"),
+  riskProfile: jsonb("risk_profile"), // Industry-specific risk factors
+  safetyRecommendations: jsonb("safety_recommendations"),
+  benchmarkDate: timestamp("benchmark_date").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  naicsCodeIdx: index("industry_benchmarks_naics_code_idx").on(table.naicsCode),
+  avgInjuryRateIdx: index("industry_benchmarks_avg_injury_rate_idx").on(table.avgInjuryRate),
+}));
+
+// Safety Intelligence Analytics - AI-Powered Insights
+export const safetyIntelligence = pgTable("safety_intelligence", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+  naicsCode: text("naics_code").notNull(),
+  query: text("query").notNull(),
+  aiResponse: text("ai_response").notNull(),
+  riskFactors: jsonb("risk_factors"), // Identified risk factors
+  recommendations: jsonb("recommendations"), // AI-generated recommendations
+  confidenceScore: integer("confidence_score"), // 0-100 AI confidence
+  oshaDataUsed: jsonb("osha_data_used"), // Referenced OSHA statistics
+  industryComparison: jsonb("industry_comparison"), // Benchmark analysis
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("safety_intelligence_user_id_idx").on(table.userId),
+  naicsCodeIdx: index("safety_intelligence_naics_code_idx").on(table.naicsCode),
+  confidenceScoreIdx: index("safety_intelligence_confidence_score_idx").on(table.confidenceScore),
+}));
+
+// Create insert schemas for OSHA tables
+export const insertOshaInjuryRatesSchema = createInsertSchema(oshaInjuryRates).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertJhsaTemplatesSchema = createInsertSchema(jhsaTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertIndustryBenchmarksSchema = createInsertSchema(industryBenchmarks).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertSafetyIntelligenceSchema = createInsertSchema(safetyIntelligence).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Export types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -255,3 +348,16 @@ export type Company = typeof companies.$inferSelect;
 
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type Project = typeof projects.$inferSelect;
+
+// OSHA Safety Intelligence Types
+export type InsertOshaInjuryRates = z.infer<typeof insertOshaInjuryRatesSchema>;
+export type OshaInjuryRates = typeof oshaInjuryRates.$inferSelect;
+
+export type InsertJhsaTemplates = z.infer<typeof insertJhsaTemplatesSchema>;
+export type JhsaTemplates = typeof jhsaTemplates.$inferSelect;
+
+export type InsertIndustryBenchmarks = z.infer<typeof insertIndustryBenchmarksSchema>;
+export type IndustryBenchmarks = typeof industryBenchmarks.$inferSelect;
+
+export type InsertSafetyIntelligence = z.infer<typeof insertSafetyIntelligenceSchema>;
+export type SafetyIntelligence = typeof safetyIntelligence.$inferSelect;
