@@ -4,6 +4,7 @@ import { Search, Filter, Plus, Users, Shield, MapPin, Building2, Award, Clock, E
 import ProfileCard from '@/components/profile/ProfileCard';
 import LoadingState, { ProfileCardSkeleton } from '@/components/profile/LoadingState';
 import ProfileTabs from '@/components/profile/ProfileTabs';
+import AddUserModal from '@/components/admin/AddUserModal';
 import { useToast } from '../hooks/use-toast';
 
 interface UserProfile {
@@ -31,6 +32,7 @@ const Profiles: React.FC = () => {
   const [currentUser] = useState<UserProfile | null>(null); // Would be set from auth context
   const [selectedProfile, setSelectedProfile] = useState<UserProfile | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'detail'>('grid');
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
   const { toast } = useToast();
 
   // Fetch real profiles from API
@@ -76,6 +78,13 @@ const Profiles: React.FC = () => {
 
     loadProfiles();
   }, [toast]);
+
+  // Function to reload profiles after adding a new user
+  const handleUserAdded = async () => {
+    const realProfiles = await fetchProfiles();
+    setProfiles(realProfiles);
+    setFilteredProfiles(realProfiles);
+  };
 
   useEffect(() => {
     // Filter profiles based on search and filters
@@ -164,6 +173,7 @@ const Profiles: React.FC = () => {
             
             <motion.button 
               whileTap={{ scale: 0.95 }}
+              onClick={() => setShowAddUserModal(true)}
               className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 shadow-lg hover:shadow-xl"
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -407,6 +417,13 @@ const Profiles: React.FC = () => {
           </motion.div>
         )}
       </div>
+      
+      {/* Add User Modal */}
+      <AddUserModal
+        isOpen={showAddUserModal}
+        onClose={() => setShowAddUserModal(false)}
+        onUserAdded={handleUserAdded}
+      />
     </div>
   );
 };
