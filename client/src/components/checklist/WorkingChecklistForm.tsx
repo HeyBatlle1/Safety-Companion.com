@@ -100,10 +100,29 @@ export default function WorkingChecklistForm({ templateId: propTemplateId }: Wor
   };
 
   const renderField = (item: any) => {
+    // If the item has options but no inputType, treat as select
+    if (item.options && item.options.length > 0 && (!item.inputType || item.inputType === 'select')) {
+      return (
+        <Select value={responses[item.id] || ''} onValueChange={(value) => handleInputChange(item.id, value)}>
+          <SelectTrigger className="bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600">
+            <SelectValue placeholder="Select an option" />
+          </SelectTrigger>
+          <SelectContent>
+            {item.options.map((option: string, index: number) => (
+              <SelectItem key={index} value={option}>
+                {option}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      );
+    }
+
+    // Handle other input types
     const commonProps = {
       value: responses[item.id] || '',
       onChange: (e: any) => handleInputChange(item.id, e.target.value),
-      className: "bg-slate-50 dark:bg-slate-800/50 border-slate-300 dark:border-slate-600"
+      className: "bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600"
     };
 
     switch (item.inputType) {
@@ -123,22 +142,6 @@ export default function WorkingChecklistForm({ templateId: propTemplateId }: Wor
             type="number"
             placeholder={item.placeholder}
           />
-        );
-      
-      case 'select':
-        return (
-          <Select value={responses[item.id] || ''} onValueChange={(value) => handleInputChange(item.id, value)}>
-            <SelectTrigger className="bg-slate-50 dark:bg-slate-800/50 border-slate-300 dark:border-slate-600">
-              <SelectValue placeholder={item.placeholder || "Select an option"} />
-            </SelectTrigger>
-            <SelectContent>
-              {item.options.map((option: string, index: number) => (
-                <SelectItem key={index} value={option}>
-                  {option}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         );
       
       case 'email':
@@ -169,10 +172,10 @@ export default function WorkingChecklistForm({ templateId: propTemplateId }: Wor
       
       default:
         return (
-          <Input
+          <Textarea
             {...commonProps}
-            type="text"
-            placeholder={item.placeholder}
+            placeholder={item.placeholder || "Describe in detail..."}
+            rows={3}
           />
         );
     }
