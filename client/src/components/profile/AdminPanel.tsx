@@ -29,6 +29,7 @@ const AdminPanel: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<string>('all');
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [viewMode, setViewMode] = useState<'dashboard' | 'users'>('dashboard');
 
   const handleExportUsers = async () => {
     try {
@@ -146,8 +147,6 @@ const AdminPanel: React.FC = () => {
       </div>
     );
   }
-
-  const [viewMode, setViewMode] = useState<'dashboard' | 'users'>('dashboard');
 
   return (
     <div className="space-y-6">
