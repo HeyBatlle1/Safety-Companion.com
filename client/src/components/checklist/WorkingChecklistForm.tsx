@@ -58,8 +58,8 @@ export default function WorkingChecklistForm({ templateId: propTemplateId }: Wor
     let total = 0;
     let completed = 0;
     
-    template.sections.forEach(section => {
-      section.items.forEach(item => {
+    template.sections.forEach((section: any) => {
+      section.items.forEach((item: any) => {
         total++;
         if (item.required && responses[item.id] && responses[item.id].toString().trim()) {
           completed++;
@@ -248,7 +248,7 @@ export default function WorkingChecklistForm({ templateId: propTemplateId }: Wor
 
         {/* Form Sections */}
         <div className="space-y-8">
-          {template.sections.map((section, sectionIndex) => (
+          {template.sections.map((section: any, sectionIndex: number) => (
             <motion.div
               key={sectionIndex}
               initial={{ opacity: 0, y: 20 }}
@@ -270,7 +270,7 @@ export default function WorkingChecklistForm({ templateId: propTemplateId }: Wor
                   )}
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {section.items.map((item, itemIndex) => (
+                  {section.items.map((item: any, itemIndex: number) => (
                     <div key={item.id} className="space-y-2">
                       <label className="flex items-center text-slate-700 dark:text-slate-200 font-medium">
                         {item.question}
