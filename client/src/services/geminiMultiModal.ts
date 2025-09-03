@@ -30,8 +30,8 @@ export async function analyzeWithGemini(params: AnalysisParams | string): Promis
     const model = genAI.getGenerativeModel({ 
       model: modelName,
       generationConfig: {
-        temperature: 0.9,
-        maxOutputTokens: 4096
+        temperature: 0.7,  // Optimized for professional safety analysis
+        maxOutputTokens: 2000  // Consistent with other services
       }
     });
 
