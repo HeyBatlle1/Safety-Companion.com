@@ -287,40 +287,51 @@ export default function EnterpriseChecklistForm() {
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Weather Conditions
                   </label>
-                  <Select
-                    value={responses.weatherCondition}
-                    onValueChange={(value) => setResponses({...responses, weatherCondition: value})}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select weather" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="clear">
-                        <div className="flex items-center space-x-2">
-                          {weatherIcons.clear}
-                          <span>Clear</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="rain">
-                        <div className="flex items-center space-x-2">
-                          {weatherIcons.rain}
-                          <span>Rain</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="snow">
-                        <div className="flex items-center space-x-2">
-                          {weatherIcons.snow}
-                          <span>Snow</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="wind">
-                        <div className="flex items-center space-x-2">
-                          {weatherIcons.wind}
-                          <span>High Wind</span>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="space-y-2">
+                    <Select
+                      value={responses.weatherCondition}
+                      onValueChange={(value) => setResponses({...responses, weatherCondition: value})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select basic weather" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="clear">
+                          <div className="flex items-center space-x-2">
+                            {weatherIcons.clear}
+                            <span>Clear</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="rain">
+                          <div className="flex items-center space-x-2">
+                            {weatherIcons.rain}
+                            <span>Rain</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="snow">
+                          <div className="flex items-center space-x-2">
+                            {weatherIcons.snow}
+                            <span>Snow</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="wind">
+                          <div className="flex items-center space-x-2">
+                            {weatherIcons.wind}
+                            <span>High Wind</span>
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      placeholder="Paste detailed weather data here or enter manually"
+                      value={responses.detailedWeather || ''}
+                      onChange={(e) => setResponses({...responses, detailedWeather: e.target.value})}
+                      className="text-sm"
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      💡 Copy weather data from the Weather Center and paste here for detailed conditions
+                    </p>
+                  </div>
                 </div>
 
                 <div className="space-y-2">

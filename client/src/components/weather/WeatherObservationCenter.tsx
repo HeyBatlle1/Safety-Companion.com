@@ -10,7 +10,9 @@ import {
   Droplets, 
   Thermometer,
   AlertTriangle,
-  MapPin
+  MapPin,
+  Copy,
+  Check
 } from 'lucide-react';
 
 interface WeatherData {
@@ -43,6 +45,7 @@ const WeatherObservationCenter = () => {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
   const [location] = useState('Lawrence, IN');
+  const [copied, setCopied] = useState(false);
 
   // Weather icon mapping
   const getWeatherIcon = (code: number, isDay: number) => {
@@ -61,6 +64,18 @@ const WeatherObservationCenter = () => {
     if (visibility < 1000) return { level: 'medium', message: 'Low visibility - equipment operators use caution' };
     if (precipitation > 5) return { level: 'medium', message: 'Heavy precipitation - outdoor work conditions hazardous' };
     return null;
+  };
+
+  // Copy weather data for checklist
+  const copyWeatherData = () => {
+    if (!weatherData) return;
+    
+    const weatherSummary = `${Math.round((weatherData.current.temperature_2m * 9/5) + 32)}°F, ${weatherData.current.relative_humidity_2m}% humidity, Wind: ${Math.round(weatherData.current.wind_speed_10m)} mph${weatherData.current.wind_gusts_10m > weatherData.current.wind_speed_10m ? ` (gusts ${Math.round(weatherData.current.wind_gusts_10m)} mph)` : ''}, Pressure: ${Math.round(weatherData.current.pressure_msl)} hPa${weatherData.current.precipitation > 0 ? `, Precipitation: ${weatherData.current.precipitation}mm` : ''}`;
+    
+    navigator.clipboard.writeText(weatherSummary).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
   useEffect(() => {
@@ -370,10 +385,28 @@ const WeatherObservationCenter = () => {
       </div>
 
       {/* Footer */}
-      <div className="bg-gray-700/50 px-4 py-2 text-center">
+      <div className="bg-gray-700/50 px-4 py-2 flex items-center justify-between">
         <span className="text-xs text-gray-400">
           Updated every 15 minutes • Data from Open-Meteo
         </span>
+        <motion.button
+          onClick={copyWeatherData}
+          className="flex items-center space-x-1 px-2 py-1 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 rounded text-xs text-blue-300 transition-colors"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          {copied ? (
+            <>
+              <Check size={12} />
+              <span>Copied!</span>
+            </>
+          ) : (
+            <>
+              <Copy size={12} />
+              <span>Copy for Checklist</span>
+            </>
+          )}
+        </motion.button>
       </div>
     </motion.div>
   );
