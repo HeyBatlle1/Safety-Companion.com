@@ -47,7 +47,7 @@ export class GeminiWeatherAnalyzer {
       
       const chat = this.model.startChat({
         generationConfig: {
-          temperature: 0.7,
+          temperature: 0.7,  // Balanced for detailed OSHA compliance analysis
           maxOutputTokens: 4000,
         },
       });

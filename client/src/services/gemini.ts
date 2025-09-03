@@ -7,10 +7,10 @@ const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 // Create a singleton instance of GoogleGenerativeAI
 const genAI = new GoogleGenerativeAI(API_KEY);
 
-// Configuration for Gemini model
+// Configuration for Gemini model - optimized for professional safety analysis
 const MODEL_CONFIG = {
   modelName: "gemini-2.0-flash",
-  temperature: 1.0,
+  temperature: 0.8,  // Optimized for focused, professional safety recommendations
   maxOutputTokens: 2000
 };
 
