@@ -160,6 +160,11 @@ export default function EnterpriseChecklistForm() {
         ...(responses.sitePhotos || [])
       ];
       
+      console.log('🔍 Debug: Photo Analysis');
+      console.log('Photos in hazardPhotos:', responses.hazardPhotos?.length || 0);
+      console.log('Photos in sitePhotos:', responses.sitePhotos?.length || 0);
+      console.log('Total photos collected:', allPhotos.length);
+      
       if (allPhotos.length === 0) {
         showToast('Please upload at least one photo for AI analysis', 'warning');
         return;
