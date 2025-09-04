@@ -1,5 +1,6 @@
 // Server-side Google Gemini Insurance Analytics Service
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { trackAIAnalysis } from './silentTracking';
 
 // Initialize Google Gemini AI with server-side API key
 const gemini = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
@@ -39,6 +40,10 @@ export class GeminiInsuranceAnalytics {
       experienceLevel?: number;
     }
   ): Promise<RiskAnalysis> {
+    // Phase 1 Silent Tracking: Wrap AI analysis with performance monitoring
+    return await trackAIAnalysis(
+      'insurance_risk_analysis',
+      async () => {
     const prompt = `
 As an insurance risk assessment AI, analyze this workplace safety conversation for insurance risk indicators:
 
@@ -109,6 +114,14 @@ Focus on:
         }
       };
     }
+      },
+      {
+        queryLength: query.length,
+        responseLength: response.length,
+        userRole: userContext?.role,
+        userDepartment: userContext?.department
+      }
+    );
   }
 
   /**

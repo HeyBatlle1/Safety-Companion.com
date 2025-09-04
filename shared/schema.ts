@@ -67,6 +67,45 @@ export const analysisHistory = pgTable("analysis_history", {
   createdAtIdx: index("analysis_history_created_at_idx").on(table.createdAt),
 }));
 
+// User interaction analytics - Phase 1 Silent Tracking
+export const userInteractionAnalytics = pgTable("user_interaction_analytics", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  sessionToken: text("session_token").notNull(), // Anonymous session identifier
+  sectionId: text("section_id"), // Checklist section or analysis component
+  interactionType: text("interaction_type").notNull(), // 'checklist_completion', 'analysis_generation', 'section_modification'
+  timeSpent: integer("time_spent"), // Seconds spent on section/component
+  modificationsCount: integer("modifications_count").default(0), // Number of edits made
+  completionStatus: text("completion_status"), // 'completed', 'abandoned', 'in_progress'
+  contextData: jsonb("context_data"), // Anonymous context information
+  performanceMetrics: jsonb("performance_metrics"), // Load times, error counts, etc.
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  sessionTokenIdx: index("user_interaction_session_token_idx").on(table.sessionToken),
+  interactionTypeIdx: index("user_interaction_type_idx").on(table.interactionType),
+  createdAtIdx: index("user_interaction_created_at_idx").on(table.createdAt),
+  // Cleanup index for automated data retention
+  cleanupIdx: index("user_interaction_cleanup_idx").on(table.createdAt),
+}));
+
+// System performance monitoring
+export const systemPerformanceMetrics = pgTable("system_performance_metrics", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  metricType: text("metric_type").notNull(), // 'database_query', 'ai_analysis', 'user_session'
+  metricName: text("metric_name").notNull(), // Specific operation name
+  duration: integer("duration"), // Milliseconds
+  success: boolean("success").notNull(),
+  errorDetails: text("error_details"), // If success = false
+  resourceUsage: jsonb("resource_usage"), // Memory, CPU, etc.
+  metadata: jsonb("metadata"), // Additional context
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  metricTypeIdx: index("system_performance_metric_type_idx").on(table.metricType),
+  createdAtIdx: index("system_performance_created_at_idx").on(table.createdAt),
+  successIdx: index("system_performance_success_idx").on(table.success),
+  // Cleanup index for automated data retention
+  cleanupIdx: index("system_performance_cleanup_idx").on(table.createdAt),
+}));
+
 // Risk assessments
 export const riskAssessments = pgTable("risk_assessments", {
   id: uuid("id").primaryKey().defaultRandom(),

@@ -37,6 +37,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { showToast } from '@/components/common/ToastContainer';
 import { safetyCompanionAPI } from '@/services/safetyCompanionAPI';
 import BackButton from '@/components/navigation/BackButton';
+import { trackChecklistInteraction, trackClientPerformance } from '@/utils/silentTracking';
 
 // Professional hazard options with severity levels
 const hazardOptions = [
@@ -153,15 +154,45 @@ export default function EnterpriseChecklistForm() {
     }
     
     setIsLoading(true);
-    try {
-      // Submit logic here
-      showToast('Checklist submitted successfully', 'success');
-      navigate('/checklists');
-    } catch (error) {
-      showToast('Failed to submit checklist', 'error');
-    } finally {
-      setIsLoading(false);
-    }
+    
+    // Phase 1 Silent Tracking: Track checklist completion
+    await trackClientPerformance('checklist_submission', async () => {
+      try {
+        // Submit logic here
+        showToast('Checklist submitted successfully', 'success');
+        
+        // Track successful completion
+        await trackChecklistInteraction({
+          interactionType: 'checklist_completion',
+          completionStatus: 'completed',
+          contextData: {
+            completionPercentage: calculateCompletion(),
+            hazardCount: responses.identifiedHazards?.length || 0,
+            riskLevel: responses.overallRiskLevel,
+            hasPhotos: !!(responses.photos && responses.photos.length > 0)
+          }
+        });
+        
+        navigate('/checklists');
+      } catch (error) {
+        showToast('Failed to submit checklist', 'error');
+        
+        // Track failed completion
+        await trackChecklistInteraction({
+          interactionType: 'checklist_submission_failed',
+          completionStatus: 'failed',
+          contextData: {
+            completionPercentage: calculateCompletion(),
+            errorMessage: error instanceof Error ? error.message : 'Unknown error'
+          }
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }, {
+      completionPercentage: calculateCompletion(),
+      formType: 'daily_safety_inspection'
+    });
   };
 
   return (
