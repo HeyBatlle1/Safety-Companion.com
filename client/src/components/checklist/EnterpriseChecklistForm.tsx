@@ -36,6 +36,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { showToast } from '@/components/common/ToastContainer';
 import { safetyCompanionAPI } from '@/services/safetyCompanionAPI';
+import { MultiModalAnalysisService } from '@/services/multiModalAnalysis';
 import BackButton from '@/components/navigation/BackButton';
 import { trackChecklistInteraction, trackClientPerformance } from '@/utils/silentTracking';
 
@@ -113,7 +114,9 @@ export default function EnterpriseChecklistForm() {
     ppeCompliance: {}
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [activeTab, setActiveTab] = useState("site-info");
+  const [aiAnalysisResult, setAiAnalysisResult] = useState<string | null>(null);
   
   // Calculate completion percentage
   const calculateCompletion = () => {
@@ -144,6 +147,73 @@ export default function EnterpriseChecklistForm() {
       showToast('Failed to save checklist', 'error');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGenerateAIReport = async () => {
+    setIsAnalyzing(true);
+    
+    try {
+      // Collect all photos from different sections
+      const allPhotos = [
+        ...(responses.hazardPhotos || []),
+        ...(responses.sitePhotos || [])
+      ];
+      
+      if (allPhotos.length === 0) {
+        showToast('Please upload at least one photo for AI analysis', 'warning');
+        return;
+      }
+      
+      // Prepare data for AI analysis
+      const analysisService = new MultiModalAnalysisService();
+      const result = await analysisService.analyzeComprehensive({
+        checklistData: responses,
+        blueprints: [], // No blueprints in this case
+        images: allPhotos
+      });
+      
+      // Create comprehensive analysis text including photo insights
+      const analysisText = `
+AI Analysis of Glass Installation Safety Assessment with ${allPhotos.length} uploaded photo(s):
+
+OVERALL RISK SCORE: ${result.overallRiskScore}/100
+
+VISUAL PATTERN RECOGNITION FROM YOUR PHOTOS:
+${result.visualPatternRecognition.identifiedHazards.map(h => `• ${h}`).join('\n')}
+
+PPE COMPLIANCE DETECTED:
+${result.visualPatternRecognition.workerSafetyIssues.map(i => `• ${i}`).join('\n')}
+
+EQUIPMENT ANALYSIS:
+${result.visualPatternRecognition.equipmentDetected.map(e => `• ${e}`).join('\n')}
+
+CRITICAL FINDINGS:
+${result.integratedInsights.criticalFindings.map(f => `• ${f}`).join('\n')}
+
+IMMEDIATE ACTIONS REQUIRED:
+${result.integratedInsights.immediateActions.map(a => `• ${a}`).join('\n')}
+      `.trim();
+      
+      setAiAnalysisResult(analysisText);
+      showToast(`AI analyzed ${allPhotos.length} photos successfully!`, 'success');
+      
+      // Track the AI analysis with photo count
+      await trackChecklistInteraction({
+        interactionType: 'ai_photo_analysis',
+        completionStatus: 'completed',
+        contextData: {
+          photoCount: allPhotos.length,
+          riskScore: result.overallRiskScore,
+          hazardsDetected: result.visualPatternRecognition.identifiedHazards.length
+        }
+      });
+      
+    } catch (error) {
+      showToast('Failed to analyze photos with AI', 'error');
+      console.error('AI Analysis error:', error);
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
@@ -529,13 +599,30 @@ export default function EnterpriseChecklistForm() {
                   AI Safety Analysis Available
                 </h4>
                 <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
-                  Based on your inputs, our AI can provide personalized safety recommendations and risk mitigation strategies.
+                  Upload photos and our AI will analyze them for safety violations, PPE compliance, and hazards.
                 </p>
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleGenerateAIReport}
+                  disabled={isAnalyzing}
+                  data-testid="button-generate-ai-report"
+                >
                   <Zap className="h-4 w-4 mr-2" />
-                  Generate Safety Report
+                  {isAnalyzing ? 'Analyzing Photos...' : 'Generate Safety Report'}
                 </Button>
               </div>
+              
+              {aiAnalysisResult && (
+                <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700">
+                  <h4 className="text-sm font-medium text-green-900 dark:text-green-100 mb-2">
+                    🧠 AI Photo Analysis Results
+                  </h4>
+                  <pre className="text-sm text-green-700 dark:text-green-300 whitespace-pre-wrap font-mono">
+                    {aiAnalysisResult}
+                  </pre>
+                </div>
+              )}
             </SafetyCard>
           </TabsContent>
         </Tabs>
