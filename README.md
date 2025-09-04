@@ -1,6 +1,6 @@
-# Safety Companion - Enterprise Edition
+# Safety Companion - Professional Edition
 
-An advanced Enterprise Safety Companion platform that leverages cutting-edge AI and data analytics to transform workforce protection through intelligent, user-centric solutions.
+An advanced Professional Safety Companion platform that leverages cutting-edge AI and data analytics to transform workforce protection through intelligent, user-centric solutions.
 
 ## 🏗️ Key Features
 
@@ -18,7 +18,7 @@ An advanced Enterprise Safety Companion platform that leverages cutting-edge AI 
 - **Executive Dashboards** - Real-time safety metrics for C-level decision making
 - **Data Export Capabilities** - JSON exports for insurance companies and regulatory compliance
 
-### Enterprise Features
+### Professional Features
 - **Role-Based Authentication** - Field workers, supervisors, project managers, safety managers, admins
 - **Multi-Tenant Support** - Company and project-based data isolation
 - **Database Health Monitoring** - Real-time connection testing and performance metrics
@@ -209,7 +209,7 @@ LOG_LEVEL=info
 - **Production-Ready Auth** - Session-based authentication with Supabase backend
 - **Role-Based Access** - Multi-tier user permissions (field_worker to admin)
 - **Account Security** - Login attempt tracking and account lockout protection
-- **Enterprise Security** - Input validation, rate limiting, and secure session management
+- **Professional Security** - Input validation, rate limiting, and secure session management
 
 ## 🎓 How to Use Pattern Analysis
 
@@ -221,17 +221,17 @@ LOG_LEVEL=info
 
 ## 🤝 Contributing
 
-This is an enterprise safety management platform designed for construction and industrial environments. The codebase prioritizes:
+This is a professional safety management platform designed for construction and industrial environments. The codebase prioritizes:
 
 - **Type Safety** - Full TypeScript coverage across frontend and backend
 - **Performance** - Optimized for large-scale deployments with strategic indexing
-- **Security** - Enterprise-grade data protection with RLS policies
+- **Security** - Professional-grade data protection with RLS policies
 - **Accessibility** - WCAG compliant interface design for all users
 - **Mobile-First** - Touch-optimized interface for field operations
 
 ## 📋 License
 
-Proprietary enterprise software. Contact for licensing information.
+Proprietary professional software. Contact for licensing information.
 
 ## 🆘 Support
 
