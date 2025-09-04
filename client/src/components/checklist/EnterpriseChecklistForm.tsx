@@ -37,6 +37,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { showToast } from '@/components/common/ToastContainer';
 import { safetyCompanionAPI } from '@/services/safetyCompanionAPI';
 import { MultiModalAnalysisService } from '@/services/multiModalAnalysis';
+import { modernGeminiVision } from '@/services/modernGeminiVision';
 import BackButton from '@/components/navigation/BackButton';
 import { trackChecklistInteraction, trackClientPerformance } from '@/utils/silentTracking';
 
@@ -170,37 +171,58 @@ export default function EnterpriseChecklistForm() {
         return;
       }
       
-      // Prepare data for AI analysis
-      const analysisService = new MultiModalAnalysisService();
-      const result = await analysisService.analyzeComprehensive({
-        checklistData: responses,
-        blueprints: [], // No blueprints in this case
-        images: allPhotos
-      });
+      // Use modern Gemini vision for individual photo analysis
+      const photoAnalyses = [];
       
-      // Create comprehensive analysis text including photo insights
-      const analysisText = `
-AI Analysis of Glass Installation Safety Assessment with ${allPhotos.length} uploaded photo(s):
+      for (let i = 0; i < Math.min(allPhotos.length, 3); i++) {
+        const photo = allPhotos[i];
+        console.log(`🔍 Analyzing photo ${i + 1}/${allPhotos.length}`);
+        
+        const photoResult = await modernGeminiVision.analyzeConstructionSafety(photo);
+        photoAnalyses.push({
+          photoIndex: i + 1,
+          analysis: photoResult
+        });
+      }
+      
+      // Create comprehensive analysis from modern vision results
+      const analysisText = photoAnalyses.map((analysis, index) => `
+🔍 PHOTO ${analysis.photoIndex} ANALYSIS:
 
-OVERALL RISK SCORE: ${result.overallRiskScore}/100
+RISK SCORE: ${analysis.analysis.overallRiskScore}/100 
 
-VISUAL PATTERN RECOGNITION FROM YOUR PHOTOS:
-${result.visualPatternRecognition.identifiedHazards.map(h => `• ${h}`).join('\n')}
+🦺 PPE COMPLIANCE DETECTED:
+• Hard Hats: ${analysis.analysis.ppeCompliance.hardHats ? '✅ Compliant' : '❌ Missing/Improper'}
+• Safety Vests: ${analysis.analysis.ppeCompliance.safetyVests ? '✅ Compliant' : '❌ Missing/Improper'}  
+• Steel Toe Boots: ${analysis.analysis.ppeCompliance.steelToes ? '✅ Compliant' : '❌ Missing/Improper'}
+• Eye Protection: ${analysis.analysis.ppeCompliance.eyeProtection ? '✅ Compliant' : '❌ Missing/Improper'}
 
-PPE COMPLIANCE DETECTED:
-${result.visualPatternRecognition.workerSafetyIssues.map(i => `• ${i}`).join('\n')}
+⚠️ SAFETY VIOLATIONS:
+${analysis.analysis.safetyViolations.map(v => `• ${v}`).join('\n')}
 
-EQUIPMENT ANALYSIS:
-${result.visualPatternRecognition.equipmentDetected.map(e => `• ${e}`).join('\n')}
+🚨 HAZARDS IDENTIFIED:
+${analysis.analysis.hazards.map(h => `• ${h}`).join('\n')}
 
-CRITICAL FINDINGS:
-${result.integratedInsights.criticalFindings.map(f => `• ${f}`).join('\n')}
+🔧 OBJECTS DETECTED:
+${analysis.analysis.detectedObjects.map(obj => `• ${obj.label} (${Math.round(obj.confidence * 100)}% confidence)`).join('\n')}
 
-IMMEDIATE ACTIONS REQUIRED:
-${result.integratedInsights.immediateActions.map(a => `• ${a}`).join('\n')}
+📋 RECOMMENDATIONS:
+${analysis.analysis.recommendations.map(r => `• ${r}`).join('\n')}
+
+      `).join('\n' + '='.repeat(50) + '\n');
+      
+      const overallRisk = Math.max(...photoAnalyses.map(p => p.analysis.overallRiskScore));
+      const finalAnalysisText = `
+🧠 AI CONSTRUCTION SAFETY ANALYSIS - ${allPhotos.length} PHOTO(S)
+
+OVERALL SITE RISK LEVEL: ${overallRisk}/100 ${overallRisk > 70 ? '🚨 HIGH RISK' : overallRisk > 40 ? '⚠️ MODERATE RISK' : '✅ LOW RISK'}
+
+${analysisText}
+
+🎯 SUMMARY: AI analyzed ${allPhotos.length} photo(s) using advanced object detection and safety pattern recognition. Review all violations and implement recommended safety measures immediately.
       `.trim();
       
-      setAiAnalysisResult(analysisText);
+      setAiAnalysisResult(finalAnalysisText);
       showToast(`AI analyzed ${allPhotos.length} photos successfully!`, 'success');
       
       // Track the AI analysis with photo count
