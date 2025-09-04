@@ -119,3 +119,21 @@ export interface CertificationExpiryAlert {
   days_until_expiry: number;
   certification_alert_days: number;
 }
+
+// For team member display and management
+export interface TeamMember {
+  id: string;
+  firstName?: string;
+  lastName?: string;
+  email: string;
+  phone?: string;
+  employeeId?: string;
+  department?: string;
+  role: 'admin' | 'project_manager' | 'field_worker' | 'safety_manager';
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  isActive?: boolean;
+  lastLogin?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
