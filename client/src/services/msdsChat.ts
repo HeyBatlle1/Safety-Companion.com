@@ -3,7 +3,7 @@ import { saveAnalysisToHistory } from './history';
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({
-  model: "gemini-2.5-flash",
+  model: "gemini-2.0-flash",
   generationConfig: {
     maxOutputTokens: 2000,
     temperature: 1.0
@@ -59,7 +59,7 @@ Format your response in a clear, professional manner with proper sections and bu
         response: text,
         type: 'sds_analysis',
         metadata: {
-          model: 'gemini-2.5-flash',
+          model: 'gemini-2.0-flash',
           temperature: 1.0,
           maxTokens: 2000
         }

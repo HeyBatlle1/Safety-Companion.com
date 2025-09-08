@@ -9,7 +9,7 @@ const genAI = new GoogleGenerativeAI(API_KEY);
 
 // Configuration for Gemini model - optimized for professional safety analysis
 const MODEL_CONFIG = {
-  modelName: "gemini-2.5-flash",
+  modelName: "gemini-2.0-flash",
   temperature: 0.8,  // Optimized for focused, professional safety recommendations
   maxOutputTokens: 2000
 };
