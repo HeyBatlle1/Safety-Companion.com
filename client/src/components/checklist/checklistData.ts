@@ -185,8 +185,8 @@ export const checklistData: ChecklistData = {
   // BACKUP CHECKLISTS - Preserved for fallback
   'safety-assessment': {
     title: 'Master JHA',
-    description: 'Comprehensive safety evaluation for high-rise glass installation and curtain wall systems',
-    aiContext: 'This assessment focuses on glass installation at height, including curtain wall systems, window walls, and structural glazing. Key risks include fall hazards, glass handling, weather conditions, and public safety.',
+    description: 'Comprehensive OSHA-compliant Job Hazard Analysis for any work activities',
+    aiContext: 'Provide comprehensive OSHA-compliant Job Hazard Analysis (JHA) for the described work activities, including regulatory citations and safety recommendations.',
     sections: [
       {
         title: 'Project Information & Location',
