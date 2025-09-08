@@ -6,7 +6,7 @@ const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 export class SafetyConnector {
-  private modelName: string = "gemini-2.0-flash";
+  private modelName: string = "gemini-2.5-flash";
   private temperature: number = 1.0;
   private maxTokens: number = 2000;
   private initialized: boolean = false;

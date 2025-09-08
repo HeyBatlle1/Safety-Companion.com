@@ -25,7 +25,7 @@ export class GeminiInsuranceAnalytics {
   private model: any;
 
   constructor() {
-    this.model = gemini.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    this.model = gemini.getGenerativeModel({ model: "gemini-2.5-flash" });
   }
 
   /**

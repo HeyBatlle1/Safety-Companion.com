@@ -22,10 +22,8 @@ export async function analyzeWithGemini(params: AnalysisParams | string): Promis
       throw new Error('Gemini API key not configured');
     }
 
-    // Use gemini-pro-vision for multi-modal analysis when visual data is present
-    const modelName = visualData && visualData.length > 0 
-      ? "gemini-pro-vision" 
-      : "gemini-2.0-flash";
+    // Use gemini-2.5-flash for all analysis (it handles both text and multi-modal)
+    const modelName = "gemini-2.5-flash";
 
     const model = genAI.getGenerativeModel({ 
       model: modelName,
