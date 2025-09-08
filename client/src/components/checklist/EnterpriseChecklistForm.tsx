@@ -19,7 +19,8 @@ import {
   Sun,
   CloudRain,
   Snowflake,
-  ThermometerSun
+  ThermometerSun,
+  RotateCcw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SafetyCard } from '@/components/ui/safety-card';
@@ -245,6 +246,16 @@ ${analysisText}
     }
   };
 
+  const handleClear = () => {
+    // Clear all form data
+    setResponses({
+      ppeCompliance: {}
+    });
+    setAiAnalysisResult(null);
+    setActiveTab('site-info');
+    showToast('Form cleared successfully', 'success');
+  };
+
   const handleSubmit = async () => {
     if (calculateCompletion() < 100) {
       showToast('Please complete all required fields', 'warning');
@@ -349,6 +360,15 @@ ${analysisText}
                 >
                   <Save className="h-4 w-4 mr-2" />
                   Save Draft
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleClear}
+                  disabled={isLoading}
+                  className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
+                >
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  CLEAR
                 </Button>
                 <Button
                   onClick={handleSubmit}
