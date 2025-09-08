@@ -184,7 +184,7 @@ export const checklistData: ChecklistData = {
   },
   // BACKUP CHECKLISTS - Preserved for fallback
   'safety-assessment': {
-    title: 'Glass Installation Site Safety Assessment',
+    title: 'Master JHA',
     description: 'Comprehensive safety evaluation for high-rise glass installation and curtain wall systems',
     aiContext: 'This assessment focuses on glass installation at height, including curtain wall systems, window walls, and structural glazing. Key risks include fall hazards, glass handling, weather conditions, and public safety.',
     sections: [

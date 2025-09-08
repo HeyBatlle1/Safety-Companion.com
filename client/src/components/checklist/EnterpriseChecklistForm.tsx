@@ -40,6 +40,7 @@ import { MultiModalAnalysisService } from '@/services/multiModalAnalysis';
 import { modernGeminiVision } from '@/services/modernGeminiVision';
 import BackButton from '@/components/navigation/BackButton';
 import { trackChecklistInteraction, trackClientPerformance } from '@/utils/silentTracking';
+import { checklistData } from './checklistData';
 
 // Professional hazard options with severity levels
 const hazardOptions = [
@@ -258,6 +259,12 @@ ${analysisText}
         // Submit logic here
         showToast('Checklist submitted successfully', 'success');
         
+        // Reset form state after successful submission
+        setResponses({
+          ppeCompliance: {}
+        });
+        setAiAnalysisResult(null);
+        
         // Track successful completion
         await trackChecklistInteraction({
           interactionType: 'checklist_completion',
@@ -302,7 +309,7 @@ ${analysisText}
               <BackButton />
               <div>
                 <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                  Daily Safety Inspection
+                  {templateId && checklistData[templateId] ? checklistData[templateId].title : 'Safety Checklist'}
                 </h1>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   {new Date().toLocaleDateString('en-US', { 
