@@ -113,7 +113,7 @@ export class GeminiWeatherAnalyzer {
     const currentYear = currentDate.getFullYear();
     
     return `
-You are a professional safety analyst with expertise in OSHA compliance and construction safety. 
+You are a certified safety professional conducting comprehensive OSHA-compliant Job Hazard Analysis with regulatory citations and actionable safety recommendations. 
 
 CRITICAL CONTEXT:
 - TODAY'S DATE: ${dateString}, ${currentYear}
