@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, Upload, X, Camera, MapPin, Loader, Check, ArrowLeft, Clock, Save, Printer, Share2, Flag, MessageSquare, Plus, Send, Sparkles, CheckCircle, XCircle, FileText, FileImage, Building, Eye } from 'lucide-react';
+import { AlertTriangle, Upload, X, Camera, MapPin, Loader, Check, ArrowLeft, Clock, Save, Printer, Share2, Flag, MessageSquare, Plus, Send, Sparkles, CheckCircle, XCircle, FileText, FileImage, Building, Eye, RotateCcw } from 'lucide-react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { checklistData } from './checklistData';
 import BackButton from '../navigation/BackButton';
@@ -349,6 +349,21 @@ Format your response professionally with clear sections and actionable insights.
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const handleClear = () => {
+    // Clear all responses
+    setResponses({});
+    setAiResponse(null);
+    setSafetyAnalysis(null);
+    setError(null);
+    
+    // Clear localStorage
+    if (templateId) {
+      localStorage.removeItem(`checklist-${templateId}-responses`);
+    }
+    
+    showToast('Form cleared successfully', 'success');
   };
 
   const handleSave = async () => {
@@ -753,6 +768,14 @@ Progress: ${Math.round(calculateProgress())}% complete
               title="Save Checklist"
             >
               <Save className="w-5 h-5" />
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={handleClear}
+              className="p-3 rounded-xl bg-gradient-to-r from-red-500 to-rose-500 text-white hover:from-red-600 hover:to-rose-600 transition-all duration-300 shadow-lg"
+              title="CLEAR All Data"
+            >
+              <RotateCcw className="w-5 h-5" />
             </motion.button>
             <motion.button
               whileTap={{ scale: 0.95 }}
