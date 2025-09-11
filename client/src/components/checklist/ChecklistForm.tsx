@@ -304,7 +304,7 @@ const ChecklistForm = () => {
           if (oshaRiskProfile) {
             showToast(`Analysis complete! Risk Level: ${intelligentAnalysis.risk_level.toUpperCase()}`, 'success');
           } else {
-            showToast('Analysis complete using local intelligence (OSHA API unavailable)', 'success');
+            showToast('Analysis complete using Supabase OSHA intelligence', 'success');
           }
         }
       }
