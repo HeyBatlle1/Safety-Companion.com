@@ -748,7 +748,7 @@ Progress: ${Math.round(calculateProgress())}% complete
             <p className="text-sm text-gray-400">Last updated: {new Date().toLocaleDateString()}</p>
           </div>
           
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 overflow-x-auto min-w-0 flex-shrink-0">
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={handleTimeView}
