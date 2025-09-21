@@ -749,10 +749,9 @@ Progress: ${Math.round(calculateProgress())}% complete
           </div>
           
           <div className="flex items-center space-x-2 overflow-x-auto min-w-0 flex-shrink-0">
-            <motion.button
-              whileTap={{ scale: 0.95 }}
+            <button
               onClick={handleTimeView}
-              className={`p-3 rounded-xl transition-all duration-300 ${
+              className={`p-3 rounded-xl transition-colors duration-150 active:scale-95 select-none ${
                 showHistory 
                   ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg' 
                   : 'bg-slate-700/50 text-gray-400 hover:text-white hover:bg-slate-600/50'
@@ -760,35 +759,31 @@ Progress: ${Math.round(calculateProgress())}% complete
               title="View History"
             >
               <Clock className="w-5 h-5" />
-            </motion.button>
-            <motion.button
-              whileTap={{ scale: 0.95 }}
+            </button>
+            <button
               onClick={handleSave}
-              className="p-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600 transition-all duration-300 shadow-lg"
+              className="p-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600 transition-colors duration-150 active:scale-95 shadow-lg select-none"
               title="Save Checklist"
             >
               <Save className="w-5 h-5" />
-            </motion.button>
-            <motion.button
-              whileTap={{ scale: 0.95 }}
+            </button>
+            <button
               onClick={handleClear}
-              className="p-3 rounded-xl bg-gradient-to-r from-red-500 to-rose-500 text-white hover:from-red-600 hover:to-rose-600 transition-all duration-300 shadow-lg"
+              className="p-3 rounded-xl bg-gradient-to-r from-red-500 to-rose-500 text-white hover:from-red-600 hover:to-rose-600 transition-colors duration-150 active:scale-95 shadow-lg select-none"
               title="CLEAR All Data"
             >
               <RotateCcw className="w-5 h-5" />
-            </motion.button>
-            <motion.button
-              whileTap={{ scale: 0.95 }}
+            </button>
+            <button
               onClick={handlePrint}
-              className="p-3 rounded-xl bg-gradient-to-r from-indigo-500 to-blue-500 text-white hover:from-indigo-600 hover:to-blue-600 transition-all duration-300 shadow-lg"
+              className="p-3 rounded-xl bg-gradient-to-r from-indigo-500 to-blue-500 text-white hover:from-indigo-600 hover:to-blue-600 transition-colors duration-150 active:scale-95 shadow-lg select-none"
               title="Print Checklist"
             >
               <Printer className="w-5 h-5" />
-            </motion.button>
-            <motion.button
-              whileTap={{ scale: 0.95 }}
+            </button>
+            <button
               onClick={handleShare}
-              className={`p-3 rounded-xl transition-all duration-300 shadow-lg ${
+              className={`p-3 rounded-xl transition-colors duration-150 active:scale-95 shadow-lg select-none ${
                 shareSuccess === true ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
                 shareSuccess === false ? 'bg-gradient-to-r from-red-500 to-rose-500' :
                 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600'
@@ -796,7 +791,7 @@ Progress: ${Math.round(calculateProgress())}% complete
               title="Share Checklist"
             >
               <Share2 className="w-5 h-5" />
-            </motion.button>
+            </button>
           </div>
         </div>
 
