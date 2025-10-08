@@ -1,5 +1,9 @@
 import express from 'express';
 import { GoogleGenAI } from '@google/genai';
+import { safetyIntelligenceService } from '../services/safetyIntelligenceService';
+import { db } from '../db';
+import { analysisHistory } from '../../shared/schema';
+import { desc, sql } from 'drizzle-orm';
 
 const router = express.Router();
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
@@ -21,13 +25,45 @@ router.post('/checklist-analysis', async (req, res) => {
       return res.status(400).json({ error: 'Checklist data is required' });
     }
 
-    console.log(`🔍 Analyzing checklist with Gemini 2.5 Flash...`);
+    console.log(`🔍 Pulling knowledge pool data...`);
     
-    // Build analysis prompt with the weather data already included from frontend
-    const prompt = buildChecklistAnalysisPrompt(checklistData);
+    // Pull OSHA risk profile for construction (NAICS 23)
+    let oshaRiskProfile = null;
+    try {
+      oshaRiskProfile = await safetyIntelligenceService.getRiskProfile('23');
+      console.log('✅ OSHA risk profile loaded:', oshaRiskProfile?.industryName);
+    } catch (error) {
+      console.warn('⚠️ Could not load OSHA data:', error);
+    }
+
+    // Pull recent historical analysis data for context
+    let historicalContext = null;
+    try {
+      const recentAnalyses = await db
+        .select()
+        .from(analysisHistory)
+        .orderBy(desc(analysisHistory.createdAt))
+        .limit(5);
+      
+      if (recentAnalyses.length > 0) {
+        historicalContext = recentAnalyses.map(a => ({
+          type: a.analysisType,
+          findings: a.findings,
+          timestamp: a.createdAt
+        }));
+        console.log(`✅ Loaded ${historicalContext.length} historical analyses`);
+      }
+    } catch (error) {
+      console.warn('⚠️ Could not load historical data:', error);
+    }
+
+    console.log(`🔍 Analyzing checklist with Gemini 2.5 Flash + Knowledge Pool...`);
+    
+    // Build analysis prompt with knowledge pool data
+    const prompt = buildChecklistAnalysisPrompt(checklistData, oshaRiskProfile, historicalContext);
     console.log('📝 Prompt length:', prompt.length, 'characters');
     
-    // Direct Gemini analysis - NO function calling, NO weather fetching
+    // Direct Gemini analysis with knowledge pool context
     const result = await genAI.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: [{ parts: [{ text: prompt }] }],
@@ -46,6 +82,8 @@ router.post('/checklist-analysis', async (req, res) => {
     res.json({
       success: true,
       analysis,
+      oshaData: oshaRiskProfile,
+      historicalInsights: historicalContext?.length || 0,
       timestamp: new Date().toISOString()
     });
 
@@ -60,9 +98,9 @@ router.post('/checklist-analysis', async (req, res) => {
 
 /**
  * Build comprehensive prompt for checklist analysis
- * Uses weather data already provided from the frontend
+ * Uses weather data, OSHA database, and historical analysis context
  */
-function buildChecklistAnalysisPrompt(checklistData: any): string {
+function buildChecklistAnalysisPrompt(checklistData: any, oshaData: any = null, historicalData: any = null): string {
   // Extract site info from various possible locations in the data
   const site = checklistData.responses?.site_location || 
                 checklistData.site_location || 
@@ -87,8 +125,33 @@ function buildChecklistAnalysisPrompt(checklistData: any): string {
     weekday: 'long'
   });
   const currentYear = currentDate.getFullYear();
+
+  // Build OSHA knowledge pool section
+  let oshaContext = '';
+  if (oshaData) {
+    oshaContext = `
+
+OSHA INDUSTRY INTELLIGENCE (2023 BLS Data):
+- Industry: ${oshaData.industryName}
+- Injury Rate: ${oshaData.injuryRate} per 100 workers
+- Fatalities (2023): ${oshaData.fatalities2023 || 'Data unavailable'}
+- Risk Score: ${oshaData.riskScore}/100
+- Risk Category: ${oshaData.riskCategory}
+- Key Recommendations: ${oshaData.recommendations?.join(', ') || 'Standard safety protocols'}`;
+  }
+
+  // Build historical analysis context
+  let historicalContext = '';
+  if (historicalData && historicalData.length > 0) {
+    historicalContext = `
+
+HISTORICAL INCIDENT PATTERNS (Recent Analyses):
+${historicalData.map((h: any, i: number) => 
+  `${i + 1}. ${h.type} - ${h.findings?.substring(0, 200) || 'No details'}...`
+).join('\n')}`;
+  }
   
-  return `You are a Senior Predictive Safety Analyst, specializing in incident forecasting and root cause analysis for the construction industry. You have 25 years of field experience. Your primary function is to not just identify risks, but to predict the most likely incidents and explain how they would happen.
+  return `You are a Senior Predictive Safety Analyst, specializing in incident forecasting and root cause analysis for the construction industry. You have 25 years of field experience and access to real OSHA injury databases and historical incident patterns. Your primary function is to not just identify risks, but to predict the most likely incidents and explain how they would happen based on actual industry data.
 
 CRITICAL CONTEXT:
 - TODAY'S DATE: ${dateString}, ${currentYear}
@@ -102,6 +165,8 @@ JOB SITE DETAILS:
 
 CHECKLIST DATA:
 ${JSON.stringify(checklistData, null, 2)}
+${oshaContext}
+${historicalContext}
 
 ANALYSIS REQUIREMENTS (Follow this logical sequence):
 

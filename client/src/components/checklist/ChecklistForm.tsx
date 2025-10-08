@@ -226,34 +226,33 @@ const ChecklistForm = () => {
         }))
       };
 
-      // Use Master JHA weather-enabled analysis for all checklists
-      console.log('🔍 Checking if templateId === master-jha...');
-      if (templateId === 'master-jha') {
-        console.log('🎯 Master JHA detected - calling /api/checklist-analysis');
-        console.log('Checklist data:', checklistData);
-        
-        // Master JHA route with weather integration
-        const response = await fetch('/api/checklist-analysis', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(checklistData)
-        });
+      // ALL CHECKLISTS now use the predictive analysis route
+      console.log('🎯 Sending to /api/checklist-analysis for predictive analysis');
+      console.log('Checklist data:', checklistData);
+      
+      const response = await fetch('/api/checklist-analysis', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(checklistData)
+      });
 
-        console.log('Response status:', response.status);
-        
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Analysis failed:', errorText);
-          throw new Error('Analysis failed: ' + errorText);
-        }
+      console.log('Response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Analysis failed:', errorText);
+        throw new Error('Analysis failed: ' + errorText);
+      }
 
-        const result = await response.json();
-        console.log('Analysis result:', result);
-        setAiResponse(result.analysis);
-        showToast('Weather-integrated Master JHA analysis completed!', 'success');
-      } else {
+      const result = await response.json();
+      console.log('Analysis result:', result);
+      setAiResponse(result.analysis);
+      showToast('Predictive safety analysis completed!', 'success');
+
+      // LEGACY CODE BELOW - Keep for fallback but won't be reached
+      if (false) {
         // Collect all blueprints and images for multi-modal analysis
         const allBlueprints: BlueprintUpload[] = [];
         const allImages: string[] = [];
