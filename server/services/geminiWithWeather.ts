@@ -54,7 +54,11 @@ export class GeminiWeatherAnalyzer {
       const functionCalls = response.functionCalls();
       
       if (functionCalls && functionCalls.length > 0) {
-        const functionResponses = [];
+        // Build conversation history with function results
+        const conversationHistory = [
+          { parts: [{ text: prompt }] },  // Original user prompt
+          { parts: response.parts }       // Gemini's response with function calls
+        ];
         
         for (const functionCall of functionCalls) {
           if (functionCall.name === 'getWeatherForSafetyAnalysis') {
@@ -63,19 +67,22 @@ export class GeminiWeatherAnalyzer {
             
             const weatherData = await getWeatherForSafetyAnalysis(location);
             
-            functionResponses.push({
-              functionResponse: {
-                name: functionCall.name,
-                response: weatherData,
-              }
+            // Add function response to conversation
+            conversationHistory.push({
+              parts: [{
+                functionResponse: {
+                  name: functionCall.name,
+                  response: weatherData,
+                }
+              }]
             });
           }
         }
         
-        // Send function results back to Gemini
+        // Send complete conversation with function results back to Gemini
         const functionResult = await genAI.models.generateContent({
           model: 'gemini-2.5-flash',
-          contents: functionResponses,
+          contents: conversationHistory,
           generationConfig: {
             temperature: 0.7,
             maxOutputTokens: 4000,
