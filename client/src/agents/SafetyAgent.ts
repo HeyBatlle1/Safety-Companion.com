@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import { WeatherAPIClient, WeatherData } from '../services/WeatherAPIClient';
 import { GeoLocationService, SiteLocation } from '../services/GeoLocationService';
 import { TaskScheduleManager, Task } from '../services/TaskScheduleManager';
@@ -27,13 +27,13 @@ interface RiskAssessment {
 }
 
 export class SafetyAgent {
-  private genAI: GoogleGenerativeAI;
+  private genAI: GoogleGenAI;
   private weatherAPI: WeatherAPIClient;
   private geoService: GeoLocationService;
   private taskManager: TaskScheduleManager;
 
   constructor() {
-    this.genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
+    this.genAI = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
     this.weatherAPI = new WeatherAPIClient();
     this.geoService = new GeoLocationService();
     this.taskManager = new TaskScheduleManager(supabase);
@@ -115,13 +115,13 @@ Format your response as a structured JSON object.`;
       const siteData = await this.collectSiteData(siteId);
       const prompt = this.preparePrompt(siteData);
       
-      const model = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-      const result = await model.generateContent(prompt);
-      const response = result.response;
+      const result = await this.genAI.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: [{ parts: [{ text: prompt }] }]
+      });
       
-      return this.parseResponse(response.text());
+      return this.parseResponse(result.response.text());
     } catch (error) {
-
       throw new Error('Failed to generate risk assessment');
     }
   }

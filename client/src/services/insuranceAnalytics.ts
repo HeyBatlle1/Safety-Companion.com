@@ -1,8 +1,8 @@
 // Insurance Analytics Service - Google Gemini Powered
-import { GoogleGenAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 
 // Initialize Google Gemini AI (Google AI Studio)
-const gemini = new GoogleGenAI(import.meta.env.VITE_GEMINI_API_KEY || '');
+const gemini = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || '' });
 
 interface RiskAnalysis {
   riskScore: number; // 1-100
@@ -34,7 +34,7 @@ export class InsuranceAnalyticsService {
   private model: any;
 
   constructor() {
-    this.model = gemini.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    // Model initialized inline for each request
   }
 
   /**
@@ -87,8 +87,9 @@ Focus on:
 `;
 
     try {
-      const result = await this.model.generateContent({
-        contents: prompt,
+      const result = await gemini.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
           temperature: 0.3, // Lower temperature for consistent risk assessment
           topK: 1,
@@ -173,8 +174,9 @@ Focus on:
 `;
 
     try {
-      const result = await this.model.generateContent({
-        contents: prompt,
+      const result = await gemini.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
           temperature: 0.2,
           topK: 1,
@@ -270,8 +272,9 @@ Base analysis on:
 `;
 
     try {
-      const result = await this.model.generateContent({
-        contents: prompt,
+      const result = await gemini.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
           temperature: 0.1, // Very low for consistent risk assessment
           topK: 1,

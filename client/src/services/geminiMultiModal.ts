@@ -1,7 +1,7 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(API_KEY);
+const genAI = new GoogleGenAI({ apiKey: API_KEY });
 
 interface AnalysisParams {
   prompt: string;
@@ -22,24 +22,14 @@ export async function analyzeWithGemini(params: AnalysisParams | string): Promis
       throw new Error('Gemini API key not configured');
     }
 
-    // Use gemini-pro-vision for multi-modal analysis when visual data is present
-    const modelName = visualData && visualData.length > 0 
-      ? "gemini-pro-vision" 
-      : "gemini-2.0-flash";
-
-    const model = genAI.getGenerativeModel({ 
-      model: modelName,
-      generationConfig: {
-        temperature: 0.9,
-        maxOutputTokens: 4096
-      }
-    });
+    // Use gemini-2.5-flash for all analysis (supports both text and vision)
+    const modelName = "gemini-2.5-flash";
 
     // Prepare content for multi-modal analysis
-    const content = [];
+    const parts = [];
     
     // Add the text prompt
-    content.push({ text: prompt });
+    parts.push({ text: prompt });
 
     // Add visual data if available
     if (visualData && visualData.length > 0) {
@@ -47,7 +37,7 @@ export async function analyzeWithGemini(params: AnalysisParams | string): Promis
         if (visual.type === 'photo' && visual.data) {
           // Handle base64 images
           const base64Data = visual.data.split(',')[1]; // Remove data:image/jpeg;base64, prefix
-          content.push({
+          parts.push({
             inlineData: {
               mimeType: 'image/jpeg',
               data: base64Data
@@ -56,17 +46,24 @@ export async function analyzeWithGemini(params: AnalysisParams | string): Promis
         } else if (visual.type === 'blueprint' && visual.url) {
           // For blueprints stored in Supabase, we'd need to fetch and convert
           // For now, include URL reference in the prompt
-          content.push({ 
+          parts.push({ 
             text: `\n[Blueprint: ${visual.metadata?.fileName || 'Blueprint'} at ${visual.url}]\n` 
           });
         }
       }
     }
 
-    // Generate response
-    const result = await model.generateContent(content);
-    const response = result.response;
-    const text = response.text();
+    // Generate response with new SDK
+    const result = await genAI.models.generateContent({
+      model: modelName,
+      contents: [{ parts }],
+      generationConfig: {
+        temperature: 0.9,
+        maxOutputTokens: 4096
+      }
+    });
+
+    const text = result.response.text();
 
     return text;
   } catch (error) {

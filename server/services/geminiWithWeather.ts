@@ -1,41 +1,14 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import { getWeatherForSafetyAnalysis } from './weatherFunction';
 
-const gemini = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
 /**
  * Gemini AI service with weather function calling capability
- * Automatically fetches weather data when analyzing safety checklists
+ * Automatically fetches weather data when analyzing safety checklists  
+ * Using Gemini 2.5 Flash with thinking mode disabled for faster responses
  */
 export class GeminiWeatherAnalyzer {
-  private model;
-
-  constructor() {
-    // Define the weather function that Gemini can call
-    const weatherFunction = {
-      name: 'getWeatherForSafetyAnalysis',
-      description: 'Get current weather conditions and safety recommendations for a specific job site location',
-      parameters: {
-        type: 'object' as const,
-        properties: {
-          location: {
-            type: 'string' as const,
-            description: 'The job site address or location (e.g., "123 Main St, Indianapolis, IN")',
-          },
-        },
-        required: ['location'],
-      },
-    };
-
-    this.model = gemini.getGenerativeModel({
-      model: 'gemini-2.0-flash-exp',
-      tools: [
-        {
-          functionDeclarations: [weatherFunction],
-        },
-      ],
-    });
-  }
 
   /**
    * Analyze checklist with automatic weather integration
@@ -45,15 +18,34 @@ export class GeminiWeatherAnalyzer {
     try {
       const prompt = this.buildChecklistAnalysisPrompt(checklistData);
       
-      const chat = this.model.startChat({
+      // First request - Gemini analyzes and may request weather data
+      const result = await genAI.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: [{ parts: [{ text: prompt }] }],
+        tools: [
+          {
+            functionDeclarations: [{
+              name: 'getWeatherForSafetyAnalysis',
+              description: 'Get current weather conditions and safety recommendations for a specific job site location',
+              parameters: {
+                type: 'object' as const,
+                properties: {
+                  location: {
+                    type: 'string' as const,
+                    description: 'The job site address or location (e.g., "123 Main St, Indianapolis, IN")',
+                  },
+                },
+                required: ['location'],
+              },
+            }],
+          },
+        ],
         generationConfig: {
-          temperature: 0.7,  // Balanced for detailed OSHA compliance analysis
+          temperature: 0.7,
           maxOutputTokens: 4000,
         },
       });
 
-      const result = await chat.sendMessage(prompt);
-      
       // Handle function calls
       const response = result.response;
       const functionCalls = response.functionCalls();
@@ -69,18 +61,23 @@ export class GeminiWeatherAnalyzer {
             const weatherData = await getWeatherForSafetyAnalysis(location);
             
             functionResponses.push({
-              name: functionCall.name,
-              response: weatherData,
+              functionResponse: {
+                name: functionCall.name,
+                response: weatherData,
+              }
             });
           }
         }
         
         // Send function results back to Gemini
-        const functionResult = await chat.sendMessage(
-          functionResponses.map(fr => ({
-            functionResponse: fr
-          }))
-        );
+        const functionResult = await genAI.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: functionResponses,
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 4000,
+          },
+        });
         
         return functionResult.response.text();
       }

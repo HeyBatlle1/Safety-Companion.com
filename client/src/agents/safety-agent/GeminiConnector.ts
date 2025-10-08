@@ -1,12 +1,12 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import { saveAnalysisToHistory } from '../../services/history';
 
 // Initialize Gemini with API key from env
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(API_KEY);
+const genAI = new GoogleGenAI({ apiKey: API_KEY });
 
 export class SafetyConnector {
-  private modelName: string = "gemini-2.0-flash";
+  private modelName: string = "gemini-2.5-flash";
   private temperature: number = 1.0;
   private maxTokens: number = 2000;
   private initialized: boolean = false;
@@ -19,7 +19,6 @@ export class SafetyConnector {
 
   private validateConfiguration(): boolean {
     if (!API_KEY || API_KEY.length < 10) {
-      
       return false;
     }
     return true;
@@ -28,7 +27,6 @@ export class SafetyConnector {
   async generateContent(prompt: string): Promise<{ response: { text: () => string } }> {
     try {
       if (!this.initialized) {
-        
         return this.getFallbackResponse('Configuration error: API service unavailable.');
       }
       
@@ -36,24 +34,22 @@ export class SafetyConnector {
         return this.getFallbackResponse('Empty prompt received. Please provide detailed safety information for assessment.');
       }
 
-      const model = genAI.getGenerativeModel({ 
-        model: this.modelName,
-        generationConfig: {
-          maxOutputTokens: this.maxTokens,
-          temperature: this.temperature
-        }
-      });
-      
       // Add retries for network resilience
       let attempts = 0;
       const maxAttempts = 3;
-      let lastError;
       
       while (attempts < maxAttempts) {
         try {
-          const result = await model.generateContent(prompt);
-          const response = await result.response;
-          const text = response.text();
+          const result = await genAI.models.generateContent({
+            model: this.modelName,
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              maxOutputTokens: this.maxTokens,
+              temperature: this.temperature
+            }
+          });
+          
+          const text = result.response.text();
           
           // Only save to history if we have a valid response
           if (text && text.length > 0) {
@@ -70,7 +66,6 @@ export class SafetyConnector {
                 }
               });
             } catch (historyError) {
-              
               // Continue even if history saving fails
             }
           }
@@ -81,8 +76,6 @@ export class SafetyConnector {
             }
           };
         } catch (error) {
-          lastError = error;
-          
           attempts++;
           
           // Wait before retry with exponential backoff
@@ -93,10 +86,8 @@ export class SafetyConnector {
         }
       }
       
-      
       return this.getFallbackResponse('Unable to generate safety assessment after multiple attempts.');
     } catch (error) {
-      
       return this.getFallbackResponse('An unexpected error occurred while analyzing safety data.');
     }
   }

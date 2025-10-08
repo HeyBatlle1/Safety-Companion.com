@@ -1,8 +1,8 @@
 // Big Picture Pattern Analysis Service - Google Gemini Powered
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 
 // Initialize Google Gemini AI with server-side API key
-const gemini = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
 interface PatternAnalysisResult {
   analysisId: string;
@@ -42,11 +42,6 @@ interface PatternAnalysisResult {
 }
 
 export class PatternAnalysisService {
-  private model: any;
-
-  constructor() {
-    this.model = gemini.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
-  }
 
   /**
    * Analyze multiple analysis records for patterns (Monthly/Quarterly/Annual)
@@ -60,7 +55,8 @@ export class PatternAnalysisService {
     const prompt = this.buildPatternAnalysisPrompt(analysisRecords, timeframe);
 
     try {
-      const result = await this.model.generateContent({
+      const result = await genAI.models.generateContent({
+        model: 'gemini-2.5-flash',
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
           temperature: 0.2,
@@ -269,7 +265,8 @@ Key Patterns: ${patternAnalysis.keyPatterns.riskTrends.join(', ')}
 
 Create a concise executive summary covering key findings, financial impact, and recommendations.`;
 
-      const result = await this.model.generateContent({
+      const result = await genAI.models.generateContent({
+        model: 'gemini-2.5-flash',
         contents: [{ parts: [{ text: summaryPrompt }] }],
         generationConfig: {
           temperature: 0.3,
