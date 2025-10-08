@@ -6,7 +6,7 @@ import { analysisHistory } from '../../shared/schema';
 import { desc, sql } from 'drizzle-orm';
 
 const router = express.Router();
-const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+const genAI = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY || '' });
 
 /**
  * POST /api/checklist-analysis
