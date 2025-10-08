@@ -63,10 +63,20 @@ router.post('/checklist-analysis', async (req, res) => {
  * Uses weather data already provided from the frontend
  */
 function buildChecklistAnalysisPrompt(checklistData: any): string {
-  const site = checklistData.responses?.site_location || checklistData.site_location || 'Unknown location';
-  const workType = checklistData.responses?.project_type || checklistData.project_type || 'Construction work';
-  const workHeight = checklistData.responses?.work_height || checklistData.work_height || 'Unknown height';
-  const weatherData = checklistData.weatherData || checklistData.weather || null;
+  // Extract site info from various possible locations in the data
+  const site = checklistData.responses?.site_location || 
+                checklistData.site_location || 
+                checklistData.sections?.[0]?.responses?.find((r: any) => r.question?.toLowerCase().includes('location'))?.response ||
+                'Unknown location';
+  
+  const workType = checklistData.responses?.project_type || 
+                    checklistData.project_type || 
+                    checklistData.template ||
+                    'Construction work';
+  
+  const workHeight = checklistData.responses?.work_height || 
+                      checklistData.work_height || 
+                      'Unknown height';
   
   // Force current date awareness
   const currentDate = new Date();
@@ -78,32 +88,23 @@ function buildChecklistAnalysisPrompt(checklistData: any): string {
   });
   const currentYear = currentDate.getFullYear();
   
-  let weatherSection = '';
-  if (weatherData) {
-    weatherSection = `
-WEATHER CONDITIONS (from frontend):
-${JSON.stringify(weatherData, null, 2)}
-`;
-  }
-  
-  return `
-You are a professional safety analyst with expertise in OSHA compliance and construction safety. 
+  return `You are a professional safety analyst with expertise in OSHA compliance and construction safety.
 
 CRITICAL CONTEXT:
 - TODAY'S DATE: ${dateString}, ${currentYear}
 - You are analyzing this checklist on ${dateString}, ${currentYear}
+- This is NOT October 26, 2023 - you are working in ${currentYear}
 
 JOB SITE DETAILS:
 - Location: ${site}
 - Work Type: ${workType}
 - Work Height: ${workHeight} feet
-${weatherSection}
 
 CHECKLIST DATA:
 ${JSON.stringify(checklistData, null, 2)}
 
 ANALYSIS REQUIREMENTS:
-1. **Weather Analysis**: Factor weather conditions (if provided) into your safety recommendations
+1. **Weather Analysis**: If weather data is available in the checklist, factor weather conditions into your safety recommendations
 2. **Fall Protection**: Assess fall hazards based on work height and weather conditions
 3. **Electrical Safety**: Evaluate electrical risks considering weather and site conditions
 4. **General Hazards**: Identify all site-specific safety concerns
@@ -111,7 +112,7 @@ ANALYSIS REQUIREMENTS:
 
 Please provide a comprehensive safety analysis that includes:
 
-**WEATHER-DEPENDENT SAFETY ASSESSMENT** (if weather data provided)
+**WEATHER-DEPENDENT SAFETY ASSESSMENT** (if weather data is available in the checklist)
 - Current weather conditions and their impact on work safety
 - Weather-specific recommendations and restrictions
 - Forecast considerations for planning
@@ -132,8 +133,7 @@ Please provide a comprehensive safety analysis that includes:
 - Evacuation considerations
 - Communication protocols
 
-Format your response as a professional safety report that a construction supervisor could use to make informed safety decisions.
-`;
+Format your response as a professional safety report that a construction supervisor could use to make informed safety decisions.`;
 }
 
 export default router;
