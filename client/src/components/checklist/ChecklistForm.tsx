@@ -199,11 +199,6 @@ const ChecklistForm = () => {
     setAiResponse(null);
     setSafetyAnalysis(null);
 
-    console.log('🔍 SUBMIT HANDLER STARTED');
-    console.log('templateId value:', templateId);
-    console.log('templateId type:', typeof templateId);
-    console.log('Is master-jha?', templateId === 'master-jha');
-
     try {
       // Format checklist data for enhanced AI processing
       const checklistData = {
@@ -226,33 +221,25 @@ const ChecklistForm = () => {
         }))
       };
 
-      // ALL CHECKLISTS now use the predictive analysis route
-      console.log('🎯 Sending to /api/checklist-analysis for predictive analysis');
-      console.log('Checklist data:', checklistData);
-      
-      const response = await fetch('/api/checklist-analysis', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(checklistData)
-      });
+      // Use Master JHA weather-enabled analysis for all checklists
+      if (templateId === 'master-jha') {
+        // Master JHA route with weather integration
+        const response = await fetch('/api/checklist-analysis', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(checklistData)
+        });
 
-      console.log('Response status:', response.status);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Analysis failed:', errorText);
-        throw new Error('Analysis failed: ' + errorText);
-      }
+        if (!response.ok) {
+          throw new Error('Analysis failed');
+        }
 
-      const result = await response.json();
-      console.log('Analysis result:', result);
-      setAiResponse(result.analysis);
-      showToast('Predictive safety analysis completed!', 'success');
-
-      // LEGACY CODE BELOW - Keep for fallback but won't be reached
-      if (false) {
+        const analysisResult = await response.text();
+        setAiResponse(analysisResult);
+        showToast('Weather-integrated Master JHA analysis completed!', 'success');
+      } else {
         // Collect all blueprints and images for multi-modal analysis
         const allBlueprints: BlueprintUpload[] = [];
         const allImages: string[] = [];
@@ -761,10 +748,11 @@ Progress: ${Math.round(calculateProgress())}% complete
             <p className="text-sm text-gray-400">Last updated: {new Date().toLocaleDateString()}</p>
           </div>
           
-          <div className="flex items-center space-x-2 overflow-x-auto min-w-0 flex-shrink-0">
-            <button
+          <div className="flex items-center space-x-3">
+            <motion.button
+              whileTap={{ scale: 0.95 }}
               onClick={handleTimeView}
-              className={`p-3 rounded-xl transition-colors duration-150 active:scale-95 select-none ${
+              className={`p-3 rounded-xl transition-all duration-300 ${
                 showHistory 
                   ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg' 
                   : 'bg-slate-700/50 text-gray-400 hover:text-white hover:bg-slate-600/50'
@@ -772,31 +760,35 @@ Progress: ${Math.round(calculateProgress())}% complete
               title="View History"
             >
               <Clock className="w-5 h-5" />
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
               onClick={handleSave}
-              className="p-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600 transition-colors duration-150 active:scale-95 shadow-lg select-none"
+              className="p-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600 transition-all duration-300 shadow-lg"
               title="Save Checklist"
             >
               <Save className="w-5 h-5" />
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
               onClick={handleClear}
-              className="p-3 rounded-xl bg-gradient-to-r from-red-500 to-rose-500 text-white hover:from-red-600 hover:to-rose-600 transition-colors duration-150 active:scale-95 shadow-lg select-none"
+              className="p-3 rounded-xl bg-gradient-to-r from-red-500 to-rose-500 text-white hover:from-red-600 hover:to-rose-600 transition-all duration-300 shadow-lg"
               title="CLEAR All Data"
             >
               <RotateCcw className="w-5 h-5" />
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
               onClick={handlePrint}
-              className="p-3 rounded-xl bg-gradient-to-r from-indigo-500 to-blue-500 text-white hover:from-indigo-600 hover:to-blue-600 transition-colors duration-150 active:scale-95 shadow-lg select-none"
+              className="p-3 rounded-xl bg-gradient-to-r from-indigo-500 to-blue-500 text-white hover:from-indigo-600 hover:to-blue-600 transition-all duration-300 shadow-lg"
               title="Print Checklist"
             >
               <Printer className="w-5 h-5" />
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
               onClick={handleShare}
-              className={`p-3 rounded-xl transition-colors duration-150 active:scale-95 shadow-lg select-none ${
+              className={`p-3 rounded-xl transition-all duration-300 shadow-lg ${
                 shareSuccess === true ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
                 shareSuccess === false ? 'bg-gradient-to-r from-red-500 to-rose-500' :
                 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600'
@@ -804,7 +796,7 @@ Progress: ${Math.round(calculateProgress())}% complete
               title="Share Checklist"
             >
               <Share2 className="w-5 h-5" />
-            </button>
+            </motion.button>
           </div>
         </div>
 

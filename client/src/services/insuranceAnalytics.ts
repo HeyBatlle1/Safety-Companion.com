@@ -1,8 +1,8 @@
 // Insurance Analytics Service - Google Gemini Powered
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI } from "@google/generative-ai";
 
 // Initialize Google Gemini AI (Google AI Studio)
-const gemini = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || '' });
+const gemini = new GoogleGenAI(import.meta.env.VITE_GEMINI_API_KEY || '');
 
 interface RiskAnalysis {
   riskScore: number; // 1-100
@@ -34,7 +34,7 @@ export class InsuranceAnalyticsService {
   private model: any;
 
   constructor() {
-    // Model initialized inline for each request
+    this.model = gemini.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
   }
 
   /**
@@ -87,18 +87,14 @@ Focus on:
 `;
 
     try {
-      const result = await gemini.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: [{ parts: [{ text: prompt }] }],
+      const result = await this.model.generateContent({
+        contents: prompt,
         generationConfig: {
           temperature: 0.3, // Lower temperature for consistent risk assessment
           topK: 1,
           topP: 0.8,
           maxOutputTokens: 1000,
           responseMimeType: "application/json"
-        },
-        thinkingConfig: {
-          thinkingBudget: 0
         }
       });
 
@@ -177,18 +173,14 @@ Focus on:
 `;
 
     try {
-      const result = await gemini.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: [{ parts: [{ text: prompt }] }],
+      const result = await this.model.generateContent({
+        contents: prompt,
         generationConfig: {
           temperature: 0.2,
           topK: 1,
           topP: 0.8,
           maxOutputTokens: 1000,
           responseMimeType: "application/json"
-        },
-        thinkingConfig: {
-          thinkingBudget: 0
         }
       });
 
@@ -278,18 +270,14 @@ Base analysis on:
 `;
 
     try {
-      const result = await gemini.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: [{ parts: [{ text: prompt }] }],
+      const result = await this.model.generateContent({
+        contents: prompt,
         generationConfig: {
           temperature: 0.1, // Very low for consistent risk assessment
           topK: 1,
           topP: 0.7,
           maxOutputTokens: 1500,
           responseMimeType: "application/json"
-        },
-        thinkingConfig: {
-          thinkingBudget: 0
         }
       });
 

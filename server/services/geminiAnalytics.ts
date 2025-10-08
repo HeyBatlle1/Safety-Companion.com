@@ -1,9 +1,9 @@
-// Server-side Google Gemini Insurance Analytics Service  
-import { GoogleGenAI } from "@google/genai";
+// Server-side Google Gemini Insurance Analytics Service
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { trackAIAnalysis } from './silentTracking';
 
 // Initialize Google Gemini AI with server-side API key
-const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+const gemini = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 interface RiskAnalysis {
   riskScore: number; // 1-100
@@ -22,6 +22,12 @@ interface RiskAnalysis {
 }
 
 export class GeminiInsuranceAnalytics {
+  private model: any;
+
+  constructor() {
+    this.model = gemini.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+  }
+
   /**
    * Analyze chat interactions for insurance risk patterns
    */
@@ -76,18 +82,14 @@ Focus on:
 `;
 
     try {
-      const result = await genAI.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: [{ parts: [{ text: prompt }] }],
+      const result = await this.model.generateContent({
+        contents: prompt,
         generationConfig: {
-          temperature: 0.3,
+          temperature: 0.3, // Lower temperature for consistent risk assessment
           topK: 1,
           topP: 0.8,
           maxOutputTokens: 1000,
           responseMimeType: "application/json"
-        },
-        thinkingConfig: {
-          thinkingBudget: 0
         }
       });
 
@@ -174,18 +176,14 @@ Focus on:
 `;
 
     try {
-      const result = await genAI.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: [{ parts: [{ text: prompt }] }],
+      const result = await this.model.generateContent({
+        contents: prompt,
         generationConfig: {
           temperature: 0.2,
           topK: 1,
           topP: 0.8,
           maxOutputTokens: 1000,
           responseMimeType: "application/json"
-        },
-        thinkingConfig: {
-          thinkingBudget: 0
         }
       });
 
@@ -258,18 +256,14 @@ Consider:
 `;
 
     try {
-      const result = await genAI.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: [{ parts: [{ text: prompt }] }],
+      const result = await this.model.generateContent({
+        contents: prompt,
         generationConfig: {
           temperature: 0.4,
           topK: 1,
           topP: 0.8,
           maxOutputTokens: 1000,
           responseMimeType: "application/json"
-        },
-        thinkingConfig: {
-          thinkingBudget: 0
         }
       });
 

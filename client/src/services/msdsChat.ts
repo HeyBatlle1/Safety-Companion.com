@@ -1,7 +1,14 @@
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { saveAnalysisToHistory } from './history';
 
-const genAI = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
+const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({
+  model: "gemini-2.0-flash",
+  generationConfig: {
+    maxOutputTokens: 2000,
+    temperature: 1.0
+  }
+});
 
 export const getMSDSResponse = async (message: string): Promise<string> => {
   try {
@@ -40,20 +47,10 @@ If the query is not related to chemical safety or workplace safety, politely red
 
 Format your response in a clear, professional manner with proper sections and bullet points where appropriate.`;
     
-    // Get response from Gemini 2.5 Flash
-    const result = await genAI.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: [{ parts: [{ text: safetyPrompt }] }],
-      generationConfig: {
-        maxOutputTokens: 2000,
-        temperature: 1.0
-      },
-      thinkingConfig: {
-        thinkingBudget: 0
-      }
-    });
-
-    const text = result.response.text();
+    // Get response from Gemini
+    const result = await model.generateContent(safetyPrompt);
+    const response = result.response;
+    const text = response.text();
     
     // Save to analysis history
     try {
@@ -62,18 +59,19 @@ Format your response in a clear, professional manner with proper sections and bu
         response: text,
         type: 'sds_analysis',
         metadata: {
-          model: 'gemini-2.5-flash',
+          model: 'gemini-2.0-flash',
           temperature: 1.0,
           maxTokens: 2000
         }
       });
     } catch (historyError) {
-      // Continue even if saving fails
+      
     }
     
     return text;
     
   } catch (error) {
+    
     return "I apologize, but I'm experiencing technical difficulties processing your chemical safety inquiry. Please try again in a few moments, or contact your safety supervisor for immediate assistance.";
   }
 };
@@ -81,18 +79,20 @@ Format your response in a clear, professional manner with proper sections and bu
 // Function to get stored analyses for context
 export const getStoredAnalyses = (): any[] => {
   // This function is deprecated - use getAnalysisHistory from history/analysisHistory.ts instead
+  
   return [];
 };
 
 // Function to clear stored analyses
 export const clearStoredAnalyses = (): void => {
   // This function is deprecated - use clearAnalysisHistory from history/analysisHistory.ts instead
+  
 };
 
 // Get information about the MSDS model being used
 export const getMSDSModelInfo = () => {
   return {
-    name: 'Gemini 2.5 Flash',
+    name: 'Gemini 2.0 Flash',
     provider: 'Google',
     temperature: 1.0,
     maxTokens: 2000,
