@@ -46,6 +46,9 @@ export class SafetyConnector {
             generationConfig: {
               maxOutputTokens: this.maxTokens,
               temperature: this.temperature
+            },
+            thinkingConfig: {
+              thinkingBudget: 0
             }
           });
           

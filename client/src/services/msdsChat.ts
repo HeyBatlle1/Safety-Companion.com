@@ -47,6 +47,9 @@ Format your response in a clear, professional manner with proper sections and bu
       generationConfig: {
         maxOutputTokens: 2000,
         temperature: 1.0
+      },
+      thinkingConfig: {
+        thinkingBudget: 0
       }
     });
 

@@ -117,7 +117,10 @@ Format your response as a structured JSON object.`;
       
       const result = await this.genAI.models.generateContent({
         model: 'gemini-2.5-flash',
-        contents: [{ parts: [{ text: prompt }] }]
+        contents: [{ parts: [{ text: prompt }] }],
+        thinkingConfig: {
+          thinkingBudget: 0
+        }
       });
       
       return this.parseResponse(result.response.text());

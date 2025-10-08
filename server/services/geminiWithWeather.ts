@@ -44,6 +44,9 @@ export class GeminiWeatherAnalyzer {
           temperature: 0.7,
           maxOutputTokens: 4000,
         },
+        thinkingConfig: {
+          thinkingBudget: 0
+        }
       });
 
       // Handle function calls
@@ -77,6 +80,9 @@ export class GeminiWeatherAnalyzer {
             temperature: 0.7,
             maxOutputTokens: 4000,
           },
+          thinkingConfig: {
+            thinkingBudget: 0
+          }
         });
         
         return functionResult.response.text();

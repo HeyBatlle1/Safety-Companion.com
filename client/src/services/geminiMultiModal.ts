@@ -60,6 +60,9 @@ export async function analyzeWithGemini(params: AnalysisParams | string): Promis
       generationConfig: {
         temperature: 0.9,
         maxOutputTokens: 4096
+      },
+      thinkingConfig: {
+        thinkingBudget: 0
       }
     });
 

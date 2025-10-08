@@ -46,6 +46,9 @@ If the question isn't related to safety, politely redirect to safety topics. For
             generationConfig: {
               temperature: MODEL_CONFIG.temperature,
               maxOutputTokens: MODEL_CONFIG.maxOutputTokens
+            },
+            thinkingConfig: {
+              thinkingBudget: 0
             }
           });
 
@@ -118,7 +121,10 @@ export const checkGeminiAvailability = async (): Promise<boolean> => {
     // Make a simple test call
     const result = await genAI.models.generateContent({
       model: MODEL_CONFIG.modelName,
-      contents: [{ parts: [{ text: "Hello" }] }]
+      contents: [{ parts: [{ text: "Hello" }] }],
+      thinkingConfig: {
+        thinkingBudget: 0
+      }
     });
     return result.response.text().length > 0;
   } catch (error) {

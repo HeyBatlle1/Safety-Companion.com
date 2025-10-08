@@ -64,6 +64,9 @@ export class PatternAnalysisService {
           topP: 0.8,
           maxOutputTokens: 2000,
           responseMimeType: "application/json"
+        },
+        thinkingConfig: {
+          thinkingBudget: 0
         }
       });
 
@@ -271,6 +274,9 @@ Create a concise executive summary covering key findings, financial impact, and 
         generationConfig: {
           temperature: 0.3,
           maxOutputTokens: 800
+        },
+        thinkingConfig: {
+          thinkingBudget: 0
         }
       });
 

@@ -85,6 +85,9 @@ Focus on:
           topP: 0.8,
           maxOutputTokens: 1000,
           responseMimeType: "application/json"
+        },
+        thinkingConfig: {
+          thinkingBudget: 0
         }
       });
 
@@ -180,6 +183,9 @@ Focus on:
           topP: 0.8,
           maxOutputTokens: 1000,
           responseMimeType: "application/json"
+        },
+        thinkingConfig: {
+          thinkingBudget: 0
         }
       });
 
@@ -261,6 +267,9 @@ Consider:
           topP: 0.8,
           maxOutputTokens: 1000,
           responseMimeType: "application/json"
+        },
+        thinkingConfig: {
+          thinkingBudget: 0
         }
       });
 
