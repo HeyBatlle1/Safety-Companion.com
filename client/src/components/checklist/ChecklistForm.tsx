@@ -223,6 +223,9 @@ const ChecklistForm = () => {
 
       // Use Master JHA weather-enabled analysis for all checklists
       if (templateId === 'master-jha') {
+        console.log('🎯 Master JHA detected - calling /api/checklist-analysis');
+        console.log('Checklist data:', checklistData);
+        
         // Master JHA route with weather integration
         const response = await fetch('/api/checklist-analysis', {
           method: 'POST',
@@ -232,11 +235,16 @@ const ChecklistForm = () => {
           body: JSON.stringify(checklistData)
         });
 
+        console.log('Response status:', response.status);
+        
         if (!response.ok) {
-          throw new Error('Analysis failed');
+          const errorText = await response.text();
+          console.error('Analysis failed:', errorText);
+          throw new Error('Analysis failed: ' + errorText);
         }
 
         const result = await response.json();
+        console.log('Analysis result:', result);
         setAiResponse(result.analysis);
         showToast('Weather-integrated Master JHA analysis completed!', 'success');
       } else {

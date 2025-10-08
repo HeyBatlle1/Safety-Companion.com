@@ -13,14 +13,19 @@ router.post('/checklist-analysis', async (req, res) => {
   try {
     const checklistData = req.body;
     
+    console.log('📥 Received checklist analysis request');
+    console.log('Template:', checklistData?.template);
+    console.log('Template ID:', checklistData?.templateId);
+    
     if (!checklistData) {
       return res.status(400).json({ error: 'Checklist data is required' });
     }
 
-    console.log(`🔍 Analyzing checklist...`);
+    console.log(`🔍 Analyzing checklist with Gemini 2.5 Flash...`);
     
     // Build analysis prompt with the weather data already included from frontend
     const prompt = buildChecklistAnalysisPrompt(checklistData);
+    console.log('📝 Prompt length:', prompt.length, 'characters');
     
     // Direct Gemini analysis - NO function calling, NO weather fetching
     const result = await genAI.models.generateContent({
@@ -36,7 +41,7 @@ router.post('/checklist-analysis', async (req, res) => {
     });
 
     const analysis = result.response.text();
-    console.log(`✅ Analysis completed`);
+    console.log(`✅ Analysis completed - ${analysis.length} characters`);
 
     res.json({
       success: true,
@@ -45,7 +50,7 @@ router.post('/checklist-analysis', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Checklist analysis error:', error);
+    console.error('❌ Checklist analysis error:', error);
     res.status(500).json({
       error: 'Analysis failed',
       message: error instanceof Error ? error.message : 'Unknown error'
