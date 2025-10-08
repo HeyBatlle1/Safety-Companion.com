@@ -4,6 +4,52 @@ import { geminiWeatherAnalyzer } from '../services/geminiWithWeather';
 const router = express.Router();
 
 /**
+ * POST /api/checklist-analysis
+ * Analyze checklist data with predictive incident forecasting and weather integration
+ */
+router.post('/checklist-analysis', async (req, res) => {
+  try {
+    const checklistData = req.body;
+    
+    if (!checklistData) {
+      return res.status(400).json({ error: 'Checklist data is required' });
+    }
+
+    // Ensure site location is present for weather function
+    const siteLocation = checklistData.sections?.[0]?.responses?.[0]?.response || 
+                        checklistData.responses?.site_location || 
+                        checklistData.site_location;
+    
+    if (!siteLocation) {
+      return res.status(400).json({ 
+        error: 'Site location is required for weather-integrated analysis' 
+      });
+    }
+
+    console.log(`🔍 Predictive analysis for site: ${siteLocation}`);
+    
+    // Use Gemini with weather function calling and predictive prompt
+    const analysis = await geminiWeatherAnalyzer.analyzeChecklistWithWeather({
+      ...checklistData,
+      site_location: siteLocation
+    });
+
+    console.log(`✅ Predictive incident forecast completed`);
+
+    // Return plain text for frontend compatibility
+    res.set('Content-Type', 'text/plain');
+    res.send(analysis);
+
+  } catch (error) {
+    console.error('Predictive analysis error:', error);
+    res.status(500).json({
+      error: 'Analysis failed',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
  * POST /api/analyze-checklist-with-weather
  * Analyze checklist data with automatic weather integration
  */
