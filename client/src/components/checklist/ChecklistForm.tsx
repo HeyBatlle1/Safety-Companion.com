@@ -236,8 +236,8 @@ const ChecklistForm = () => {
           throw new Error('Analysis failed');
         }
 
-        const analysisResult = await response.text();
-        setAiResponse(analysisResult);
+        const result = await response.json();
+        setAiResponse(result.analysis);
         showToast('Weather-integrated Master JHA analysis completed!', 'success');
       } else {
         // Collect all blueprints and images for multi-modal analysis
