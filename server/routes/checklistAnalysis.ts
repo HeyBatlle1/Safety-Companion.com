@@ -76,6 +76,12 @@ router.post('/checklist-analysis', async (req, res) => {
       }
     });
 
+    console.log('🔍 Result object:', JSON.stringify(result, null, 2).substring(0, 500));
+    
+    if (!result || !result.response) {
+      throw new Error('Invalid response from Gemini API');
+    }
+
     const analysis = result.response.text();
     console.log(`✅ Analysis completed - ${analysis.length} characters`);
 
