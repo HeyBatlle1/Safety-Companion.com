@@ -27,7 +27,7 @@ export class GeminiWeatherAnalyzer {
       const result = await this.model.generateContent({
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
         generationConfig: {
-          temperature: 0.7,
+          temperature: 1.0,
           maxOutputTokens: 6000,
         },
       });
