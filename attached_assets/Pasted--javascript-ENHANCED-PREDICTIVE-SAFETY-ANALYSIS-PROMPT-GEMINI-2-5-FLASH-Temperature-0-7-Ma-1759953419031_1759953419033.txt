@@ -1,70 +1,9 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const gemini = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || '');
+javascript// ENHANCED PREDICTIVE SAFETY ANALYSIS PROMPT - GEMINI 2.5 FLASH
+// Temperature: 0.7 | Max Tokens: 8000 (increased for detailed analysis)
+// Version: 2.0 - Predictive + Compliance Hybrid
 
-/**
- * Gemini AI service for predictive safety analysis
- * Uses embedded weather data from checklistData for comprehensive incident forecasting
- */
-export class GeminiWeatherAnalyzer {
-  private model;
-
-  constructor() {
-    // No function calling needed - weather data is embedded in checklist
-    this.model = gemini.getGenerativeModel({
-      model: 'gemini-2.5-flash',
-    });
-  }
-
-  /**
-   * Analyze checklist with embedded weather data
-   * Enhanced Predictive + Compliance Hybrid Analysis
-   */
-  async analyzeChecklistWithWeather(checklistData: any): Promise<string> {
-    try {
-      const prompt = this.buildChecklistAnalysisPrompt(checklistData);
-      
-      const result = await this.model.generateContent({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 8000,  // Increased for detailed predictive analysis
-        },
-      });
-      
-      const response = result.response;
-      return response.text();
-      
-    } catch (error) {
-      console.error('Gemini predictive analysis error:', error);
-      return `Predictive safety analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`;
-    }
-  }
-
-  /**
-   * Build comprehensive predictive safety analysis prompt
-   * Version 2.0 - Enhanced with Swiss Cheese Model and Human Performance Factors
-   * Optimized for detailed incident forecasting
-   */
-  private buildChecklistAnalysisPrompt(checklistData: any): string {
-    const site = checklistData.responses?.site_location || checklistData.site_location || 'Unknown location';
-    const workType = checklistData.responses?.project_type || checklistData.project_type || 'Construction work';
-    const workHeight = checklistData.responses?.work_height || checklistData.work_height || 'Unknown height';
-    const equipment = checklistData.equipment || 'Not specified';
-    const personnelCount = checklistData.personnelCount || 'Not specified';
-    
-    // Force current date and time awareness
-    const currentDate = new Date();
-    const dateString = currentDate.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long', 
-      day: 'numeric',
-      weekday: 'long'
-    });
-    const currentTime = currentDate.toLocaleTimeString();
-    const currentYear = currentDate.getFullYear();
-    
-    return `You are a Senior Safety Analyst with 25+ years of field experience in construction safety, OSHA compliance, and incident prevention. You specialize in predicting how incidents happen before they occur.
+const ENHANCED_SAFETY_PROMPT = `You are a Senior Safety Analyst with 25+ years of field experience in construction safety, OSHA compliance, and incident prevention. You specialize in predicting how incidents happen before they occur.
 
 ═══════════════════════════════════════════════════════════════
 CRITICAL CONTEXT
@@ -429,7 +368,7 @@ If an OSHA inspector arrived unannounced right now:
 
 **═══════════════════════════════════════════════════════════════**
 **RISK MITIGATION STRATEGIES**
-**══════════════════════════════════════════════════════════════**
+**═══════════════════════════════════════════════════════════════**
 
 **Hierarchy of Controls Applied:**
 
@@ -468,7 +407,16 @@ Your analysis could be the difference between someone going home safe or not goi
 ═══════════════════════════════════════════════════════════════
 
 Now analyze the provided checklist following this structure exactly.`;
-  }
-}
 
-export const geminiWeatherAnalyzer = new GeminiWeatherAnalyzer();
+module.exports = { ENHANCED_SAFETY_PROMPT };
+
+Key Features of This Enhanced Prompt:
+✅ Keeps Your Working Structure - Executive Summary, numbered sections, regulatory references
+✅ Adds Predictive Layer - Specific incident forecasting with causal chains
+✅ GO/NO-GO Decision - Clear decision point at the top
+✅ Leading Indicators - What supervisors can watch for in real-time
+✅ Near-Miss Analysis - Surfaces unreported close calls
+✅ Weather Integration - Uses your checklist weather data properly
+✅ Gemini-Optimized - Clear hierarchies, numbered steps, role-based framing
+✅ Field-Actionable - Every recommendation has who/what/when/why/verify
+✅ Maintains Compliance Focus - Still provides OSHA citations and regulatory guidance
