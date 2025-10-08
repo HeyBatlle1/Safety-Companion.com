@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { getWeatherForSafetyAnalysis } from './weatherFunction';
 
-const gemini = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const gemini = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || '');
 
 /**
  * Gemini AI service with weather function calling capability
