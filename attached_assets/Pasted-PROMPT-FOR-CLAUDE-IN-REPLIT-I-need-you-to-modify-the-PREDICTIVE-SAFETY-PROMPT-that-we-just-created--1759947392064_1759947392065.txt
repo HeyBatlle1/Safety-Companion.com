@@ -1,0 +1,65 @@
+PROMPT FOR CLAUDE IN REPLIT:
+I need you to modify the PREDICTIVE_SAFETY_PROMPT that we just created together.
+
+CONTEXT: The weather integration works differently than expected. Instead of calling a function named `getWeatherForSafetyAnalysis()`, the weather data is already available in the checklist data object as `checklistData.weather`.
+
+TASK: Remove all references to calling the `getWeatherForSafetyAnalysis` function and replace them with instructions to use the weather data that's already in `checklistData.weather`.
+
+SPECIFIC CHANGES NEEDED:
+
+1. DELETE this entire section:
+🚨 MANDATORY FIRST STEP - DO NOT SKIP:
+Before writing ANY analysis, you MUST call the getWeatherForSafetyAnalysis function with the exact location: "${site}"
+This is NOT optional. Weather is a primary incident catalyst. Current conditions may invalidate every control measure on this checklist. A job that's safe at 8am may be deadly by 10am if weather changes.
+STEP 1: Call getWeatherForSafetyAnalysis("${site}")
+STEP 2: Wait for weather response
+STEP 3: Analyze how weather interacts with EVERY major hazard
+STEP 4: Then write your full analysis
+
+2. REPLACE it with:
+🚨 CRITICAL REQUIREMENT - WEATHER ANALYSIS FIRST:
+Weather data has been provided in the checklist. You MUST analyze weather conditions BEFORE assessing any other hazards.
+Weather data is available in checklistData.weather with the following structure:
+
+temperature: Current temperature in °F
+windSpeed: Sustained wind speed in mph
+windGust: Wind gust speed in mph
+precipitation: Current precipitation type and intensity
+visibility: Visibility in miles
+conditions: General weather description
+trend: Whether conditions are improving, stable, or deteriorating
+
+CRITICAL: Analyze how current weather conditions interact with EVERY major hazard on this site. Weather is not just another checkbox - it's the variable most likely to turn a safe operation into a fatal incident within the next 2 hours.
+
+3. In the "WEATHER ANALYSIS & DYNAMIC RISK ASSESSMENT" section, change the opening from:
+"After receiving weather data, analyze:"
+
+TO:
+"Using the weather data provided in checklistData.weather, analyze:"
+
+4. DO NOT change anything else in the prompt. Keep all the structure, all the requirements for:
+- EXECUTIVE DECISION POINT (GO/NO-GO)
+- PREDICTIVE INCIDENT FORECASTING with causal chains
+- Swiss Cheese Model analysis
+- Leading Indicators
+- Near-Miss versions
+- Stop-Work Triggers
+- Hierarchy of Controls
+- Worst Credible Scenario
+- All the formatting with ═══ boxes
+- All the cognitive bias countermeasures
+- The Testimony Standard
+
+5. IMPORTANT: Preserve all the character-based formatting (═══, ├─, └─, etc.). This is critical for the structured output.
+
+Make ONLY the changes related to weather data source. Everything else stays exactly as written.
+
+After you make the changes, show me the modified section so I can verify you only changed what I asked for.
+
+CRITICAL: Make sure Claude in Replit understands:
+
+Only change weather references - nothing else
+Keep all the aggressive language ("lives depend on this," "testimony standard," etc.)
+Keep all the structured formatting with box-drawing characters
+Keep all the specific requirements (Swiss Cheese, causal chains, leading indicators)
+Don't let Opus "clean up" or "improve" anything else

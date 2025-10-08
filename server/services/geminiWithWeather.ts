@@ -1,95 +1,43 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { getWeatherForSafetyAnalysis } from './weatherFunction';
 
 const gemini = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || '');
 
 /**
- * Gemini AI service with weather function calling capability
- * Automatically fetches weather data when analyzing safety checklists
+ * Gemini AI service for predictive safety analysis
+ * Uses embedded weather data from checklistData for comprehensive incident forecasting
  */
 export class GeminiWeatherAnalyzer {
   private model;
 
   constructor() {
-    // Define the weather function that Gemini can call
-    const weatherFunction = {
-      name: 'getWeatherForSafetyAnalysis',
-      description: 'Get current weather conditions and safety recommendations for a specific job site location',
-      parameters: {
-        type: 'object' as const,
-        properties: {
-          location: {
-            type: 'string' as const,
-            description: 'The job site address or location (e.g., "123 Main St, Indianapolis, IN")',
-          },
-        },
-        required: ['location'],
-      },
-    };
-
+    // No function calling needed - weather data is embedded in checklist
     this.model = gemini.getGenerativeModel({
       model: 'gemini-2.5-flash',
-      tools: [
-        {
-          functionDeclarations: [weatherFunction],
-        },
-      ],
     });
   }
 
   /**
-   * Analyze checklist with automatic weather integration
-   * Gemini will automatically call the weather function when needed
+   * Analyze checklist with embedded weather data
+   * Weather is already included in checklistData - no function calling needed
    */
   async analyzeChecklistWithWeather(checklistData: any): Promise<string> {
     try {
       const prompt = this.buildChecklistAnalysisPrompt(checklistData);
       
-      const chat = this.model.startChat({
+      const result = await this.model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
         generationConfig: {
           temperature: 0.7,  // Balanced for detailed OSHA compliance analysis
           maxOutputTokens: 4000,
         },
       });
-
-      const result = await chat.sendMessage(prompt);
       
-      // Handle function calls
       const response = result.response;
-      const functionCalls = response.functionCalls();
-      
-      if (functionCalls && functionCalls.length > 0) {
-        const functionResponses = [];
-        
-        for (const functionCall of functionCalls) {
-          if (functionCall.name === 'getWeatherForSafetyAnalysis') {
-            const location = functionCall.args?.location as string;
-            console.log(`🌦️ Fetching weather data for: ${location}`);
-            
-            const weatherData = await getWeatherForSafetyAnalysis(location);
-            
-            functionResponses.push({
-              name: functionCall.name,
-              response: weatherData,
-            });
-          }
-        }
-        
-        // Send function results back to Gemini
-        const functionResult = await chat.sendMessage(
-          functionResponses.map(fr => ({
-            functionResponse: fr
-          }))
-        );
-        
-        return functionResult.response.text();
-      }
-      
       return response.text();
       
     } catch (error) {
-      console.error('Gemini weather analysis error:', error);
-      return `Safety analysis completed, but weather integration failed: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      console.error('Gemini predictive analysis error:', error);
+      return `Predictive safety analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`;
     }
   }
 
@@ -132,15 +80,20 @@ JOB SITE DETAILS:
 * Personnel Count: ${personnelCount}
 * Checklist Data: ${JSON.stringify(checklistData, null, 2)}
 
-🚨 MANDATORY FIRST STEP - DO NOT SKIP:
-Before writing ANY analysis, you MUST call the getWeatherForSafetyAnalysis function with the exact location: "${site}"
+🚨 CRITICAL REQUIREMENT - WEATHER ANALYSIS FIRST:
+Weather data has been provided in the checklist. You MUST analyze weather conditions BEFORE assessing any other hazards.
 
-This is NOT optional. Weather is a primary incident catalyst. Current conditions may invalidate every control measure on this checklist. A job that's safe at 8am may be deadly by 10am if weather changes.
+Weather data is available in checklistData.weather with the following structure:
 
-STEP 1: Call getWeatherForSafetyAnalysis("${site}")
-STEP 2: Wait for weather response
-STEP 3: Analyze how weather interacts with EVERY major hazard
-STEP 4: Then write your full analysis
+temperature: Current temperature in °F
+windSpeed: Sustained wind speed in mph
+windGust: Wind gust speed in mph
+precipitation: Current precipitation type and intensity
+visibility: Visibility in miles
+conditions: General weather description
+trend: Whether conditions are improving, stable, or deteriorating
+
+CRITICAL: Analyze how current weather conditions interact with EVERY major hazard on this site. Weather is not just another checkbox - it's the variable most likely to turn a safe operation into a fatal incident within the next 2 hours.
 
 ═══════════════════════════════════════════════════════════════════════════════
 ANALYSIS FRAMEWORK: THE SWISS CHEESE MODEL OF FAILURE
@@ -162,7 +115,7 @@ REQUIRED ANALYSIS SEQUENCE - FOLLOW THIS ORDER
 
 1. WEATHER ANALYSIS & DYNAMIC RISK ASSESSMENT
 
-After receiving weather data, analyze:
+Using the weather data provided in checklistData.weather, analyze:
 
 * Current conditions: Temperature, wind speed (sustained + gusts), precipitation, visibility
 * Trend direction: Are conditions improving or deteriorating?
@@ -382,7 +335,7 @@ Your analysis should make the site supervisor think:
 
 Now proceed with your analysis following all requirements above.
 
-Remember: Call getWeatherForSafetyAnalysis("${site}") FIRST, then analyze how weather interacts with EVERY major hazard, THEN write your comprehensive analysis.`;
+Remember: Analyze the weather data from checklistData.weather FIRST, understand how it interacts with EVERY major hazard, THEN write your comprehensive analysis.`;
   }
 }
 
