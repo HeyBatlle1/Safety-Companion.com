@@ -199,6 +199,11 @@ const ChecklistForm = () => {
     setAiResponse(null);
     setSafetyAnalysis(null);
 
+    console.log('🔍 SUBMIT HANDLER STARTED');
+    console.log('templateId value:', templateId);
+    console.log('templateId type:', typeof templateId);
+    console.log('Is master-jha?', templateId === 'master-jha');
+
     try {
       // Format checklist data for enhanced AI processing
       const checklistData = {
@@ -222,6 +227,7 @@ const ChecklistForm = () => {
       };
 
       // Use Master JHA weather-enabled analysis for all checklists
+      console.log('🔍 Checking if templateId === master-jha...');
       if (templateId === 'master-jha') {
         console.log('🎯 Master JHA detected - calling /api/checklist-analysis');
         console.log('Checklist data:', checklistData);
