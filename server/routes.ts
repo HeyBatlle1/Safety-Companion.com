@@ -20,6 +20,7 @@ import { sql } from "drizzle-orm";
 import { body, validationResult } from "express-validator";
 import checklistAnalysisRoutes from './routes/checklistAnalysis';
 import monitoringRoutes from './routes/monitoring';
+import multiAgentTestRoutes from './routes/multiAgentTest';
 import { logError } from "./utils/logger";
 import './types/session';
 import { geminiAnalytics } from "./services/geminiAnalytics";
@@ -1309,6 +1310,9 @@ Please provide a comprehensive, grounded response that helps ensure workplace sa
   
   // Add Phase 1 silent tracking monitoring routes (internal only)
   app.use('/api', monitoringRoutes);
+  
+  // Add multi-agent test route (Phase 1 pipeline testing)
+  app.use('/api', multiAgentTestRoutes);
 
   return httpServer;
 }
