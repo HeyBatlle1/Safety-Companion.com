@@ -24,6 +24,12 @@ export class GeminiWeatherAnalyzer {
    */
   async analyzeChecklistWithWeather(checklistData: any): Promise<string> {
     try {
+      // Log weather data status for debugging
+      console.log(`🌤️  Weather data present: ${!!checklistData.weather}`);
+      if (checklistData.weather) {
+        console.log(`   Temperature: ${checklistData.weather.temperature}°F, Wind: ${checklistData.weather.windSpeed} mph`);
+      }
+      
       const prompt = await this.buildChecklistAnalysisPrompt(checklistData);
       
       const result = await this.model.generateContent({

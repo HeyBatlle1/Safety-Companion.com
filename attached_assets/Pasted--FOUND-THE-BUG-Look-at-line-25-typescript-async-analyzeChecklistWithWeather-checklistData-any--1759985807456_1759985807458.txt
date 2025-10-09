@@ -1,0 +1,135 @@
+
+FOUND THE BUG.
+
+Look at line 25:
+
+typescript
+async analyzeChecklistWithWeather(checklistData: any): Promise<string>
+The function is called analyzeChecklistWithWeather but it only takes checklistData - there's NO weather parameter!
+
+The Problem
+The function signature says "withWeather" but doesn't actually receive weather data. It's only getting the checklist.
+
+Then in buildChecklistAnalysisPrompt(checklistData), it's probably doing something like:
+
+typescript
+// WRONG - Weather is probably being extracted from checklistData
+const weather = checklistData.weather || "⚠️ NO WEATHER DATA - HIGH RISK";
+So the weather IS in the checklist as user-pasted text, not as structured data.
+
+The Fix
+Change the function signature:
+
+typescript
+async analyzeChecklistWithWeather(
+  checklistData: any, 
+  weatherData?: any  // ← ADD THIS
+): Promise<string> {
+  try {
+    // Build the massive prompt with REAL OSHA data AND weather
+    const prompt = await this.buildChecklistAnalysisPrompt(
+      checklistData, 
+      weatherData  // ← PASS WEATHER SEPARATELY
+    );
+    
+    const result = await this.model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: 1.0,
+        maxOutputTokens: 6000,
+      },
+    });
+    return result.response.text();
+  } catch (error) {
+    console.error('Gemini predictive analysis error:', error);
+    return `Predictive safety analysis failed: ${error}`;
+  }
+}
+Then update buildChecklistAnalysisPrompt:
+
+typescript
+private async buildChecklistAnalysisPrompt(
+  checklistData: any,
+  weatherData?: any  // ← ADD THIS
+): Promise<string> {
+  
+  // Query OSHA data
+  const constructionProfile = await safetyIntelligence.getRiskProfile('23');
+  const industryBenchmarks = await safetyIntelligence.getIndustryBenchmark('23');
+  
+  // Format weather - use provided data OR mark as missing
+  const weatherSection = weatherData 
+    ? JSON.stringify(weatherData, null, 2)
+    : "⚠️ NO WEATHER DATA - HIGH RISK";
+  
+  // Build prompt with ACTUAL replacements
+  const prompt = `
+You are a Senior Safety Analyst specializing in incident prediction and prevention for construction environments.
+═══════════════════════════════════════════
+ANALYSIS CONTEXT - ${new Date().toLocaleDateString()}, ${new Date().getFullYear()}
+═══════════════════════════════════════════
+SITE: ${checklistData.location || 'Location not specified'}
+WORK TYPE: ${checklistData.workType || checklistData.template || 'Not specified'}
+WORK HEIGHT: ${checklistData.height || 'Not specified'} feet
+TIME: ${new Date().toLocaleTimeString()}
+
+CURRENT CONDITIONS:
+${weatherSection}
+
+CHECKLIST DATA:
+${JSON.stringify(checklistData, null, 2)}
+
+REAL OSHA DATA FROM SUPABASE (BLS 2023):
+**CONSTRUCTION INDUSTRY PROFILE (NAICS 23):**
+- Industry Name: ${constructionProfile?.industry_name || 'Construction'}
+- Injury Rate: ${constructionProfile?.injury_rate || 'N/A'} per 100 FTE (REAL BLS 2023 DATA)
+- 2023 Fatalities: ${constructionProfile?.total_cases || 'N/A'} (REAL GOVERNMENT DATA)
+- Risk Score: ${constructionProfile?.risk_score || 'N/A'}/100
+
+**INDUSTRY BENCHMARKS:**
+${JSON.stringify(industryBenchmarks, null, 2)}
+
+[... rest of your prompt template ...]
+`;
+
+  return prompt;
+}
+Frontend Change
+Wherever you call this function, pass weather separately:
+
+typescript
+// BEFORE (wrong):
+const analysis = await geminiService.analyzeChecklistWithWeather(checklistData);
+
+// AFTER (correct):
+const weatherData = {
+  temperature: 69,
+  feelsLike: 72,
+  wind: { speed: 7, gusts: 16 },
+  humidity: 89,
+  visibility: 15.2,
+  pressure: 1019,
+  conditions: "Clear conditions"
+};
+
+const analysis = await geminiService.analyzeChecklistWithWeather(
+  checklistData,
+  weatherData  // ← Pass weather as separate parameter
+);
+Why This Fixes Everything
+Right now:
+
+Weather is probably undefined or extracted as text from checklist
+Prompt gets sent with placeholder brackets still in it
+Gemini sees incomplete data → falls back to generic analysis
+After fix:
+
+Weather is structured data passed separately
+Prompt template gets ACTUAL values injected
+Gemini receives complete data → follows the detailed prediction framework
+Show me the buildChecklistAnalysisPrompt function (lines 100-438) so I can see exactly how it's handling the weather currently.
+
+
+
+
+

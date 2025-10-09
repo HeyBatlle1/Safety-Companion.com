@@ -28,10 +28,15 @@ router.post('/checklist-analysis', async (req, res) => {
 
     console.log(`🔍 Predictive analysis for site: ${siteLocation}`);
     
-    // Use Gemini with weather function calling and predictive prompt
+    // Fetch real-time weather data for the site location
+    const { getWeatherForSafetyAnalysis } = await import('../services/weatherFunction');
+    const weatherData = await getWeatherForSafetyAnalysis(siteLocation);
+    
+    // Use Gemini with weather data embedded and predictive prompt
     const analysis = await geminiWeatherAnalyzer.analyzeChecklistWithWeather({
       ...checklistData,
-      site_location: siteLocation
+      site_location: siteLocation,
+      weather: weatherData  // ← ADD WEATHER DATA!
     });
 
     console.log(`✅ Predictive incident forecast completed`);
@@ -74,10 +79,15 @@ router.post('/analyze-checklist-with-weather', async (req, res) => {
 
     console.log(`🔍 Analyzing checklist for site: ${siteLocation}`);
     
-    // Use Gemini with weather function calling
+    // Fetch real-time weather data for the site location
+    const { getWeatherForSafetyAnalysis } = await import('../services/weatherFunction');
+    const weatherData = await getWeatherForSafetyAnalysis(siteLocation);
+    
+    // Use Gemini with weather data embedded
     const analysis = await geminiWeatherAnalyzer.analyzeChecklistWithWeather({
       ...checklistData,
-      site_location: siteLocation
+      site_location: siteLocation,
+      weather: weatherData  // ← ADD WEATHER DATA!
     });
 
     console.log(`✅ Analysis completed with weather integration`);
