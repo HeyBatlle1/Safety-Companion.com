@@ -1,6 +1,8 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { SafetyIntelligenceService } from './safetyIntelligenceService';
 
 const gemini = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || '');
+const safetyIntelligence = new SafetyIntelligenceService();
 
 /**
  * Gemini AI service for predictive safety analysis
@@ -22,7 +24,7 @@ export class GeminiWeatherAnalyzer {
    */
   async analyzeChecklistWithWeather(checklistData: any): Promise<string> {
     try {
-      const prompt = this.buildChecklistAnalysisPrompt(checklistData);
+      const prompt = await this.buildChecklistAnalysisPrompt(checklistData);
       
       const result = await this.model.generateContent({
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
@@ -42,10 +44,10 @@ export class GeminiWeatherAnalyzer {
   }
 
   /**
-   * Build predictive safety analysis prompt using OSHA statistical data
-   * Optimized for real-time incident forecasting with statistical context
+   * Build predictive safety analysis prompt using REAL OSHA data from Supabase
+   * Queries actual BLS 2023 injury/fatality statistics
    */
-  private buildChecklistAnalysisPrompt(checklistData: any): string {
+  private async buildChecklistAnalysisPrompt(checklistData: any): Promise<string> {
     const site = checklistData.responses?.site_location || checklistData.site_location || 'Unknown location';
     const workType = checklistData.responses?.project_type || checklistData.project_type || 'Construction work';
     const workHeight = checklistData.responses?.work_height || checklistData.work_height || 'Unknown height';
@@ -62,6 +64,38 @@ export class GeminiWeatherAnalyzer {
     });
     const currentTime = currentDate.toLocaleTimeString();
     const currentYear = currentDate.getFullYear();
+    
+    // QUERY REAL OSHA DATA FROM SUPABASE - Construction NAICS 23
+    let oshaDataSection = '';
+    try {
+      const constructionProfile = await safetyIntelligence.getRiskProfile('23');
+      const industryBenchmarks = await safetyIntelligence.getIndustryBenchmark('23');
+      
+      oshaDataSection = `
+═══════════════════════════════════════════
+REAL OSHA DATA FROM SUPABASE (BLS 2023)
+═══════════════════════════════════════════
+
+**CONSTRUCTION INDUSTRY PROFILE (NAICS 23):**
+- Industry Name: ${constructionProfile.industryName}
+- Injury Rate: ${constructionProfile.injuryRate || 'N/A'} per 100 FTE (REAL BLS 2023 DATA)
+- 2023 Fatalities: ${constructionProfile.fatalities2023 || 'N/A'} (REAL GOVERNMENT DATA)
+- Risk Score: ${constructionProfile.riskScore}/100
+- Risk Category: ${constructionProfile.riskCategory}
+
+**INDUSTRY BENCHMARKS (${industryBenchmarks.length} sub-categories):**
+${industryBenchmarks.slice(0, 5).map(b => `- ${b.industryName}: ${b.injuryRate || 'N/A'} injuries per 100 FTE`).join('\n')}
+
+**THIS IS REAL DATA FROM YOUR SUPABASE OSHA TABLES - NOT ESTIMATES!**
+
+Use this REAL statistical data to weight your risk predictions.
+Compare this job site's conditions to these actual industry injury rates.`;
+    } catch (error) {
+      oshaDataSection = `
+⚠️ UNABLE TO RETRIEVE OSHA DATA FROM SUPABASE
+Error: ${error instanceof Error ? error.message : 'Unknown error'}
+Proceeding with general construction industry estimates.`;
+    }
     
     return `You are a Senior Safety Analyst specializing in incident prediction and prevention for construction environments.
 
@@ -80,24 +114,7 @@ ${checklistData.weather ? JSON.stringify(checklistData.weather, null, 2) : '⚠�
 CHECKLIST DATA:
 ${JSON.stringify(checklistData, null, 2)}
 
-═══════════════════════════════════════════
-OSHA REFERENCE DATA AVAILABLE TO YOU
-═══════════════════════════════════════════
-
-You have access to REAL 2023 BLS injury statistics for construction:
-- Falls: 36.5% of construction fatalities (real government data)
-- Struck-by: 10.1% of construction fatalities
-- Caught-in/between: 2.3% of construction fatalities
-- Electrical: 8.6% of construction fatalities
-
-These are NOT estimates. These are actual reported injury rates.
-Use this data to weight your risk assessment.
-
-Construction injury rate: 2.8 per 100 FTE (OSHA 2023)
-Days away from work (median): 8 days
-Cost per injury (average): $42,000 direct costs
-
-When you analyze this job site, compare observed risks to these statistical baselines.
+${oshaDataSection}
 
 ═══════════════════════════════════════════
 YOUR PRIMARY MISSION
