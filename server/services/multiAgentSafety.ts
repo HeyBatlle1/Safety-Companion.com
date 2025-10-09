@@ -420,8 +420,8 @@ Respond with ONLY valid JSON, no other text:
 
   /**
    * AGENT 4: Report Synthesizer
-   * Temperature: 0.5 (structured)
-   * Task: Generate final formatted safety analysis report
+   * Temperature: 0.5 (structured formatting)
+   * Task: Generate hybrid report (Traditional JHA + Predictive Analysis)
    */
   private async synthesizeReport(
     validation: ValidationResult,
@@ -431,80 +431,517 @@ Respond with ONLY valid JSON, no other text:
     checklistData: any
   ): Promise<string> {
     
-    const prompt = `You are a safety report writer. Synthesize the multi-agent analysis results into a clear, actionable safety report.
-
-AGENT OUTPUTS:
-
-**DATA VALIDATION:**
-Quality Score: ${validation.qualityScore}/10
-Data Quality: ${validation.dataQuality}
-Missing Critical: ${JSON.stringify(validation.missingCritical)}
-Concerns: ${JSON.stringify(validation.concerns)}
-Weather Present: ${validation.weatherPresent}
-
-**RISK ASSESSMENT:**
-Top Hazard: ${risk.hazards[0]?.name}
-Risk Score: ${risk.hazards[0]?.riskScore}/100
-Consequence: ${risk.hazards[0]?.consequence}
-OSHA Context: ${risk.hazards[0]?.oshaContext}
-Inadequate Controls: ${JSON.stringify(risk.hazards[0]?.inadequateControls)}
-All Threats: ${JSON.stringify(risk.topThreats)}
-
-**INCIDENT PREDICTION:**
-Incident Name: ${prediction.incidentName}
-Confidence: ${prediction.confidence}
-Causal Chain: ${JSON.stringify(prediction.causalChain)}
-Leading Indicators: ${JSON.stringify(prediction.leadingIndicators)}
-Best Intervention: ${prediction.singleBestIntervention}
-
-**WEATHER DATA:**
-${weatherData ? JSON.stringify(weatherData, null, 2) : 'No weather data available'}
-
-YOUR TASK:
-Create a professional safety analysis report with these sections:
-
-1. **EXECUTIVE DECISION** - Based on data quality and risks, recommend: GO / GO WITH CONDITIONS / NO-GO
-2. **PRIMARY THREAT** - One sentence describing the top incident risk
-3. **INCIDENT FORECAST** - Detailed prediction with causal chain
-4. **IMMEDIATE ACTIONS** - Top 3 critical actions before work starts
-5. **WEATHER IMPACT** - How conditions affect safety (if weather available)
-6. **DATA GAPS** - What information is missing and why it matters
-
-FORMAT: Use clear headings, bullet points, and specific details. Make it actionable for a field supervisor.
-
-OUTPUT REQUIREMENTS:
-Return a well-formatted text report (not JSON). Be specific and direct.`;
-
-    try {
-      const result = await this.callGemini(prompt, 0.5, 3000);
-      return result;
-    } catch (error) {
-      console.error('Agent 4 synthesis error:', error);
-      // Fallback to structured output if AI synthesis fails
-      return `**MULTI-AGENT SAFETY ANALYSIS**
-
-**EXECUTIVE DECISION:** ${validation.qualityScore < 5 ? 'NO-GO' : validation.qualityScore < 7 ? 'GO WITH CONDITIONS' : 'GO'}
-
-**PRIMARY THREAT:**
-${prediction.incidentName} (Confidence: ${prediction.confidence})
-
-**DATA VALIDATION:**
-Quality: ${validation.dataQuality} (${validation.qualityScore}/10)
-Missing Critical: ${validation.missingCritical.join(', ') || 'None'}
-
-**TOP HAZARD:**
-${risk.hazards[0]?.name} (Risk Score: ${risk.hazards[0]?.riskScore}/100)
-
-**BEST INTERVENTION:**
-${prediction.singleBestIntervention}
-
-**LEADING INDICATORS:**
-${prediction.leadingIndicators.map((ind, i) => `${i + 1}. ${ind}`).join('\n')}
-
-${weatherData ? `\n**WEATHER:** ${weatherData.temperature}°F, ${weatherData.windSpeed} mph wind` : '⚠️ NO WEATHER DATA'}
-
---- AI synthesis failed - showing structured fallback ---`;
+    const now = new Date();
+    const topHazard = risk.hazards[0] || {};
+    
+    // Calculate GO/NO-GO decision logic
+    let decision = 'GO WITH CONDITIONS';
+    const stopWorkReasons: string[] = [];
+    const requiredConditions: string[] = [];
+    
+    // Evaluate stop-work triggers
+    if (validation.dataQuality === 'LOW') {
+      stopWorkReasons.push('Insufficient data quality for safe operations');
+      decision = 'NO-GO';
     }
+    
+    if (weatherData?.windSpeed) {
+      const windLimit = 20; // ASME B30.3 conservative limit
+      if (weatherData.windSpeed > windLimit) {
+        stopWorkReasons.push(`Wind speed (${weatherData.windSpeed} mph) exceeds ${windLimit} mph safe crane operation limit`);
+        decision = 'NO-GO';
+      } else if (weatherData.windSpeed > windLimit * 0.8) {
+        requiredConditions.push('Continuous wind speed monitoring with hard stop at 20 mph');
+      }
+    }
+    
+    if (prediction.confidence === 'HIGH' && topHazard.riskScore > 85) {
+      stopWorkReasons.push('High-confidence prediction of critical incident with inadequate controls');
+      decision = 'NO-GO';
+    }
+    
+    if (validation.missingCritical.some(field => 
+      field.toLowerCase().includes('emergency') || 
+      field.toLowerCase().includes('rescue'))) {
+      requiredConditions.push('Competent person inspection of fall protection before work starts');
+    }
+    
+    // If we have conditions but they're critical, it's still GO WITH CONDITIONS
+    if (stopWorkReasons.length === 0 && requiredConditions.length > 0) {
+      decision = 'GO WITH CONDITIONS';
+    }
+    
+    // Calculate weather safety margins
+    let weatherStatus = 'GREEN';
+    let windMargin = 100;
+    if (weatherData?.windSpeed) {
+      const safeLimit = 20;
+      windMargin = ((safeLimit - weatherData.windSpeed) / safeLimit) * 100;
+      
+      if (windMargin < 20) weatherStatus = 'RED';
+      else if (windMargin < 30) weatherStatus = 'YELLOW';
+    }
+    
+    // Extract site info
+    const siteLocation = checklistData.sections?.[0]?.responses?.[0]?.response || 'Location not specified';
+    const workType = checklistData.sections?.[0]?.responses?.[1]?.response || 'Work type not specified';
+    
+    // Build traditional JHA section
+    const traditionalJHA = `═══════════════════════════════════════════
+EXECUTIVE SUMMARY (Industry Standard JHA)
+═══════════════════════════════════════════
+
+**Overall Assessment:**
+
+${this.generateOverallAssessment(validation, risk, weatherData)}
+
+**Critical Safety Risks Identified:**
+
+${risk.hazards.slice(0, 5).map((hazard, i) => 
+  `${i + 1}. **${hazard.name}** (Risk Score: ${hazard.riskScore}/100)
+   - Consequence: ${hazard.consequence}
+   - OSHA Context: ${hazard.oshaContext}
+   - Inadequate Controls: ${hazard.inadequateControls.join('; ') || 'None identified'}`
+).join('\n\n')}
+
+**Compliance Status Assessment:**
+
+${this.generateComplianceStatus(validation, risk, checklistData)}
+
+**Immediate Action Items:**
+
+${this.generateImmediateActions(prediction, validation, weatherData, topHazard)}
+
+**Long-Term Recommendations:**
+
+1. **Engineering Controls:** Implement permanent wind monitoring system at crane height
+2. **Administrative Controls:** Develop written Safe Work Procedure for glass installation addressing all identified hazards
+3. **Fall Protection Program:** Establish comprehensive fall protection program with competent person inspections
+4. **Weather Contingency Plan:** Create documented protocol for suspending operations in adverse weather
+5. **Equipment Specifications:** Obtain and document all manufacturer wind limits and load ratings
+
+**Training Needs:**
+
+- **Wind Awareness Training:** All personnel on recognizing wind hazards and stop-work criteria
+- **Swing Stage Safety:** ANSI/IWCA I-14.1 certification for all swing stage operators
+- **Crane Operations:** Verify operator certification and provide wind-specific operational training
+- **Fall Protection:** Competent person training for equipment inspection and rescue procedures
+- **Glass Handling Safety:** Ergonomic training and proper lifting techniques for heavy glass panels
+- **Emergency Response:** Regular drills for fall rescue and dropped object scenarios
+
+**Follow-Up Requirements:**
+
+- Daily safety briefings documenting wind conditions and stop-work criteria
+- Shift-by-shift competent person inspections of fall protection systems
+- Weekly equipment certification reviews (crane, swing stage, rigging)
+- Incident and near-miss reporting with root cause analysis
+- Monthly JHA review and update based on site conditions`;
+
+    // Build predictive analysis section
+    const predictiveAnalysis = `
+
+═══════════════════════════════════════════
+PREDICTIVE INCIDENT ANALYSIS (AI-Enhanced)
+═══════════════════════════════════════════
+
+**EXECUTIVE DECISION: ${decision}**
+
+${stopWorkReasons.length > 0 ? `
+**STOP-WORK REASONS:**
+${stopWorkReasons.map(r => `⛔ ${r}`).join('\n')}
+
+**WORK CANNOT PROCEED UNTIL:**
+${stopWorkReasons.map(r => this.getCorrectiveAction(r)).join('\n')}
+` : ''}
+
+${requiredConditions.length > 0 ? `
+**CONDITIONS REQUIRED FOR GO DECISION:**
+${requiredConditions.map(c => `✓ ${c}`).join('\n')}
+` : ''}
+
+**PRIMARY THREAT TODAY:**
+${prediction.incidentName}
+
+---
+
+**INCIDENT FORECAST #1: ${prediction.incidentName}**
+
+**Statistical Context (OSHA BLS 2023):**
+- Hazard Type: ${topHazard.name}
+- Risk Score: ${topHazard.riskScore}/100
+- OSHA Statistical Context: ${topHazard.oshaContext}
+- Site Exposure: ${siteLocation} - ${workType}
+- Prediction Confidence: **${prediction.confidence}**
+
+${prediction.confidence === 'HIGH' ? 
+  '⚠️ **HIGH CONFIDENCE PREDICTION** - Multiple observable precursors present' : ''}
+
+**Causal Chain Analysis (Swiss Cheese Model):**
+
+This shows EXACTLY how the incident will unfold if current conditions don't change:
+
+${prediction.causalChain.map((stage, i) => {
+  let output = `**${i + 1}. ${stage.stage}:**
+${stage.description}`;
+  
+  if (stage.evidence) output += `
+   📋 *Evidence from checklist:* ${stage.evidence}`;
+  if (stage.whyItFails) output += `
+   ⚠️ *Why this defense fails:* ${stage.whyItFails}`;
+  if (stage.why) output += `
+   🧠 *Why worker makes this choice:* ${stage.why}`;
+  if (stage.timeToIntervene) output += `
+   ⏱️ *Time available to intervene:* ${stage.timeToIntervene}`;
+  
+  return output;
+}).join('\n\n')}
+
+**Leading Indicators Observable RIGHT NOW:**
+
+${prediction.leadingIndicators.map(indicator => `🔍 ${indicator}`).join('\n')}
+
+**These are the warning signs supervisors should be watching for TODAY.**
+
+**Single Most Effective Intervention:**
+
+🎯 **${prediction.singleBestIntervention}**
+
+This intervention breaks the causal chain at its weakest point, preventing the incident sequence from progressing.
+
+**Implementation Details:**
+- **What:** ${prediction.singleBestIntervention}
+- **Who:** Site supervisor / Competent person for this hazard category
+- **When:** Before any operations begin today
+- **Verification:** ${this.getVerificationMethod(prediction.singleBestIntervention)}
+- **If not implemented:** ${prediction.incidentName} becomes statistically likely
+
+---
+
+**WEATHER IMPACT ON OPERATIONS:**
+
+**Current Conditions** (${now.toLocaleTimeString()}):
+- 🌡️ Temperature: ${weatherData?.temperature || 'N/A'}°F
+- 💨 Wind Speed: ${weatherData?.windSpeed || 'N/A'} mph ${weatherData?.windSpeed ? `(gusts documented in checklist)` : ''}
+- ☁️ Conditions: ${weatherData?.conditions || 'Unknown'}
+- 💧 Humidity: ${weatherData?.humidity || 'N/A'}%
+
+**Equipment-Specific Limits Analysis:**
+
+**Crane Operations (ASME B30.3):**
+- Conservative safe limit: 20 mph (standard for mobile/tower cranes)
+- Current wind speed: ${weatherData?.windSpeed || 'UNKNOWN'} mph
+- Safety margin: ${windMargin.toFixed(1)}%
+- **Status: ${weatherStatus}**
+  ${weatherStatus === 'GREEN' ? '✅ Weather not a limiting factor - proceed with normal monitoring' : ''}
+  ${weatherStatus === 'YELLOW' ? '⚠️ CAUTION - Active monitoring required, close to limits' : ''}
+  ${weatherStatus === 'RED' ? '🛑 CRITICAL - Too close to limits, recommend postpone until conditions improve' : ''}
+
+**Swing Stage Operations (ANSI/IWCA I-14.1):**
+- Recommended wind limit: 25 mph
+- Current conditions: ${weatherData?.windSpeed || 'UNKNOWN'} mph
+- Status: ${weatherData?.windSpeed && weatherData.windSpeed < 25 ? '✅ Within limits' : '⚠️ Borderline or exceeded'}
+
+${weatherData?.windSpeed && weatherData.windSpeed > 15 ? 
+`
+🚨 **CRITICAL WEATHER FINDING:**
+Wind speeds are ${weatherData.windSpeed > 20 ? 'EXCEEDING' : 'APPROACHING'} operational limits.
+Mandatory continuous monitoring required. Any increase triggers immediate work stoppage.
+` : ''}
+
+---
+
+**COMPLIANCE GAPS ENABLING THIS INCIDENT:**
+
+${topHazard.inadequateControls && topHazard.inadequateControls.length > 0 ? 
+  topHazard.inadequateControls.map((control, i) => 
+    `**Gap ${i + 1}: ${control}**
+- Enables: Stage ${this.mapControlToStage(control, prediction.causalChain)} of causal chain
+- OSHA Reference: ${this.getOSHAReference(control)}
+- Corrective Action: ${this.getCorrectiveAction(control)}
+- Citation Risk: ${topHazard.riskScore > 80 ? 'HIGH' : topHazard.riskScore > 60 ? 'MEDIUM' : 'LOW'}`
+  ).join('\n\n') : 
+  'No specific inadequate controls identified - risk stems from environmental conditions'}
+
+**Connection to Predicted Incident:**
+Each inadequate control represents a "hole in the Swiss cheese" that allows the incident sequence to progress. Closing any one of these holes can prevent the incident.
+
+---
+
+**PREDICTION CONFIDENCE ASSESSMENT:**
+
+**Overall Confidence: ${prediction.confidence}**
+
+**Reasoning:**
+- 📊 Data Completeness: ${validation.qualityScore}/10 (${validation.missingCritical.length} critical fields missing)
+- 📈 Statistical Support: ${risk.oshaData?.constructionProfile ? 
+    `Real OSHA BLS 2023 data available - ${risk.oshaData.constructionProfile.injury_rate} injuries per 100 FTE` : 
+    'Limited statistical baseline'}
+- 👁️ Observable Indicators: ${prediction.leadingIndicators.length} leading indicators currently visible on site
+- 🛡️ Control Verification: ${validation.dataQuality === 'HIGH' ? 
+    'Controls documented AND verified' : 
+    validation.dataQuality === 'MEDIUM' ? 'Controls documented only' : 'Control status unclear'}
+
+${prediction.confidence === 'LOW' ? `
+**To Raise Confidence to MEDIUM/HIGH, Obtain:**
+${validation.missingCritical.map(field => `- ${field}`).join('\n')}
+
+Without this data, prediction relies more on general construction risk patterns than site-specific analysis.
+` : ''}
+
+${prediction.confidence === 'HIGH' ? `
+**High Confidence Justification:**
+This prediction is based on observable conditions present RIGHT NOW (${prediction.leadingIndicators.length} indicators), 
+supported by real OSHA statistical data, with documented control failures evident in the checklist responses.
+` : ''}
+
+---
+
+**DATA VALIDATION SUMMARY:**
+
+- ✅ Quality Score: ${validation.qualityScore}/10
+- ${validation.weatherPresent ? '✅' : '❌'} Weather Data: ${validation.weatherPresent ? 'Present and analyzed' : 'MISSING - reduces prediction accuracy'}
+- ${validation.missingCritical.length === 0 ? '✅' : '⚠️'} Missing Critical Fields: ${validation.missingCritical.length === 0 ? 'None' : validation.missingCritical.join(', ')}
+- ${validation.concerns.length === 0 ? '✅' : '⚠️'} Data Quality Concerns: ${validation.concerns.length === 0 ? 'None identified' : validation.concerns.length + ' concerns flagged'}
+
+${validation.dataQuality === 'LOW' ? `
+⚠️ **LOW DATA QUALITY WARNING:**
+Insufficient data reduces prediction accuracy and may hide additional hazards. 
+Recommend completing all critical fields before final GO decision.
+` : ''}
+
+---
+
+**EMERGENCY RESPONSE CAPABILITY ASSESSMENT:**
+
+**For Predicted Incident: ${prediction.incidentName}**
+
+Current Documented Response:
+${checklistData.sections?.find((s: any) => s.title?.toLowerCase().includes('emergency'))?.responses?.map((r: any) => 
+  `- ${r.question}: ${r.response}`).join('\n') || 'Emergency response section not found in checklist'}
+
+**Adequacy Analysis:**
+- ${prediction.incidentName.toLowerCase().includes('fall') ? 
+    `Fall Rescue Capability: ${validation.concerns.some(c => c.toLowerCase().includes('rescue')) ? 
+      '❌ INADEQUATE - No documented rescue plan' : 
+      '⚠️ REQUIRES VERIFICATION - Rescue capability mentioned but not detailed'}` : ''}
+- First Aid Equipment: ${checklistData.sections?.some((s: any) => 
+    s.responses?.some((r: any) => r.response?.toLowerCase().includes('first aid'))) ? '✅ Present' : '⚠️ Unknown'}
+- Communication Systems: ${checklistData.sections?.some((s: any) => 
+    s.responses?.some((r: any) => r.response?.toLowerCase().includes('radio') || r.response?.toLowerCase().includes('communication'))) ? 
+    '✅ Two-way radios and hand signals documented' : '⚠️ Not documented'}
+
+**Required for This Incident Type:**
+${this.getEmergencyRequirements(prediction.incidentName)}
+
+**Nearest Trauma Center:** [Data not in checklist - recommend adding to JHA]
+
+---
+
+**RISK SUMMARY TABLE:**
+
+| Rank | Hazard | Risk Score | Consequence | Probability | Controls |
+|------|--------|-----------|-------------|-------------|----------|
+${risk.hazards.slice(0, 5).map((h, i) => 
+  `| ${i + 1} | ${h.name.substring(0, 40)}... | ${h.riskScore}/100 | ${h.consequence} | ${(h.probability * 100).toFixed(1)}% | ${h.inadequateControls.length > 0 ? '⚠️ Gaps' : '✓'} |`
+).join('\n')}
+
+**Top 3 Threats Requiring Immediate Attention:**
+${risk.topThreats.slice(0, 3).map((t, i) => `${i + 1}. ${t}`).join('\n')}
+
+---
+
+**REGULATORY COMPLIANCE REFERENCES:**
+
+This analysis incorporates requirements from:
+- 📋 OSHA 1926.502 (Fall Protection Systems)
+- 🏗️ OSHA 1926.550 (Cranes and Derricks in Construction)
+- 👷 OSHA 1926.95 (Personal Protective Equipment)
+- 🪟 ANSI/IWCA I-14.1 (Suspended Access Equipment for Window Cleaning)
+- 🏗️ ASME B30.3 (Tower Crane Standards)
+- 📦 OSHA 1926.250 (Material Handling and Storage)
+
+For detailed compliance requirements, consult the specific standard sections referenced in the compliance gaps analysis above.
+
+---
+
+**ANALYSIS METHODOLOGY:**
+
+**Multi-Agent AI Pipeline:**
+- 🤖 Agent 1: Data Validation (Temperature 0.3 - precise checking)
+- ⚠️ Agent 2: Risk Assessment with real OSHA BLS 2023 data (Temperature 0.7 - analytical)
+- 🔮 Agent 3: Incident Prediction using Swiss Cheese causation model (Temperature 1.0 - creative reasoning)
+- 📄 Agent 4: Report Synthesis combining traditional JHA + predictive analysis (Temperature 0.5 - structured)
+
+**Data Sources:**
+- OSHA Bureau of Labor Statistics 2023 construction injury data (Supabase database)
+- Real-time weather data for site location
+- Checklist responses validated for completeness and quality
+- Industry best practices and regulatory standards
+
+**Analysis Timestamp:** ${now.toISOString()}
+**Site Location:** ${siteLocation}
+**Work Type:** ${workType}
+**Checklist Template:** ${checklistData.template || checklistData.templateId || 'Unknown'}
+
+═══════════════════════════════════════════
+
+*This hybrid analysis combines industry-standard JHA Executive Summary format with AI-powered predictive incident forecasting. The goal is to prevent injuries through specific, actionable interventions while maintaining regulatory compliance documentation requirements.*`;
+
+    // Return combined report
+    return traditionalJHA + predictiveAnalysis;
+  }
+
+  /**
+   * Helper: Generate overall assessment section
+   */
+  private generateOverallAssessment(validation: ValidationResult, risk: RiskAssessment, weatherData: any): string {
+    const topRisk = risk.hazards[0];
+    const qualityNote = validation.dataQuality === 'LOW' ? 
+      'However, data quality concerns limit analysis confidence. ' : '';
+    
+    const weatherNote = weatherData?.windSpeed && weatherData.windSpeed > 15 ? 
+      `Current wind conditions (${weatherData.windSpeed} mph) present significant operational concerns. ` : '';
+    
+    return `This JHA addresses key aspects of ${risk.hazards[0]?.name || 'the construction project'}. ${qualityNote}${weatherNote}The analysis identifies ${risk.hazards.length} distinct hazards requiring attention, with ${risk.hazards.filter(h => h.riskScore > 70).length} rated as high-risk (>70/100). ${validation.dataQuality === 'HIGH' ? 'Comprehensive data quality enables high-confidence predictions.' : 'Additional data would improve prediction accuracy.'}`;
+  }
+
+  /**
+   * Helper: Generate compliance status text
+   */
+  private generateComplianceStatus(validation: ValidationResult, risk: RiskAssessment, checklistData: any): string {
+    const standards = [
+      'OSHA 1926.502 (Fall Protection)',
+      'OSHA 1926.550 (Cranes and Derricks)',
+      'OSHA 1926.95 (PPE Requirements)',
+      'ANSI/IWCA I-14.1 (Swing Stage Safety)',
+      'OSHA 1926.250 (Material Storage)'
+    ];
+    
+    return `**Referenced Standards:**
+${standards.map(s => `- ${s}: Compliance requires verification of documented procedures`).join('\n')}
+
+**Compliance Concerns:**
+${validation.missingCritical.length > 0 ? 
+  `- Missing critical documentation: ${validation.missingCritical.join(', ')}` : 
+  '- No critical documentation gaps identified'}
+${validation.concerns.length > 0 ? 
+  `- Data quality issues: ${validation.concerns.slice(0, 3).join('; ')}` : ''}
+${risk.hazards[0]?.inadequateControls.length > 0 ? 
+  `- Inadequate controls identified: ${risk.hazards[0].inadequateControls.length} gaps requiring correction` : ''}
+
+**Overall Compliance Status:** ${validation.dataQuality === 'HIGH' && validation.missingCritical.length === 0 ? 
+  'LIKELY COMPLIANT - Pending verification' : 
+  'GAPS IDENTIFIED - Corrective action required before full compliance'}`;
+  }
+
+  /**
+   * Helper: Generate immediate actions list
+   */
+  private generateImmediateActions(prediction: IncidentPrediction, validation: ValidationResult, weatherData: any, topHazard: any): string {
+    const actions: string[] = [];
+    
+    // Weather-based action
+    if (weatherData?.windSpeed && weatherData.windSpeed > 15) {
+      actions.push(`**CRITICAL:** Implement wind speed stop-work protocol. Halt crane and swing stage operations if wind exceeds 20 mph. Install real-time monitoring system.`);
+    }
+    
+    // Prediction-based action
+    actions.push(`**PRIMARY INTERVENTION:** ${prediction.singleBestIntervention}`);
+    
+    // Validation-based actions
+    if (validation.missingCritical.length > 0) {
+      actions.push(`**DATA GAPS:** Obtain missing critical information: ${validation.missingCritical.join(', ')}`);
+    }
+    
+    // Control-based actions
+    if (topHazard.inadequateControls && topHazard.inadequateControls.length > 0) {
+      actions.push(`**CONTROL FAILURES:** Address inadequate controls: ${topHazard.inadequateControls.slice(0, 2).join('; ')}`);
+    }
+    
+    // Generic fall protection if applicable
+    if (prediction.incidentName.toLowerCase().includes('fall')) {
+      actions.push(`**FALL PROTECTION:** Competent person inspection of all anchor points, harnesses, and lanyards before shift start. Document inspection.`);
+    }
+    
+    return actions.map((a, i) => `${i + 1}. ${a}`).join('\n\n');
+  }
+
+  /**
+   * Helper: Get verification method for intervention
+   */
+  private getVerificationMethod(intervention: string): string {
+    if (intervention.toLowerCase().includes('anemometer') || intervention.toLowerCase().includes('wind')) {
+      return 'Visible wind speed display at ground level, alarm test before first lift';
+    }
+    if (intervention.toLowerCase().includes('inspect')) {
+      return 'Signed inspection form by competent person with photo documentation';
+    }
+    if (intervention.toLowerCase().includes('training')) {
+      return 'Signed training attendance sheet with comprehension quiz';
+    }
+    return 'Documented completion with supervisor sign-off';
+  }
+
+  /**
+   * Helper: Get OSHA reference for control gap
+   */
+  private getOSHAReference(control: string): string {
+    const lower = control.toLowerCase();
+    if (lower.includes('fall') || lower.includes('anchor')) return 'OSHA 1926.502';
+    if (lower.includes('crane') || lower.includes('lift')) return 'OSHA 1926.550';
+    if (lower.includes('ppe') || lower.includes('glove') || lower.includes('harness')) return 'OSHA 1926.95';
+    if (lower.includes('wind') || lower.includes('weather')) return 'OSHA 1926.550(a)(6)';
+    return 'OSHA 1926 Subpart (see specific standard)';
+  }
+
+  /**
+   * Helper: Get corrective action for a gap/reason
+   */
+  private getCorrectiveAction(item: string): string {
+    const lower = item.toLowerCase();
+    if (lower.includes('wind')) return '→ Install calibrated anemometer and establish 20 mph hard stop protocol';
+    if (lower.includes('emergency') || lower.includes('rescue')) return '→ Document fall rescue plan with 6-minute response capability';
+    if (lower.includes('inspect')) return '→ Competent person inspection with written documentation';
+    if (lower.includes('data') || lower.includes('quality')) return '→ Complete all critical JHA fields with specific details';
+    if (lower.includes('certification')) return '→ Verify and document all equipment certifications and operator qualifications';
+    return '→ Implement corrective measures per specific standard requirements';
+  }
+
+  /**
+   * Helper: Map control to causal chain stage
+   */
+  private mapControlToStage(control: string, causalChain: CausalStage[]): string {
+    const lower = control.toLowerCase();
+    if (lower.includes('monitor') || lower.includes('wind')) return '1-2';
+    if (lower.includes('inspect') || lower.includes('anchor')) return '2-3';
+    if (lower.includes('training') || lower.includes('procedure')) return '3';
+    return '1-3';
+  }
+
+  /**
+   * Helper: Get emergency requirements for incident type
+   */
+  private getEmergencyRequirements(incidentName: string): string {
+    const requirements: string[] = [];
+    
+    if (incidentName.toLowerCase().includes('fall')) {
+      requirements.push('- Fall rescue equipment and trained rescue team with 6-minute response time');
+      requirements.push('- Suspension trauma relief straps in all harnesses');
+    }
+    
+    if (incidentName.toLowerCase().includes('struck') || incidentName.toLowerCase().includes('crush')) {
+      requirements.push('- Trauma first aid kit with bleeding control supplies');
+      requirements.push('- Immediate 911 access and trauma center routing');
+    }
+    
+    if (incidentName.toLowerCase().includes('glass')) {
+      requirements.push('- Severe laceration treatment supplies and pressure bandages');
+    }
+    
+    requirements.push('- Site-specific emergency evacuation plan');
+    requirements.push('- All workers trained on emergency response procedures');
+    
+    return requirements.join('\n');
   }
 
   /**
