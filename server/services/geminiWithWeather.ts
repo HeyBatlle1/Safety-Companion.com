@@ -117,6 +117,25 @@ ${JSON.stringify(checklistData, null, 2)}
 ${oshaDataSection}
 
 ═══════════════════════════════════════════
+PRE-ANALYSIS DATA VALIDATION
+═══════════════════════════════════════════
+
+CRITICAL DATA CHECK:
+□ Weather data: [PRESENT / MISSING]
+□ Equipment specifications: [PRESENT / MISSING]
+□ Worker certifications: [PRESENT / MISSING]
+□ Emergency response plan: [PRESENT / MISSING]
+□ OSHA statistical data: [PRESENT / MISSING]
+
+IF any CRITICAL data is MISSING:
+- EXECUTIVE DECISION defaults to NO-GO or GO WITH CONDITIONS
+- Analysis proceeds with REDUCED CONFIDENCE
+- Missing data items listed as IMMEDIATE ACTIONS
+- State "INSUFFICIENT DATA FOR HIGH-CONFIDENCE PREDICTION" in affected sections
+
+PERFORM THIS CHECK FIRST - Before any incident prediction.
+
+═══════════════════════════════════════════
 YOUR PRIMARY MISSION
 ═══════════════════════════════════════════
 
@@ -135,6 +154,28 @@ Tell me SPECIFICALLY:
 - WHAT intervention breaks the chain
 
 ═══════════════════════════════════════════
+MANDATORY STOP-WORK CONDITIONS (Check First)
+═══════════════════════════════════════════
+
+Evaluate these conditions BEFORE proceeding with incident forecasts.
+IF any condition exists, EXECUTIVE DECISION = NO-GO
+
+AUTOMATIC NO-GO TRIGGERS:
+□ Emergency response plan missing or inadequate for HIGH-RISK work
+□ Weather exceeds ANY equipment manufacturer limit (if limits known)
+□ Required certifications unverified (crane operator, competent person, swing stage)
+□ Anchor points not certified for fall protection system loads
+□ Wind speed within 20% of any known equipment limit + no weather monitoring plan
+
+IF NO-GO TRIGGERED:
+- State which specific condition(s) triggered stop-work
+- List specific actions required to clear NO-GO status
+- Provide realistic timeline to implement (hours/days, not "immediately")
+- Identify who has authority to clear the stop-work
+
+IF NO TRIGGERS EXIST: Proceed with full analysis and incident forecasting.
+
+═══════════════════════════════════════════
 REQUIRED OUTPUT FORMAT
 ═══════════════════════════════════════════
 
@@ -148,9 +189,16 @@ REQUIRED OUTPUT FORMAT
 **INCIDENT FORECAST #1: [Specific Incident Name]**
 
 **Statistical Context:**
-This incident type represents [X]% of construction injuries (OSHA 2023 data).
-On a site with ${checklistData.numberOfWorkers || 'unknown'} workers, the baseline annual probability is [calculated risk].
-Current conditions ${increaseOrDecrease} this risk by [estimated factor].
+
+OSHA incident rate for this work type: [X per 100 FTE from Supabase data]
+Baseline probability: [Calculate: incidents per worker-hours for this specific task]
+Site exposure today: [Number workers] × [Expected hours] = [exposure units]
+Expected incidents this project: [Calculated probability × project duration]
+Current conditions modifier: [How today's conditions differ from baseline - specific factors]
+Confidence in prediction: [HIGH/MEDIUM/LOW - see criteria below]
+
+IF OSHA data unavailable for exact work type, use closest analog and state:
+"Using [analog work type] data - actual risk may vary by [estimated %]"
 
 **Causal Chain - How This Happens:**
 
@@ -195,7 +243,42 @@ Verification: [How to confirm it's working - measurable indicator]
 
 ---
 
+═══════════════════════════════════════════
+PREDICTION CONFIDENCE ASSESSMENT
+═══════════════════════════════════════════
+
+For each incident forecast provided above, evaluate confidence:
+
+**INCIDENT #1 CONFIDENCE: [HIGH/MEDIUM/LOW]**
+Reasoning:
+- Data completeness: [X/Y required inputs present - list what's missing]
+- Statistical support: [Direct OSHA match / Analogous data / Limited stats]
+- Observable indicators: [List specific leading indicators currently visible]
+- Control verification: [Controls documented and verified / documented only / unknown]
+
+**INCIDENT #2 CONFIDENCE: [HIGH/MEDIUM/LOW]**
+[Same structure]
+
+**CONFIDENCE DEFINITIONS:**
+HIGH = All critical data present + Direct OSHA stats + Multiple observable precursors + Controls verified
+MEDIUM = Analogous OSHA data + Some data gaps + At least one observable precursor + Controls documented
+LOW = Significant data gaps + Limited statistical support + Prediction based on general construction risk
+
+IF CONFIDENCE IS LOW: State what specific data would raise it to MEDIUM or HIGH.
+
+---
+
 **COMPLIANCE GAPS ENABLING THESE INCIDENTS:**
+
+Each compliance gap below is connected to a specific predicted incident and includes the intervention required.
+FORMAT: Standard → Violation → Incident Connection → Required Action → Verification
+
+EXAMPLE:
+- OSHA 1926.502(d)(15) - Fall Protection Rescue
+  Violation: No rescue plan documented for swing stage operations
+  Enables Incident #1: If fall arrest occurs, suspended worker → positional asphyxia risk within 6 minutes
+  Required Action: Designate rescue team with 6-minute response capability
+  Verification: Conduct rescue drill before work authorization, document response time
 
 **Immediate Violations:**
 - **[OSHA Standard Number]** - [Standard name]
@@ -240,9 +323,24 @@ Current: [Temp]°F, [Wind speed] mph, [Conditions]
 Critical finding: [Are you within 20% of any equipment operating limit? State the margin.]
 
 Equipment-specific limits for TODAY'S CONDITIONS:
-- Crane: [Manufacturer limit] vs [Current conditions] = [X]% margin
-- Swing stage: [ANSI/IWCA I-14.1 limit] vs [Current] = [X]% margin  
-- Glass handling: [How current weather affects this specific operation]
+
+IF equipment specifications are in the checklist data:
+- Crane [Model]: Manufacturer limit [X] mph vs Current [Y] mph = [Z]% safety margin
+- Swing stage: ANSI/IWCA I-14.1 limit [X] mph vs Current [Y] mph = [Z]% margin
+- Glass handling: [How current weather affects THIS specific panel size/weight]
+
+IF equipment specifications are MISSING:
+- MISSING: Crane model/specifications - cannot determine manufacturer wind limit
+  DEFAULT: Apply ASME B30.3 conservative limit of 20 mph for mobile cranes
+- MISSING: Swing stage load capacity - cannot verify current load vs rating
+  REQUIRED ACTION: Obtain equipment specifications before authorizing work
+
+Weather safety margin status:
+- GREEN (>30% margin): Weather not a limiting factor
+- YELLOW (20-30% margin): Active monitoring required, stop-work trigger defined
+- RED (<20% margin): Too close to limits, recommend postpone until conditions improve
+
+Current status: [GREEN/YELLOW/RED]
 
 Forecast next 2 hours: [Improving/Stable/Deteriorating]
 Work stoppage trigger: [Specific measurable weather condition]
@@ -304,6 +402,34 @@ ANALYSIS PRINCIPLES
 ✗ DO NOT assume procedures work just because they're documented
 ✗ DO NOT provide generic advice that applies to any construction site
 ✗ DO NOT ignore production pressure - it's always present and affects safety decisions
+
+✓ For each documented control, assess ACTUAL EFFECTIVENESS using this scale:
+  1 = Documented only, no evidence of implementation
+  2 = Partially implemented, inconsistent application observed
+  3 = Implemented but not verified/inspected
+  4 = Implemented with regular verification/spot-checks
+  5 = Engineered control, doesn't depend on worker compliance
+  Include effectiveness rating in your incident forecasts when assessing defense failures.
+
+═══════════════════════════════════════════
+FACTUAL CONSTRAINTS - PREVENT HALLUCINATION
+═══════════════════════════════════════════
+
+✓ ONLY cite OSHA standards you can reference with specific section numbers
+✓ ONLY reference weather data that appears in [CURRENT CONDITIONS] section above
+✓ ONLY use statistical data from [REAL OSHA DATA FROM SUPABASE] section above
+✓ If manufacturer limits unknown, state "MISSING: [Equipment model] specifications"
+✓ If data is missing, state "MISSING: [specific data needed]" - NEVER estimate or assume
+
+CORRECT response when data missing:
+"MISSING: Crane manufacturer specifications required. Without model/config data, cannot determine wind limit. RECOMMEND: Use conservative 20mph limit per ASME B30.3 until specs verified."
+
+INCORRECT response:
+"Crane wind limit is typically 25mph" ← NEVER make generic assumptions
+
+✓ When citing distances/measurements, verify they appear in the checklist data
+✓ When stating compliance requirements, cite the specific standard section
+✓ When predicting injury severity, base on OSHA injury distribution data for that incident type
 
 Your analysis could prevent an injury TODAY. Write accordingly.
 
