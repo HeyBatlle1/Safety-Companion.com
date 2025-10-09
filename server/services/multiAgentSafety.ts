@@ -47,8 +47,55 @@ interface IncidentPrediction {
   leadingIndicators: string[];
 }
 
+interface PipelineMetadata {
+  pipelineVersion: string;
+  executionTimeMs: number;
+  agents: {
+    agent1_validator: {
+      model: string;
+      temperature: number;
+      maxTokens: number;
+      executionTimeMs: number;
+      responseLength: number;
+    };
+    agent2_risk_assessor: {
+      model: string;
+      temperature: number;
+      maxTokens: number;
+      executionTimeMs: number;
+      responseLength: number;
+      oshaDataSources: string[];
+    };
+    agent3_incident_predictor: {
+      model: string;
+      temperature: number;
+      maxTokens: number;
+      executionTimeMs: number;
+      responseLength: number;
+      confidenceLevel: string;
+    };
+    agent4_report_synthesizer: {
+      model: string;
+      temperature: number;
+      method: string;
+      executionTimeMs: number;
+      reportLength: number;
+      responseLength: number;
+    };
+  };
+  dataQuality: string;
+  topRiskScore: number;
+  predictionConfidence: string;
+}
+
+interface AnalysisResult {
+  report: string;
+  metadata: PipelineMetadata;
+}
+
 export class MultiAgentSafetyAnalysis {
   private model;
+  private pipelineStartTime: number = 0;
 
   constructor() {
     this.model = gemini.getGenerativeModel({
@@ -59,35 +106,142 @@ export class MultiAgentSafetyAnalysis {
   /**
    * Main entry point - orchestrates the 4-agent pipeline
    */
-  async analyze(checklistData: any, weatherData: any): Promise<string> {
+  async analyze(checklistData: any, weatherData: any): Promise<AnalysisResult> {
+    this.pipelineStartTime = Date.now();
+    const agentTimings: any = {};
+    
+    // Track partial results for fallback fidelity
+    let lastKnownDataQuality = 'ERROR';
+    let lastKnownTopRiskScore = 0;
+    let lastKnownConfidence = 'NONE';
+
     try {
       console.log('🤖 Starting multi-agent analysis pipeline...');
 
       // AGENT 1: Data Validation (Temperature 0.3 - precise)
       console.log('📋 Agent 1: Validating data quality...');
+      const agent1Start = Date.now();
       const validation = await this.validateData(checklistData, weatherData);
+      agentTimings.agent1_validator = {
+        model: 'gemini-2.5-flash',
+        temperature: 0.3,
+        maxTokens: 4000,
+        executionTimeMs: Date.now() - agent1Start,
+        responseLength: JSON.stringify(validation).length
+      };
+      lastKnownDataQuality = validation.dataQuality;
       console.log(`✓ Data quality: ${validation.dataQuality} (score: ${validation.qualityScore}/10)`);
 
       // AGENT 2: Risk Assessment (Temperature 0.7 - analytical)
       console.log('⚠️  Agent 2: Assessing risks with OSHA data...');
+      const agent2Start = Date.now();
       const risk = await this.assessRisk(validation, checklistData);
+      agentTimings.agent2_risk_assessor = {
+        model: 'gemini-2.5-flash',
+        temperature: 0.7,
+        maxTokens: 8000,
+        executionTimeMs: Date.now() - agent2Start,
+        responseLength: JSON.stringify(risk).length,
+        oshaDataSources: risk.oshaData ? ['BLS_2023_Construction', 'NAICS_23'] : []
+      };
+      lastKnownTopRiskScore = risk.hazards[0]?.riskScore || 0;
       console.log(`✓ Identified ${risk.hazards.length} hazards`);
 
       // AGENT 3: Incident Prediction (Temperature 1.0 - creative reasoning)
       console.log('🔮 Agent 3: Predicting incident scenarios...');
+      const agent3Start = Date.now();
       const prediction = await this.predictIncident(risk, checklistData);
+      agentTimings.agent3_incident_predictor = {
+        model: 'gemini-2.5-flash',
+        temperature: 1.0,
+        maxTokens: 8000,
+        executionTimeMs: Date.now() - agent3Start,
+        responseLength: JSON.stringify(prediction).length,
+        confidenceLevel: prediction.confidence
+      };
+      lastKnownConfidence = prediction.confidence;
       console.log(`✓ Predicted: ${prediction.incidentName} (confidence: ${prediction.confidence})`);
 
       // AGENT 4: Report Synthesis (Temperature 0.5 - structured)
       console.log('📄 Agent 4: Synthesizing final report...');
+      const agent4Start = Date.now();
       const report = await this.synthesizeReport(validation, risk, prediction, weatherData, checklistData);
+      agentTimings.agent4_report_synthesizer = {
+        model: 'hybrid-template',
+        temperature: 0.5,
+        method: 'structured_typescript',
+        executionTimeMs: Date.now() - agent4Start,
+        reportLength: report.length,
+        responseLength: report.length  // Alias for consistency with other agents
+      };
       console.log('✓ Pipeline complete!');
 
-      return report;
+      const totalExecutionTime = Date.now() - this.pipelineStartTime;
+
+      const metadata: PipelineMetadata = {
+        pipelineVersion: 'multi-agent-v1.0-hybrid',
+        executionTimeMs: totalExecutionTime,
+        agents: agentTimings,
+        dataQuality: validation.dataQuality,
+        topRiskScore: risk.hazards[0]?.riskScore || 0,
+        predictionConfidence: prediction.confidence
+      };
+
+      return {
+        report,
+        metadata
+      };
 
     } catch (error) {
       console.error('❌ Multi-agent pipeline error:', error);
-      return this.generateFallbackReport(error, checklistData, weatherData);
+      const fallbackReport = this.generateFallbackReport(error, checklistData, weatherData);
+      
+      // Use last known values from successful agents (preserves analytics fidelity)
+      const fallbackMetadata: PipelineMetadata = {
+        pipelineVersion: 'multi-agent-v1.0-hybrid',
+        executionTimeMs: Date.now() - this.pipelineStartTime,
+        agents: {
+          agent1_validator: agentTimings.agent1_validator || {
+            model: 'gemini-2.5-flash',
+            temperature: 0.3,
+            maxTokens: 4000,
+            executionTimeMs: 0,
+            responseLength: 0
+          },
+          agent2_risk_assessor: agentTimings.agent2_risk_assessor || {
+            model: 'gemini-2.5-flash',
+            temperature: 0.7,
+            maxTokens: 8000,
+            executionTimeMs: 0,
+            responseLength: 0,
+            oshaDataSources: []
+          },
+          agent3_incident_predictor: agentTimings.agent3_incident_predictor || {
+            model: 'gemini-2.5-flash',
+            temperature: 1.0,
+            maxTokens: 8000,
+            executionTimeMs: 0,
+            responseLength: 0,
+            confidenceLevel: lastKnownConfidence  // Preserve real confidence from Agent 3
+          },
+          agent4_report_synthesizer: agentTimings.agent4_report_synthesizer || {
+            model: 'hybrid-template',
+            temperature: 0.5,
+            method: 'structured_typescript',
+            executionTimeMs: 0,
+            reportLength: 0,
+            responseLength: 0
+          }
+        },
+        dataQuality: lastKnownDataQuality,  // Preserve real data quality from Agent 1
+        topRiskScore: lastKnownTopRiskScore,  // Preserve real risk score from Agent 2
+        predictionConfidence: lastKnownConfidence  // Preserve real confidence from Agent 3
+      };
+      
+      return {
+        report: fallbackReport,
+        metadata: fallbackMetadata
+      };
     }
   }
 
