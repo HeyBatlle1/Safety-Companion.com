@@ -52,7 +52,7 @@ export class MultiAgentSafetyAnalysis {
 
   constructor() {
     this.model = gemini.getGenerativeModel({
-      model: 'gemini-1.5-flash-latest',
+      model: 'gemini-2.5-flash',
     });
   }
 
@@ -130,7 +130,7 @@ Respond with ONLY valid JSON, no other text. Use this exact structure:
 
     let result = '';
     try {
-      result = await this.callGemini(prompt, 0.3, 3000); // Increased for thinking tokens
+      result = await this.callGemini(prompt, 0.3, 4000); // 2.5-flash thinking + response
       const extracted = this.extractJSON(result);
       console.log('🔍 Agent 1 extracted JSON length:', extracted.length);
       const parsed = JSON.parse(extracted);
@@ -234,7 +234,7 @@ Respond with ONLY valid JSON, no other text:
 
     let result = '';
     try {
-      result = await this.callGemini(prompt, 0.7, 5000); // Increased for thinking tokens
+      result = await this.callGemini(prompt, 0.7, 8000); // 2.5-flash thinking + response
       const extracted = this.extractJSON(result);
       console.log('🔍 Agent 2 extracted JSON length:', extracted.length);
       const parsed = JSON.parse(extracted);
@@ -338,7 +338,7 @@ Respond with ONLY valid JSON, no other text:
 
     let result = '';
     try {
-      result = await this.callGemini(prompt, 1.0, 6000); // Increased for thinking tokens
+      result = await this.callGemini(prompt, 1.0, 8000); // 2.5-flash thinking + response
       const extracted = this.extractJSON(result);
       console.log('🔍 Agent 3 extracted JSON length:', extracted.length);
       const parsed = JSON.parse(extracted);
