@@ -52,7 +52,7 @@ export class MultiAgentSafetyAnalysis {
 
   constructor() {
     this.model = gemini.getGenerativeModel({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-1.5-flash-latest',
     });
   }
 
@@ -128,9 +128,12 @@ Respond with ONLY valid JSON, no other text. Use this exact structure:
   "weatherPresent": <true|false>
 }`;
 
+    let result = '';
     try {
-      const result = await this.callGemini(prompt, 0.3, 1500);
-      const parsed = JSON.parse(this.extractJSON(result));
+      result = await this.callGemini(prompt, 0.3, 3000); // Increased for thinking tokens
+      const extracted = this.extractJSON(result);
+      console.log('🔍 Agent 1 extracted JSON length:', extracted.length);
+      const parsed = JSON.parse(extracted);
       
       return {
         ...parsed,
@@ -138,6 +141,7 @@ Respond with ONLY valid JSON, no other text. Use this exact structure:
       };
     } catch (error) {
       console.error('Agent 1 parsing error:', error);
+      console.error('Agent 1 raw response preview:', result?.substring(0, 200));
       // Fallback validation
       return {
         qualityScore: 5,
@@ -228,9 +232,12 @@ Respond with ONLY valid JSON, no other text:
   "topThreats": ["threat 1", "threat 2", "threat 3"]
 }`;
 
+    let result = '';
     try {
-      const result = await this.callGemini(prompt, 0.7, 2000);
-      const parsed = JSON.parse(this.extractJSON(result));
+      result = await this.callGemini(prompt, 0.7, 5000); // Increased for thinking tokens
+      const extracted = this.extractJSON(result);
+      console.log('🔍 Agent 2 extracted JSON length:', extracted.length);
+      const parsed = JSON.parse(extracted);
       
       return {
         ...parsed,
@@ -238,6 +245,7 @@ Respond with ONLY valid JSON, no other text:
       };
     } catch (error) {
       console.error('Agent 2 parsing error:', error);
+      console.error('Agent 2 raw response preview:', result?.substring(0, 200));
       // Fallback risk assessment
       return {
         hazards: [{
@@ -328,13 +336,17 @@ Respond with ONLY valid JSON, no other text:
   "singleBestIntervention": "ONE specific action that breaks the chain (not 'provide training' but 'Install real-time anemometer with 20mph alarm before authorizing any lifts')"
 }`;
 
+    let result = '';
     try {
-      const result = await this.callGemini(prompt, 1.0, 2500);
-      const parsed = JSON.parse(this.extractJSON(result));
+      result = await this.callGemini(prompt, 1.0, 6000); // Increased for thinking tokens
+      const extracted = this.extractJSON(result);
+      console.log('🔍 Agent 3 extracted JSON length:', extracted.length);
+      const parsed = JSON.parse(extracted);
       
       return parsed;
     } catch (error) {
       console.error('Agent 3 parsing error:', error);
+      console.error('Agent 3 raw response preview:', result?.substring(0, 300));
       // Fallback prediction
       return {
         incidentName: topHazard.name,
@@ -353,28 +365,56 @@ Respond with ONLY valid JSON, no other text:
    * Helper: Call Gemini with specific temperature and token limit
    */
   private async callGemini(prompt: string, temperature: number, maxTokens: number): Promise<string> {
-    const result = await this.model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature,
-        maxOutputTokens: maxTokens
+    try {
+      const result = await this.model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature,
+          maxOutputTokens: maxTokens
+        }
+      });
+      
+      const responseText = result.response.text();
+      console.log(`📡 Gemini response (temp ${temperature}): ${responseText.length} chars`);
+      
+      // Check for safety blocks
+      if (!responseText || responseText.trim() === '') {
+        console.error('⚠️  Empty response from Gemini');
+        console.error('Prompt length:', prompt.length);
+        console.error('Response object:', JSON.stringify(result.response, null, 2));
       }
-    });
-    return result.response.text();
+      
+      return responseText;
+    } catch (error) {
+      console.error('❌ Gemini API error:', error);
+      throw error;
+    }
   }
 
   /**
    * Helper: Extract JSON from markdown code blocks
    */
   private extractJSON(text: string): string {
-    // Try to extract from markdown code block
-    const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/);
-    if (jsonMatch) return jsonMatch[1].trim();
+    // Try multiple patterns to extract JSON from markdown
+    const patterns = [
+      /```json\s*([\s\S]*?)\s*```/,  // ```json with optional whitespace
+      /```\s*([\s\S]*?)\s*```/,        // ``` with optional whitespace
+      /\{[\s\S]*\}/                     // Raw JSON object
+    ];
 
-    const codeMatch = text.match(/```\n([\s\S]*?)\n```/);
-    if (codeMatch) return codeMatch[1].trim();
+    for (const pattern of patterns) {
+      const match = text.match(pattern);
+      if (match) {
+        const extracted = match[1] || match[0];
+        const trimmed = extracted.trim();
+        // Verify it looks like JSON
+        if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+          return trimmed;
+        }
+      }
+    }
 
-    // Return as-is if no code block
+    // Return as-is if no pattern matches
     return text.trim();
   }
 
