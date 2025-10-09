@@ -85,7 +85,7 @@ Focus on:
       const result = await this.model.generateContent({
         contents: prompt,
         generationConfig: {
-          temperature: 0.3, // Lower temperature for consistent risk assessment
+          temperature: 1.0,
           topK: 1,
           topP: 0.8,
           maxOutputTokens: 1000,
@@ -179,7 +179,7 @@ Focus on:
       const result = await this.model.generateContent({
         contents: prompt,
         generationConfig: {
-          temperature: 0.2,
+          temperature: 1.0,
           topK: 1,
           topP: 0.8,
           maxOutputTokens: 1000,
@@ -259,7 +259,7 @@ Consider:
       const result = await this.model.generateContent({
         contents: prompt,
         generationConfig: {
-          temperature: 0.4,
+          temperature: 1.0,
           topK: 1,
           topP: 0.8,
           maxOutputTokens: 1000,

@@ -63,7 +63,7 @@ export class PatternAnalysisService {
       const result = await this.model.generateContent({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
-          temperature: 0.2,
+          temperature: 1.0,
           topK: 1,
           topP: 0.8,
           maxOutputTokens: 2000,
@@ -272,7 +272,7 @@ Create a concise executive summary covering key findings, financial impact, and 
       const result = await this.model.generateContent({
         contents: [{ parts: [{ text: summaryPrompt }] }],
         generationConfig: {
-          temperature: 0.3,
+          temperature: 1.0,
           maxOutputTokens: 800
         }
       });
