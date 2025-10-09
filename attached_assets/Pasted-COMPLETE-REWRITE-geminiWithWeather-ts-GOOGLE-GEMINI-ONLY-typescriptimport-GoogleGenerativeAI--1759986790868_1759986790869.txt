@@ -1,14 +1,14 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { SafetyIntelligenceService } from './safetyIntelligenceService';
+COMPLETE REWRITE - geminiWithWeather.ts (GOOGLE GEMINI ONLY)
+typescriptimport { GoogleGenerativeAI } from '@google/generative-ai';
+import dotenv from 'dotenv';
+import { SafetyIntelligenceService } from './safetyIntelligence.js';
 
-const gemini = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || '');
+dotenv.config();
+
+const gemini = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 const safetyIntelligence = new SafetyIntelligenceService();
 
-/**
- * Gemini AI service for predictive safety analysis
- * Now properly accepts weather data as SEPARATE parameter
- */
-export class GeminiWeatherAnalyzer {
+export class GeminiWithWeatherService {
   private model;
 
   constructor() {
@@ -19,25 +19,19 @@ export class GeminiWeatherAnalyzer {
 
   /**
    * Main analysis function - receives checklist AND weather separately
-   * This properly separates concerns and ensures weather data is always passed explicitly
    */
   async analyzeChecklistWithWeather(
     checklistData: any,
     weatherData: any  // ← NOW REQUIRED AS SEPARATE PARAM
   ): Promise<string> {
     try {
-      console.log(`🌤️  Weather data provided: ${!!weatherData}`);
-      if (weatherData) {
-        console.log(`   Temperature: ${weatherData.temperature}°F, Wind: ${weatherData.windSpeed} mph`);
-      }
-      
       // Build the massive prompt with REAL OSHA data + weather
       const prompt = await this.buildChecklistAnalysisPrompt(
         checklistData,
         weatherData  // ← Pass weather separately
       );
 
-      // Send to Gemini 2.5-flash at TEMPERATURE 1.0 (maximum thinking)
+      // Send to Gemini 2.5-flash at TEMPERATURE 1.0
       const result = await this.model.generateContent({
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
         generationConfig: {
@@ -49,12 +43,12 @@ export class GeminiWeatherAnalyzer {
       return result.response.text();
     } catch (error) {
       console.error('Gemini predictive analysis error:', error);
-      return `Predictive safety analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      return `Predictive safety analysis failed: ${error}`;
     }
   }
 
   /**
-   * Build comprehensive prompt with ALL data injected - NO PLACEHOLDERS LEFT BEHIND
+   * Build comprehensive prompt with ALL data injected
    */
   private async buildChecklistAnalysisPrompt(
     checklistData: any,
@@ -69,14 +63,14 @@ export class GeminiWeatherAnalyzer {
       
       oshaDataSection = `
 **CONSTRUCTION INDUSTRY PROFILE (NAICS 23):**
-- Industry Name: ${constructionProfile?.industryName || 'Construction'}
-- Injury Rate: ${constructionProfile?.injuryRate || 'N/A'} per 100 FTE (REAL BLS 2023 DATA)
-- 2023 Fatalities: ${constructionProfile?.fatalities2023 || 'N/A'} (REAL GOVERNMENT DATA)
-- Risk Score: ${constructionProfile?.riskScore || 'N/A'}/100
-- Risk Category: ${constructionProfile?.riskCategory || 'N/A'}
+- Industry Name: ${constructionProfile?.industry_name || 'Construction'}
+- Injury Rate: ${constructionProfile?.injury_rate || 'N/A'} per 100 FTE (REAL BLS 2023 DATA)
+- 2023 Fatalities: ${constructionProfile?.total_cases || 'N/A'} (REAL GOVERNMENT DATA)
+- Risk Score: ${constructionProfile?.risk_score || 'N/A'}/100
+- Risk Category: ${constructionProfile?.risk_category || 'N/A'}
 
 **INDUSTRY BENCHMARKS (${industryBenchmarks?.length || 0} sub-categories):**
-${industryBenchmarks?.slice(0, 5).map((b: any) => `- ${b.industryName}: ${b.injuryRate || 'N/A'} injuries per 100 FTE`).join('\n') || 'No benchmark data available'}
+${industryBenchmarks ? JSON.stringify(industryBenchmarks, null, 2) : 'No benchmark data available'}
 
 **THIS IS REAL DATA FROM YOUR SUPABASE OSHA TABLES - NOT ESTIMATES!**
 Use this REAL statistical data to weight your risk predictions.
@@ -87,35 +81,30 @@ Compare this job site's conditions to these actual industry injury rates.
       oshaDataSection = '⚠️ OSHA DATA UNAVAILABLE - Proceeding with reduced statistical confidence';
     }
 
-    // Step 2: Format weather data (passed as separate parameter now!)
+    // Step 2: Format weather data
     const weatherSection = weatherData 
       ? JSON.stringify(weatherData, null, 2)
       : '⚠️ NO WEATHER DATA - HIGH RISK';
 
-    // Step 3: Extract checklist metadata with multiple fallbacks
+    // Step 3: Extract checklist metadata
     const now = new Date();
-    const siteLocation = checklistData.site_location ||
-                        checklistData.location || 
+    const siteLocation = checklistData.location || 
                         checklistData.site || 
                         checklistData.siteLocation || 
                         'Location not specified';
-    const workType = checklistData.project_type ||
-                    checklistData.workType || 
+    const workType = checklistData.workType || 
                     checklistData.template || 
                     checklistData.templateId || 
                     'Work type not specified';
-    const workHeight = checklistData.work_height ||
-                      checklistData.height || 
+    const workHeight = checklistData.height || 
                       checklistData.workHeight || 
                       'Height not specified';
 
     // Step 4: Build the complete prompt with ALL placeholders replaced
     const prompt = `You are a Senior Safety Analyst specializing in incident prediction and prevention for construction environments.
-
 ═══════════════════════════════════════════
 ANALYSIS CONTEXT - ${now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
 ═══════════════════════════════════════════
-
 SITE: ${siteLocation}
 WORK TYPE: ${workType}
 WORK HEIGHT: ${workHeight} feet
@@ -135,7 +124,6 @@ ${oshaDataSection}
 ═══════════════════════════════════════════
 PRE-ANALYSIS DATA VALIDATION
 ═══════════════════════════════════════════
-
 CRITICAL DATA CHECK:
 □ Weather data: ${weatherData ? 'PRESENT' : 'MISSING'}
 □ Equipment specifications: ${checklistData.equipment ? 'PRESENT' : 'MISSING'}
@@ -154,7 +142,6 @@ PERFORM THIS CHECK FIRST - Before any incident prediction.
 ═══════════════════════════════════════════
 YOUR PRIMARY MISSION
 ═══════════════════════════════════════════
-
 PREDICT THE INCIDENT THAT WILL HAPPEN TODAY IF NOTHING CHANGES.
 
 Not "could happen" or "might happen" - based on:
@@ -172,7 +159,6 @@ Tell me SPECIFICALLY:
 ═══════════════════════════════════════════
 MANDATORY STOP-WORK CONDITIONS (Check First)
 ═══════════════════════════════════════════
-
 Evaluate these conditions BEFORE proceeding with incident forecasts.
 IF any condition exists, EXECUTIVE DECISION = NO-GO
 
@@ -184,17 +170,16 @@ AUTOMATIC NO-GO TRIGGERS:
 □ Wind speed within 20% of any known equipment limit + no weather monitoring plan
 
 IF NO-GO TRIGGERED:
-- State which specific condition(s) triggered stop-work
-- List specific actions required to clear NO-GO status
-- Provide realistic timeline to implement (hours/days, not "immediately")
-- Identify who has authority to clear the stop-work
+1. State which specific condition(s) triggered stop-work
+2. List specific actions required to clear NO-GO status
+3. Provide realistic timeline to implement (hours/days, not "immediately")
+4. Identify who has authority to clear the stop-work
 
 IF NO TRIGGERS EXIST: Proceed with full analysis and incident forecasting.
 
 ═══════════════════════════════════════════
 REQUIRED OUTPUT FORMAT
 ═══════════════════════════════════════════
-
 **EXECUTIVE DECISION: [GO / GO WITH CONDITIONS / NO-GO]**
 
 **PRIMARY THREAT TODAY:**
@@ -205,13 +190,12 @@ REQUIRED OUTPUT FORMAT
 **INCIDENT FORECAST #1: [Specific Incident Name]**
 
 **Statistical Context:**
-
-OSHA incident rate for this work type: [X per 100 FTE from Supabase data]
-Baseline probability: [Calculate: incidents per worker-hours for this specific task]
-Site exposure today: [Number workers] × [Expected hours] = [exposure units]
-Expected incidents this project: [Calculated probability × project duration]
-Current conditions modifier: [How today's conditions differ from baseline - specific factors]
-Confidence in prediction: [HIGH/MEDIUM/LOW - see criteria below]
+- OSHA incident rate for this work type: [X per 100 FTE from Supabase data]
+- Baseline probability: [Calculate: incidents per worker-hours for this specific task]
+- Site exposure today: [Number workers] × [Expected hours] = [exposure units]
+- Expected incidents this project: [Calculated probability × project duration]
+- Current conditions modifier: [How today's conditions differ from baseline - specific factors]
+- Confidence in prediction: [HIGH/MEDIUM/LOW - see criteria below]
 
 IF OSHA data unavailable for exact work type, use closest analog and state:
 "Using [analog work type] data - actual risk may vary by [estimated %]"
@@ -254,7 +238,6 @@ Verification: [How to confirm it's working - measurable indicator]
 ---
 
 **INCIDENT FORECAST #2:** [If warranted - distinct mechanism]
-
 [Same detailed structure as #1 - only include if there's a DIFFERENT causal chain]
 
 ---
@@ -262,7 +245,6 @@ Verification: [How to confirm it's working - measurable indicator]
 ═══════════════════════════════════════════
 PREDICTION CONFIDENCE ASSESSMENT
 ═══════════════════════════════════════════
-
 For each incident forecast provided above, evaluate confidence:
 
 **INCIDENT #1 CONFIDENCE: [HIGH/MEDIUM/LOW]**
@@ -275,10 +257,10 @@ Reasoning:
 **INCIDENT #2 CONFIDENCE: [HIGH/MEDIUM/LOW]**
 [Same structure]
 
-**CONFIDENCE DEFINITIONS:**
-HIGH = All critical data present + Direct OSHA stats + Multiple observable precursors + Controls verified
-MEDIUM = Analogous OSHA data + Some data gaps + At least one observable precursor + Controls documented
-LOW = Significant data gaps + Limited statistical support + Prediction based on general construction risk
+CONFIDENCE DEFINITIONS:
+- HIGH = All critical data present + Direct OSHA stats + Multiple observable precursors + Controls verified
+- MEDIUM = Analogous OSHA data + Some data gaps + At least one observable precursor + Controls documented
+- LOW = Significant data gaps + Limited statistical support + Prediction based on general construction risk
 
 IF CONFIDENCE IS LOW: State what specific data would raise it to MEDIUM or HIGH.
 
@@ -287,10 +269,11 @@ IF CONFIDENCE IS LOW: State what specific data would raise it to MEDIUM or HIGH.
 **COMPLIANCE GAPS ENABLING THESE INCIDENTS:**
 
 Each compliance gap below is connected to a specific predicted incident and includes the intervention required.
+
 FORMAT: Standard → Violation → Incident Connection → Required Action → Verification
 
 EXAMPLE:
-- OSHA 1926.502(d)(15) - Fall Protection Rescue
+- **OSHA 1926.502(d)(15)** - Fall Protection Rescue
   Violation: No rescue plan documented for swing stage operations
   Enables Incident #1: If fall arrest occurs, suspended worker → positional asphyxia risk within 6 minutes
   Required Action: Designate rescue team with 6-minute response capability
@@ -336,9 +319,10 @@ Site's current risk profile vs industry baseline:
 **WEATHER IMPACT ON OPERATIONS:**
 
 Current: ${weatherData?.temperature || 'N/A'}°F, ${weatherData?.windSpeed || 'N/A'} mph wind, ${weatherData?.conditions || 'Unknown conditions'}
+
 Critical finding: [Are you within 20% of any equipment operating limit? State the margin.]
 
-Equipment-specific limits for TODAY'S CONDITIONS:
+**Equipment-specific limits for TODAY'S CONDITIONS:**
 
 IF equipment specifications are in the checklist data:
 - Crane [Model]: Manufacturer limit [X] mph vs Current [Y] mph = [Z]% safety margin
@@ -351,13 +335,12 @@ IF equipment specifications are MISSING:
 - MISSING: Swing stage load capacity - cannot verify current load vs rating
   REQUIRED ACTION: Obtain equipment specifications before authorizing work
 
-Weather safety margin status:
+**Weather safety margin status:**
 - GREEN (>30% margin): Weather not a limiting factor
 - YELLOW (20-30% margin): Active monitoring required, stop-work trigger defined
 - RED (<20% margin): Too close to limits, recommend postpone until conditions improve
 
 Current status: [GREEN/YELLOW/RED]
-
 Forecast next 2 hours: [Improving/Stable/Deteriorating]
 Work stoppage trigger: [Specific measurable weather condition]
 
@@ -392,9 +375,9 @@ These factors increase incident probability by [estimated factor] above baseline
 **EMERGENCY RESPONSE CAPABILITY:**
 
 For Incident #1 ([incident name]):
-Current capability: [Adequate/Inadequate]
-Critical gap: [What's missing that would worsen outcome]
-Required: [Specific equipment/training/plan needed]
+- Current capability: [Adequate/Inadequate]
+- Critical gap: [What's missing that would worsen outcome]
+- Required: [Specific equipment/training/plan needed]
 
 For Incident #2 ([incident name]):
 [Same assessment]
@@ -405,7 +388,6 @@ On-site first aid: [Adequate/Inadequate for severity of predicted incidents]
 ═══════════════════════════════════════════
 ANALYSIS PRINCIPLES
 ═══════════════════════════════════════════
-
 ✓ Use OSHA statistical data to weight predictions - falls are 36.5% of fatalities, weight accordingly
 ✓ Call out "No response" checklist answers as RED FLAGS - these are data gaps that hide risk
 ✓ Connect compliance gaps DIRECTLY to predicted incidents - show the causal link
@@ -413,12 +395,6 @@ ANALYSIS PRINCIPLES
 ✓ Assume workers are competent but subject to human factors (fatigue, pressure, normalization)
 ✓ Predict incidents that are STATISTICALLY LIKELY, not worst-case scenarios
 ✓ Every recommendation must be implementable by the site supervisor reading this
-
-✗ DO NOT hedge with "may," "could," "potentially" - make specific predictions
-✗ DO NOT assume procedures work just because they're documented
-✗ DO NOT provide generic advice that applies to any construction site
-✗ DO NOT ignore production pressure - it's always present and affects safety decisions
-
 ✓ For each documented control, assess ACTUAL EFFECTIVENESS using this scale:
   1 = Documented only, no evidence of implementation
   2 = Partially implemented, inconsistent application observed
@@ -427,10 +403,14 @@ ANALYSIS PRINCIPLES
   5 = Engineered control, doesn't depend on worker compliance
   Include effectiveness rating in your incident forecasts when assessing defense failures.
 
+✗ DO NOT hedge with "may," "could," "potentially" - make specific predictions
+✗ DO NOT assume procedures work just because they're documented
+✗ DO NOT provide generic advice that applies to any construction site
+✗ DO NOT ignore production pressure - it's always present and affects safety decisions
+
 ═══════════════════════════════════════════
 FACTUAL CONSTRAINTS - PREVENT HALLUCINATION
 ═══════════════════════════════════════════
-
 ✓ ONLY cite OSHA standards you can reference with specific section numbers
 ✓ ONLY reference weather data that appears in [CURRENT CONDITIONS] section above
 ✓ ONLY use statistical data from [REAL OSHA DATA FROM SUPABASE] section above
@@ -448,13 +428,56 @@ INCORRECT response:
 ✓ When predicting injury severity, base on OSHA injury distribution data for that incident type
 
 Your analysis could prevent an injury TODAY. Write accordingly.
-
 ═══════════════════════════════════════════
 
 Analyze the checklist above using this framework.`;
 
     return prompt;
   }
+
+  /**
+   * Legacy method for backward compatibility - converts old calls to new format
+   * @deprecated Use analyzeChecklistWithWeather with separate weather parameter
+   */
+  async analyzeChecklistLegacy(checklistData: any): Promise<string> {
+    console.warn('Warning: Using legacy analysis method without separate weather data');
+    
+    // Extract weather if embedded in checklist
+    const weatherData = checklistData.weather || null;
+    
+    return this.analyzeChecklistWithWeather(checklistData, weatherData);
+  }
 }
 
-export const geminiWeatherAnalyzer = new GeminiWeatherAnalyzer();
+export const geminiWithWeatherService = new GeminiWithWeatherService();
+
+KEY CHANGES:
+
+Line 24: weatherData: any now REQUIRED as separate parameter
+Line 48: Accepts weather as separate parameter in buildChecklistAnalysisPrompt
+Lines 58-71: Weather formatting separated from checklist
+Line 104: Weather injected directly: ${weatherSection} - NO MORE CHECKING checklistData.weather
+Lines 374-382: Legacy method for backward compatibility if needed
+
+
+NOW UPDATE YOUR ROUTE:
+typescript// In your route file (e.g., analysis.routes.ts)
+router.post('/analyze-jha', async (req, res) => {
+  try {
+    const { checklistData, location } = req.body;
+    
+    // Fetch weather separately
+    const weatherData = await getWeatherForSafetyAnalysis(location);
+    
+    // Call with BOTH parameters
+    const analysis = await geminiWithWeatherService.analyzeChecklistWithWeather(
+      checklistData,
+      weatherData  // ← Pass separately, don't embed
+    );
+    
+    res.json({ analysis });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+This is 100% Google Gemini, no Anthropic. Replace your file and test.RetryClaude can make mistakes. Please double-check responses. Sonnet 4.5

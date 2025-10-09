@@ -32,12 +32,11 @@ router.post('/checklist-analysis', async (req, res) => {
     const { getWeatherForSafetyAnalysis } = await import('../services/weatherFunction');
     const weatherData = await getWeatherForSafetyAnalysis(siteLocation);
     
-    // Use Gemini with weather data embedded and predictive prompt
-    const analysis = await geminiWeatherAnalyzer.analyzeChecklistWithWeather({
-      ...checklistData,
-      site_location: siteLocation,
-      weather: weatherData  // ← ADD WEATHER DATA!
-    });
+    // Use Gemini with weather passed as SEPARATE parameter (proper architecture)
+    const analysis = await geminiWeatherAnalyzer.analyzeChecklistWithWeather(
+      checklistData,  // ← First parameter: checklist
+      weatherData     // ← Second parameter: weather (NOT embedded!)
+    );
 
     console.log(`✅ Predictive incident forecast completed`);
 
@@ -83,12 +82,11 @@ router.post('/analyze-checklist-with-weather', async (req, res) => {
     const { getWeatherForSafetyAnalysis } = await import('../services/weatherFunction');
     const weatherData = await getWeatherForSafetyAnalysis(siteLocation);
     
-    // Use Gemini with weather data embedded
-    const analysis = await geminiWeatherAnalyzer.analyzeChecklistWithWeather({
-      ...checklistData,
-      site_location: siteLocation,
-      weather: weatherData  // ← ADD WEATHER DATA!
-    });
+    // Use Gemini with weather passed as SEPARATE parameter (proper architecture)
+    const analysis = await geminiWeatherAnalyzer.analyzeChecklistWithWeather(
+      checklistData,  // ← First parameter: checklist
+      weatherData     // ← Second parameter: weather (NOT embedded!)
+    );
 
     console.log(`✅ Analysis completed with weather integration`);
 
