@@ -21,6 +21,7 @@ import { body, validationResult } from "express-validator";
 import checklistAnalysisRoutes from './routes/checklistAnalysis';
 import monitoringRoutes from './routes/monitoring';
 import multiAgentTestRoutes from './routes/multiAgentTest';
+import eapRoutes from './routes/eap.routes.js';
 import { logError } from "./utils/logger";
 import './types/session';
 import { geminiAnalytics } from "./services/geminiAnalytics";
@@ -1313,6 +1314,9 @@ Please provide a comprehensive, grounded response that helps ensure workplace sa
   
   // Add multi-agent test route (Phase 1 pipeline testing)
   app.use('/api', multiAgentTestRoutes);
+  
+  // Add Emergency Action Plan (EAP) generator routes
+  app.use('/api/eap', eapRoutes);
 
   return httpServer;
 }
