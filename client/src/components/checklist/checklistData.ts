@@ -1057,226 +1057,660 @@ export const checklistData: ChecklistData = {
       }
     ]
   },
-  'respiratory-protection': {
-    title: 'Respiratory Protection for Glass Installation',
-    description: 'Respiratory protection assessment for glass installation operations',
-    aiContext: 'Glass installation may involve exposure to silica dust, chemical vapors from sealants and adhesives, and other airborne contaminants requiring respiratory protection.',
+  'emergency-action-plan': {
+    title: 'Emergency Action Plan Generator',
+    description: 'Generate a comprehensive OSHA-compliant Emergency Action Plan for your worksite',
+    aiContext: 'This questionnaire collects essential site information to automatically generate a fully OSHA-compliant Emergency Action Plan (EAP) document tailored to your specific worksite, hazards, and operations.',
     sections: [
       {
-        title: 'Exposure Assessment and Monitoring',
-        description: 'Assessment of respiratory hazards in glass installation',
+        title: 'Basic Site Information',
+        description: 'Essential information about your worksite',
         items: [
           {
-            id: 'rp-1',
-            question: 'Silica Dust Exposure Assessment',
-            options: [
-              'Silica exposure assessment completed',
-              'Dust control measures implemented',
-              'Air monitoring conducted',
-              'Exposure levels below PEL',
-              'Exposure assessment needs updating',
-              'Silica exposure not assessed'
-            ],
-            notes: true,
+            id: 'eap-company-name',
+            question: 'Company Name',
+            options: [],
+            inputType: 'text',
+            placeholder: 'Enter your company name',
+            required: true,
             critical: true,
-            deadline: true,
-            aiWeight: 9,
-            riskCategory: 'respiratory_hazards',
-            complianceStandard: 'OSHA 1926.1153'
+            aiWeight: 10,
+            riskCategory: 'site_identification',
+            complianceStandard: 'OSHA 1910.38'
           },
           {
-            id: 'rp-2',
-            question: 'Chemical Vapor Exposure',
+            id: 'eap-site-address',
+            question: 'Site Address',
+            options: [],
+            inputType: 'text',
+            placeholder: 'Street address of worksite',
+            required: true,
+            critical: true,
+            aiWeight: 10,
+            riskCategory: 'site_identification',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-city',
+            question: 'City',
+            options: [],
+            inputType: 'text',
+            placeholder: 'City',
+            required: true,
+            aiWeight: 8,
+            riskCategory: 'site_identification',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-state',
+            question: 'State',
+            options: [],
+            inputType: 'text',
+            placeholder: 'State (e.g., IN, CA, TX)',
+            required: true,
+            aiWeight: 8,
+            riskCategory: 'site_identification',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-zip',
+            question: 'ZIP Code',
+            options: [],
+            inputType: 'text',
+            placeholder: '5-digit ZIP code',
+            required: true,
+            aiWeight: 7,
+            riskCategory: 'site_identification',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-site-type',
+            question: 'Site Type',
             options: [
-              'Sealant and adhesive vapor exposure assessed',
-              'Ventilation controls adequate',
-              'Vapor monitoring conducted',
-              'Exposure controls effective',
-              'Vapor exposure needs attention',
-              'Chemical vapor exposure not controlled'
+              'Construction',
+              'General Industry',
+              'Maritime'
             ],
-            notes: true,
+            inputType: 'select',
+            required: true,
+            critical: true,
+            aiWeight: 9,
+            riskCategory: 'site_classification',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-project-description',
+            question: 'Project Description',
+            options: [],
+            inputType: 'textarea',
+            placeholder: 'Describe the project or operations at this site',
+            required: true,
+            critical: true,
+            aiWeight: 9,
+            riskCategory: 'operations',
+            complianceStandard: 'OSHA 1910.38'
+          }
+        ]
+      },
+      {
+        title: 'Personnel & Contacts',
+        description: 'Key personnel and emergency coordinator information',
+        items: [
+          {
+            id: 'eap-total-employees',
+            question: 'Total Number of Employees on Site',
+            options: [],
+            inputType: 'number',
+            placeholder: 'Number of employees',
+            required: true,
+            critical: true,
+            aiWeight: 9,
+            riskCategory: 'personnel',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-coordinator-name',
+            question: 'Emergency Coordinator Name',
+            options: [],
+            inputType: 'text',
+            placeholder: 'Full name of emergency coordinator',
+            required: true,
+            critical: true,
+            aiWeight: 10,
+            riskCategory: 'emergency_contacts',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-coordinator-title',
+            question: 'Emergency Coordinator Title/Position',
+            options: [],
+            inputType: 'text',
+            placeholder: 'Job title (e.g., Site Safety Manager)',
+            required: true,
+            aiWeight: 9,
+            riskCategory: 'emergency_contacts',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-coordinator-phone',
+            question: 'Emergency Coordinator Phone Number',
+            options: [],
+            inputType: 'tel',
+            placeholder: '(555) 123-4567',
+            required: true,
+            critical: true,
+            aiWeight: 10,
+            riskCategory: 'emergency_contacts',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-coordinator-email',
+            question: 'Emergency Coordinator Email (Optional)',
+            options: [],
+            inputType: 'email',
+            placeholder: 'coordinator@company.com',
+            required: false,
+            aiWeight: 6,
+            riskCategory: 'emergency_contacts',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-alternate-name',
+            question: 'Alternate Emergency Coordinator Name',
+            options: [],
+            inputType: 'text',
+            placeholder: 'Full name of alternate coordinator',
+            required: true,
+            critical: true,
+            aiWeight: 9,
+            riskCategory: 'emergency_contacts',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-alternate-title',
+            question: 'Alternate Coordinator Title/Position',
+            options: [],
+            inputType: 'text',
+            placeholder: 'Job title',
+            required: true,
+            aiWeight: 8,
+            riskCategory: 'emergency_contacts',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-alternate-phone',
+            question: 'Alternate Coordinator Phone Number',
+            options: [],
+            inputType: 'tel',
+            placeholder: '(555) 123-4567',
+            required: true,
+            critical: true,
+            aiWeight: 9,
+            riskCategory: 'emergency_contacts',
+            complianceStandard: 'OSHA 1910.38'
+          }
+        ]
+      },
+      {
+        title: 'Site Characteristics',
+        description: 'Physical characteristics of the worksite',
+        items: [
+          {
+            id: 'eap-building-height',
+            question: 'Building Height (feet)',
+            options: [],
+            inputType: 'number',
+            placeholder: 'Height in feet (optional)',
+            required: false,
+            aiWeight: 7,
+            riskCategory: 'site_physical',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-work-elevation',
+            question: 'Maximum Work Elevation (feet)',
+            options: [],
+            inputType: 'number',
+            placeholder: 'Maximum work height in feet (optional)',
+            required: false,
+            aiWeight: 8,
+            riskCategory: 'fall_hazards',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-building-type',
+            question: 'Building Type',
+            options: [],
+            inputType: 'text',
+            placeholder: 'e.g., "8-story commercial", "Single-story warehouse"',
+            required: true,
             critical: true,
             aiWeight: 8,
-            riskCategory: 'respiratory_hazards',
+            riskCategory: 'site_physical',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-construction-phase',
+            question: 'Construction Phase (if applicable)',
+            options: [],
+            inputType: 'text',
+            placeholder: 'e.g., "Curtain wall installation", "Foundation work"',
+            required: false,
+            aiWeight: 7,
+            riskCategory: 'operations',
+            complianceStandard: 'OSHA 1910.38'
+          }
+        ]
+      },
+      {
+        title: 'Hazards Present',
+        description: 'Identify hazards present at your worksite',
+        items: [
+          {
+            id: 'eap-hazard-fall',
+            question: 'Fall from Height Hazards',
+            options: ['Yes', 'No'],
+            required: true,
+            critical: true,
+            aiWeight: 10,
+            riskCategory: 'fall_hazards',
+            complianceStandard: 'OSHA 1926.501'
+          },
+          {
+            id: 'eap-hazard-confined',
+            question: 'Confined Space Work',
+            options: ['Yes', 'No'],
+            required: true,
+            critical: true,
+            aiWeight: 10,
+            riskCategory: 'confined_space',
+            complianceStandard: 'OSHA 1926.1203'
+          },
+          {
+            id: 'eap-hazard-crane',
+            question: 'Crane Operations',
+            options: ['Yes', 'No'],
+            required: true,
+            critical: true,
+            aiWeight: 9,
+            riskCategory: 'equipment_hazards',
+            complianceStandard: 'OSHA 1926.550'
+          },
+          {
+            id: 'eap-hazard-hotwork',
+            question: 'Hot Work/Welding',
+            options: ['Yes', 'No'],
+            required: true,
+            critical: true,
+            aiWeight: 9,
+            riskCategory: 'fire_hazards',
+            complianceStandard: 'OSHA 1926.352'
+          },
+          {
+            id: 'eap-hazard-chemicals',
+            question: 'Hazardous Materials',
+            options: ['Yes', 'No'],
+            required: true,
+            critical: true,
+            aiWeight: 10,
+            riskCategory: 'chemical_hazards',
             complianceStandard: 'OSHA 1926.59'
           },
           {
-            id: 'rp-3',
-            question: 'Confined Space Respiratory Hazards',
-            options: [
-              'Confined space atmospheric testing',
-              'Ventilation systems operational',
-              'Oxygen levels monitored',
-              'Toxic gas detection available',
-              'Atmospheric monitoring needs improvement',
-              'Confined space hazards not assessed'
-            ],
-            notes: true,
+            id: 'eap-hazard-swing',
+            question: 'Swing Stage/Suspended Scaffolds',
+            options: ['Yes', 'No'],
+            required: true,
             critical: true,
             aiWeight: 9,
-            riskCategory: 'respiratory_hazards',
-            complianceStandard: 'OSHA 1926.1203'
+            riskCategory: 'fall_hazards',
+            complianceStandard: 'OSHA 1926.451'
+          },
+          {
+            id: 'eap-hazard-excavation',
+            question: 'Excavation/Trenching',
+            options: ['Yes', 'No'],
+            required: true,
+            critical: true,
+            aiWeight: 10,
+            riskCategory: 'excavation_hazards',
+            complianceStandard: 'OSHA 1926.651'
+          },
+          {
+            id: 'eap-hazard-electrical',
+            question: 'Electrical High Voltage Work',
+            options: ['Yes', 'No'],
+            required: true,
+            critical: true,
+            aiWeight: 10,
+            riskCategory: 'electrical_hazards',
+            complianceStandard: 'OSHA 1926.416'
+          },
+          {
+            id: 'eap-hazard-roof',
+            question: 'Roof Work',
+            options: ['Yes', 'No'],
+            required: true,
+            critical: true,
+            aiWeight: 9,
+            riskCategory: 'fall_hazards',
+            complianceStandard: 'OSHA 1926.501'
+          },
+          {
+            id: 'eap-hazard-demolition',
+            question: 'Demolition Work',
+            options: ['Yes', 'No'],
+            required: true,
+            critical: true,
+            aiWeight: 9,
+            riskCategory: 'structural_hazards',
+            complianceStandard: 'OSHA 1926.850'
           }
         ]
       },
       {
-        title: 'Respirator Selection and Fit Testing',
-        description: 'Proper respirator selection and fit testing procedures',
+        title: 'Equipment In Use',
+        description: 'Equipment and machinery present at the worksite',
         items: [
           {
-            id: 'rp-4',
-            question: 'Respirator Selection Appropriateness',
+            id: 'eap-equipment',
+            question: 'Equipment and Machinery (Select all that apply)',
             options: [
-              'Respirators appropriate for identified hazards',
-              'NIOSH approved respirators used',
-              'Protection factors adequate',
-              'Respirator types match exposure levels',
-              'Respirator selection needs review',
-              'Inappropriate respirator selection'
+              'Tower Crane',
+              'Mobile Crane',
+              'Swing Stage',
+              'Scissor Lifts',
+              'Aerial Lifts',
+              'Forklifts',
+              'Excavators',
+              'Bulldozers',
+              'Concrete Pumps',
+              'Scaffolding Systems',
+              'Boom Lifts',
+              'Material Hoists'
             ],
-            notes: true,
+            required: true,
             critical: true,
-            images: true,
-            aiWeight: 9,
-            riskCategory: 'respiratory_protection',
-            complianceStandard: 'OSHA 1926.103'
-          },
-          {
-            id: 'rp-5',
-            question: 'Fit Testing Program',
-            options: [
-              'Annual fit testing completed',
-              'Quantitative fit testing performed',
-              'Fit testing records maintained',
-              'Different respirator models tested',
-              'Fit testing overdue',
-              'No fit testing program'
-            ],
-            notes: true,
-            critical: true,
-            deadline: true,
-            aiWeight: 9,
-            riskCategory: 'respiratory_protection',
-            complianceStandard: 'OSHA 1926.103'
-          },
-          {
-            id: 'rp-6',
-            question: 'Medical Evaluation Program',
-            options: [
-              'Medical evaluations current',
-              'Physician approval documented',
-              'Medical surveillance program active',
-              'Fitness for respirator use verified',
-              'Medical evaluations overdue',
-              'No medical evaluation program'
-            ],
-            notes: true,
-            critical: true,
-            deadline: true,
             aiWeight: 8,
-            riskCategory: 'respiratory_protection',
-            complianceStandard: 'OSHA 1926.103'
+            riskCategory: 'equipment',
+            complianceStandard: 'OSHA 1910.38'
           }
         ]
       },
       {
-        title: 'Respirator Maintenance and Care',
-        description: 'Proper maintenance and care of respiratory equipment',
+        title: 'Emergency Resources',
+        description: 'Emergency services and response resources',
         items: [
           {
-            id: 'rp-7',
-            question: 'Cleaning and Sanitization',
-            options: [
-              'Regular cleaning schedule maintained',
-              'Proper sanitization procedures followed',
-              'Cleaning supplies adequate',
-              'Storage conditions appropriate',
-              'Cleaning procedures need improvement',
-              'Inadequate respirator maintenance'
-            ],
-            notes: true,
-            images: true,
-            aiWeight: 7,
-            riskCategory: 'equipment_maintenance',
-            complianceStandard: 'OSHA 1926.103'
-          },
-          {
-            id: 'rp-8',
-            question: 'Filter and Cartridge Management',
-            options: [
-              'Change schedule based on exposure',
-              'Proper filter/cartridge selection',
-              'End-of-service-life indicators used',
-              'Inventory management adequate',
-              'Filter management needs improvement',
-              'Inadequate filter/cartridge program'
-            ],
-            notes: true,
+            id: 'eap-hospital-name',
+            question: 'Nearest Hospital Name',
+            options: [],
+            inputType: 'text',
+            placeholder: 'Hospital name',
+            required: true,
             critical: true,
-            deadline: true,
-            aiWeight: 8,
-            riskCategory: 'equipment_maintenance',
-            complianceStandard: 'OSHA 1926.103'
+            aiWeight: 10,
+            riskCategory: 'emergency_medical',
+            complianceStandard: 'OSHA 1910.38'
           },
           {
-            id: 'rp-9',
-            question: 'Inspection and Defect Identification',
-            options: [
-              'Pre-use inspection procedures',
-              'Defect identification training',
-              'Damaged equipment removed from service',
-              'Inspection records maintained',
-              'Inspection procedures need improvement',
-              'Inadequate inspection program'
-            ],
-            notes: true,
-            images: true,
+            id: 'eap-hospital-address',
+            question: 'Hospital Address',
+            options: [],
+            inputType: 'text',
+            placeholder: 'Complete hospital address',
+            required: true,
+            critical: true,
+            aiWeight: 10,
+            riskCategory: 'emergency_medical',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-hospital-distance',
+            question: 'Distance to Hospital (miles)',
+            options: [],
+            inputType: 'number',
+            placeholder: 'Distance in miles',
+            required: true,
+            critical: true,
+            aiWeight: 9,
+            riskCategory: 'emergency_medical',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-hospital-phone',
+            question: 'Hospital Phone Number',
+            options: [],
+            inputType: 'tel',
+            placeholder: '(555) 123-4567',
+            required: true,
+            critical: true,
+            aiWeight: 10,
+            riskCategory: 'emergency_medical',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-hospital-trauma',
+            question: 'Trauma Level (if known)',
+            options: [],
+            inputType: 'text',
+            placeholder: 'e.g., Level 1, Level 2 (optional)',
+            required: false,
             aiWeight: 7,
-            riskCategory: 'equipment_maintenance',
-            complianceStandard: 'OSHA 1926.103'
+            riskCategory: 'emergency_medical',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-fire-district',
+            question: 'Fire Station District (if known)',
+            options: [],
+            inputType: 'text',
+            placeholder: 'Fire district or station number (optional)',
+            required: false,
+            aiWeight: 6,
+            riskCategory: 'fire_emergency',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-fire-phone',
+            question: 'Fire Department Phone Number',
+            options: [],
+            inputType: 'tel',
+            placeholder: '911 or local fire department number',
+            required: true,
+            critical: true,
+            aiWeight: 10,
+            riskCategory: 'fire_emergency',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-fire-response',
+            question: 'Estimated Fire Response Time (minutes)',
+            options: [],
+            inputType: 'number',
+            placeholder: 'Estimated response time (optional)',
+            required: false,
+            aiWeight: 7,
+            riskCategory: 'fire_emergency',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-police-jurisdiction',
+            question: 'Police Jurisdiction',
+            options: [],
+            inputType: 'text',
+            placeholder: 'e.g., Indianapolis Metro Police',
+            required: true,
+            aiWeight: 8,
+            riskCategory: 'police_emergency',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-police-phone',
+            question: 'Police Department Phone Number',
+            options: [],
+            inputType: 'tel',
+            placeholder: '911 or local police number',
+            required: true,
+            critical: true,
+            aiWeight: 9,
+            riskCategory: 'police_emergency',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-rescue-option',
+            question: 'Rescue Service Provider',
+            options: [
+              'Local Fire/EMS',
+              'Trained Employees',
+              'Contracted Rescue Service'
+            ],
+            inputType: 'select',
+            required: true,
+            critical: true,
+            aiWeight: 10,
+            riskCategory: 'rescue_capabilities',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-alarm-systems',
+            question: 'Alarm/Alert Systems (Select all that apply)',
+            options: [
+              'Air Horn',
+              'Two-way Radio',
+              'PA System',
+              'Text Alert System',
+              'Siren',
+              'Strobe Lights',
+              'Verbal Command'
+            ],
+            required: true,
+            critical: true,
+            aiWeight: 9,
+            riskCategory: 'communication',
+            complianceStandard: 'OSHA 1910.165'
+          },
+          {
+            id: 'eap-radio-channel',
+            question: 'Radio Channel (if applicable)',
+            options: [],
+            inputType: 'text',
+            placeholder: 'e.g., Channel 3, 462.550 MHz',
+            required: false,
+            aiWeight: 6,
+            riskCategory: 'communication',
+            complianceStandard: 'OSHA 1910.38'
           }
         ]
       },
       {
-        title: 'Training and Program Administration',
-        description: 'Training and administrative aspects of respiratory protection',
+        title: 'Assembly Areas',
+        description: 'Evacuation assembly points and environmental concerns',
         items: [
           {
-            id: 'rp-10',
-            question: 'Respiratory Protection Training',
-            options: [
-              'Comprehensive training program implemented',
-              'Training specific to glass installation hazards',
-              'Hands-on training provided',
-              'Training documentation current',
-              'Training program needs enhancement',
-              'Inadequate respiratory protection training'
-            ],
-            notes: true,
+            id: 'eap-primary-assembly',
+            question: 'Primary Assembly Point Location',
+            options: [],
+            inputType: 'text',
+            placeholder: 'e.g., North parking lot, 100ft from building',
+            required: true,
             critical: true,
-            deadline: true,
-            aiWeight: 8,
-            riskCategory: 'training',
-            complianceStandard: 'OSHA 1926.103'
+            aiWeight: 10,
+            riskCategory: 'evacuation',
+            complianceStandard: 'OSHA 1910.38'
           },
           {
-            id: 'rp-11',
-            question: 'Program Administrator Designation',
-            options: [
-              'Qualified program administrator designated',
-              'Administrator training current',
-              'Program oversight adequate',
-              'Regular program evaluation conducted',
-              'Program administration needs improvement',
-              'No designated program administrator'
-            ],
-            notes: true,
+            id: 'eap-primary-gps',
+            question: 'Primary Assembly GPS Coordinates (Optional)',
+            options: [],
+            inputType: 'text',
+            placeholder: 'e.g., 39.7684° N, 86.1581° W',
+            required: false,
+            aiWeight: 6,
+            riskCategory: 'evacuation',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-secondary-assembly',
+            question: 'Secondary Assembly Point Location',
+            options: [],
+            inputType: 'text',
+            placeholder: 'e.g., Southwest corner, near main gate',
+            required: true,
             critical: true,
-            deadline: true,
+            aiWeight: 9,
+            riskCategory: 'evacuation',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-secondary-gps',
+            question: 'Secondary Assembly GPS Coordinates (Optional)',
+            options: [],
+            inputType: 'text',
+            placeholder: 'GPS coordinates',
+            required: false,
+            aiWeight: 5,
+            riskCategory: 'evacuation',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-weather-concerns',
+            question: 'Weather/Environmental Concerns (Select all that apply)',
+            options: [
+              'Tornado Risk',
+              'High Winds',
+              'Lightning/Thunderstorms',
+              'Flooding',
+              'Extreme Heat',
+              'Extreme Cold',
+              'Hurricanes',
+              'Earthquakes',
+              'Wildfires'
+            ],
+            required: true,
+            critical: true,
+            aiWeight: 8,
+            riskCategory: 'environmental',
+            complianceStandard: 'OSHA 1910.38'
+          }
+        ]
+      },
+      {
+        title: 'Additional Information',
+        description: 'Site access and special considerations',
+        items: [
+          {
+            id: 'eap-site-access',
+            question: 'Site Access Notes',
+            options: [],
+            inputType: 'textarea',
+            placeholder: 'e.g., "Gated - code 1234", "Badge required at east entrance"',
+            required: false,
             aiWeight: 7,
-            riskCategory: 'program_management',
-            complianceStandard: 'OSHA 1926.103'
+            riskCategory: 'site_access',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-nearby-hazards',
+            question: 'Nearby External Hazards',
+            options: [],
+            inputType: 'textarea',
+            placeholder: 'e.g., "Railroad tracks 100ft west", "Natural gas pipeline"',
+            required: false,
+            aiWeight: 8,
+            riskCategory: 'external_hazards',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
+            id: 'eap-additional-info',
+            question: 'Additional Information or Special Notes',
+            options: [],
+            inputType: 'textarea',
+            placeholder: 'Any other relevant information for the Emergency Action Plan',
+            required: false,
+            aiWeight: 6,
+            riskCategory: 'general',
+            complianceStandard: 'OSHA 1910.38'
           }
         ]
       }

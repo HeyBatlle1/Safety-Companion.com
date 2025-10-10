@@ -1,0 +1,159 @@
+export interface EAPQuestionnaire {
+  // Basic Site Info
+  companyName: string;
+  siteAddress: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  siteType: 'construction' | 'general_industry' | 'maritime';
+  projectDescription: string;
+  
+  // Personnel
+  totalEmployees: number;
+  emergencyCoordinator: {
+    name: string;
+    title: string;
+    phone: string;
+    email?: string;
+  };
+  alternateCoordinator: {
+    name: string;
+    title: string;
+    phone: string;
+    email?: string;
+  };
+  
+  // Site Physical Characteristics
+  buildingHeight?: number; // In feet
+  workElevation?: number; // In feet
+  buildingType: string; // "8-story commercial", "Single-story warehouse"
+  constructionPhase?: string; // "Curtain wall installation", "Foundation work"
+  
+  // Hazards Present (User checks applicable boxes)
+  hazards: {
+    fallFromHeight: boolean;
+    confinedSpace: boolean;
+    craneOperations: boolean;
+    hotWork: boolean;
+    hazardousMaterials: boolean;
+    swingStage: boolean;
+    excavation: boolean;
+    electricalHighVoltage: boolean;
+    roofWork: boolean;
+    demolition: boolean;
+  };
+  
+  // Equipment In Use (Multi-select)
+  equipment: string[]; // ["Tower crane", "Swing stage", "Scissor lifts", "Aerial lifts", "Forklifts"]
+  
+  // Emergency Contacts
+  nearestHospital: {
+    name: string;
+    address: string;
+    distance: number; // Miles
+    phone: string;
+    traumaLevel?: string; // "Level 1", "Level 2", etc.
+  };
+  fireStation: {
+    district?: string;
+    phone: string;
+    estimatedResponseTime?: number; // Minutes
+  };
+  localPolice: {
+    jurisdiction: string;
+    phone: string;
+  };
+  
+  // Assembly/Rally Points
+  primaryAssembly: {
+    location: string; // "North parking lot, 100ft from building"
+    gpsCoordinates?: string;
+  };
+  secondaryAssembly: {
+    location: string;
+    gpsCoordinates?: string;
+  };
+  
+  // Weather/Environmental
+  weatherConcerns: string[]; // ["Tornado risk", "High winds", "Lightning", "Flooding", "Extreme heat"]
+  
+  // Site Access
+  siteAccessNotes?: string; // "Gated - code 1234", "Badge required at east entrance"
+  nearbyHazards?: string; // "Railroad tracks 100ft west", "Natural gas pipeline"
+  
+  // Rescue Capabilities
+  rescueOption: 'local_fire_ems' | 'trained_employees' | 'contracted_service';
+  trainedRescuers?: Array<{
+    name: string;
+    certifications: string[]; // ["CPR", "First Aid", "Fall Rescue", "Confined Space"]
+    expirationDate?: string;
+  }>;
+  
+  // Communication Systems
+  alarmSystems: string[]; // ["Air horn", "Two-way radio", "PA system", "Text alert", "Siren"]
+  radioChannel?: string; // "Channel 3"
+  
+  // Special Notes
+  additionalInfo?: string; // Free-form field for anything else
+}
+
+export interface EAPValidation {
+  complete: boolean;
+  missingRequired: string[];
+  warnings: string[];
+  hazardEquipmentMismatches: string[];
+  readyToGenerate: boolean;
+}
+
+export interface RequiredEmergency {
+  type: string;
+  reason: string;
+  oshaReference: string;
+  criticalDetails: string[];
+  priority: 'critical' | 'high' | 'medium';
+}
+
+export interface EmergencyClassification {
+  requiredEmergencies: RequiredEmergency[];
+  optionalEmergencies: string[];
+  totalProcedures: number;
+}
+
+export interface EmergencyProcedure {
+  emergencyType: string;
+  title: string;
+  whenApplicable: string;
+  procedureSteps: string;
+  siteSpecificFactors: string;
+  equipmentNeeded?: string;
+  trainingRequired?: string;
+  oshaReference: string;
+}
+
+export interface GeneratedEAP {
+  metadata: {
+    generatedDate: string;
+    companyName: string;
+    siteAddress: string;
+    documentVersion: string;
+  };
+  sections: {
+    coverPage: string;
+    tableOfContents: string;
+    section1_policy: string;
+    section2_responsibilities: string;
+    section3_emergencyReporting: string;
+    section4_evacuation: string;
+    section5_accounting: string;
+    section6_criticalOperations: string;
+    section7_rescueMedical: string;
+    section8_contacts: string;
+    section9_specificProcedures: string;
+    section10_alarmSystems: string;
+    section11_training: string;
+    section12_review: string;
+    attachments: string;
+  };
+  completeness: number; // 0-100 score
+  oshaCompliant: boolean;
+}

@@ -1,0 +1,61 @@
+ANSWERS TO YOUR QUESTIONS:
+
+1. **Which checklist to repurpose?**
+   Use 'respiratory-protection' - it's the least critical backup and we can always regenerate it later if needed.
+
+2. **Checklist ID naming:**
+   Use 'emergency-action-plan' - more professional and clear for users.
+
+3. **Input style matching:**
+   YES - use the same approach as current checklists:
+   - inputType: 'text' for company name, addresses
+   - inputType: 'tel' for phone numbers
+   - inputType: 'email' for email addresses
+   - inputType: 'number' for totalEmployees, buildingHeight, etc.
+   - inputType: 'select' for dropdown choices like siteType
+   - Use checkbox groups for the hazards section (multiple checkboxes)
+   - Use multi-select for equipment array
+   
+   Match the existing UI patterns exactly - users are already familiar with them.
+
+4. **File creation:**
+   YES - create `server/types/eap.types.ts` with those exact type definitions. We'll need them for the service layer.
+
+YOUR TASK - JUST THE QUESTIONNAIRE FORM:
+
+Step 1: Create `server/types/eap.types.ts` with the type definitions I provided
+
+Step 2: Transform the 'respiratory-protection' checklist into 'emergency-action-plan':
+   - Update the templateId to 'emergency-action-plan'
+   - Update the display name to "Emergency Action Plan Generator"
+   - Change all the questions to match the EAPQuestionnaire interface
+   - Group questions into logical sections:
+     * Section 1: "Basic Site Information"
+     * Section 2: "Personnel & Contacts"
+     * Section 3: "Site Characteristics"
+     * Section 4: "Hazards Present"
+     * Section 5: "Equipment In Use"
+     * Section 6: "Emergency Resources"
+     * Section 7: "Assembly Areas"
+     * Section 8: "Additional Information"
+
+Step 3: Keep the existing form submission flow:
+   - Form submits to the same endpoint as other checklists
+   - Store in database with templateId: 'emergency-action-plan'
+   - For NOW, just return a success message (we'll wire up the generator later)
+
+DO NOT:
+- Create new routes yet
+- Create the EAP generator service yet
+- Modify the analysis system yet
+
+Just get the questionnaire form working so users can fill it out and save it. We'll wire up the actual EAP generation in the next step.
+
+Show me the checklist structure when you're done (just the questions array from one section so I can verify the format).
+This breaks it into digestible pieces:
+
+✅ Create types file
+✅ Repurpose existing checklist into questionnaire form
+✅ Keep existing infrastructure
+⏸️ Hold on generator service (next phase)
+
