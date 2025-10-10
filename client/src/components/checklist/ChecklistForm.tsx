@@ -206,6 +206,19 @@ const ChecklistForm = () => {
         templateId: templateId,
         sections: template.sections.map(section => ({
           title: section.title,
+          items: section.items.map(item => ({
+            id: item.id,
+            question: item.question,
+            response: responses[item.id]?.value || '',
+            notes: responses[item.id]?.notes,
+            critical: item.critical || false,
+            flagged: responses[item.id]?.flagged || false,
+            aiWeight: item.aiWeight || 1,
+            riskCategory: item.riskCategory,
+            complianceStandard: item.complianceStandard,
+            images: responses[item.id]?.images || [],
+            blueprints: responses[item.id]?.blueprints || []
+          })),
           responses: section.items.map(item => ({
             question: item.question,
             response: responses[item.id]?.value || 'No response',
@@ -221,8 +234,50 @@ const ChecklistForm = () => {
         }))
       };
 
-      // Use Master JHA weather-enabled analysis for all checklists
-      if (templateId === 'master-jha') {
+      // Route Emergency Action Plan Generator to EAP endpoint
+      if (templateId === 'emergency-action-plan') {
+        showToast('Generating OSHA-compliant Emergency Action Plan...', 'info');
+        
+        const response = await fetch('/api/eap/generate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(checklistData)
+        });
+
+        if (!response.ok) {
+          throw new Error('EAP generation failed');
+        }
+
+        const eapResult = await response.json();
+        
+        if (eapResult.success && eapResult.document) {
+          // Format the EAP document for display
+          const formattedEAP = Object.entries(eapResult.document.sections)
+            .map(([key, content]) => content)
+            .join('\n\n');
+          
+          setAiResponse(formattedEAP);
+          showToast('Emergency Action Plan generated successfully!', 'success');
+          
+          // Save to database
+          try {
+            await saveChecklistResponse(
+              templateId || 'unknown',
+              template.title,
+              responses
+            );
+          } catch (saveError) {
+            showToast('EAP generated! (Database save pending)', 'warning');
+          }
+          
+          // Early return to prevent fallback analysis from running
+          return;
+        } else {
+          throw new Error('Invalid EAP response');
+        }
+      } else if (templateId === 'master-jha') {
         // Master JHA route with weather integration
         const response = await fetch('/api/checklist-analysis', {
           method: 'POST',
