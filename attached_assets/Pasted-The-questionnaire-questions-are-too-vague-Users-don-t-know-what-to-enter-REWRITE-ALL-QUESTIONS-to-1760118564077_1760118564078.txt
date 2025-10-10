@@ -1,0 +1,133 @@
+The questionnaire questions are too vague. Users don't know what to enter.
+
+REWRITE ALL QUESTIONS to be specific data collection fields:
+
+BEFORE (BAD):
+{
+  question: "Emergency Coordinator Designation",
+  inputType: "text",
+  placeholder: "Enter response..."
+}
+
+AFTER (GOOD):
+{
+  question: "Emergency Coordinator - Full Name",
+  inputType: "text",
+  placeholder: "John Smith",
+  helpText: "Person responsible for managing emergency response"
+}
+
+SECTION 1: BASIC SITE INFORMATION
+Instead of vague questions, use:
+1. "Company Legal Name" (text)
+2. "Site Street Address" (text)
+3. "City" (text)
+4. "State" (select dropdown with all US states)
+5. "ZIP Code" (text, 5 digits)
+6. "Site Type" (select: Construction / General Industry / Maritime)
+7. "Project Description" (textarea - "8-story commercial glass installation")
+
+SECTION 2: PERSONNEL & CONTACTS
+Instead of vague questions, use:
+1. "Total Number of Workers on This Site" (number)
+2. "Emergency Coordinator - Full Name" (text)
+3. "Emergency Coordinator - Job Title" (text)
+4. "Emergency Coordinator - Phone Number" (tel - format: 555-123-4567)
+5. "Emergency Coordinator - Email Address" (email - optional)
+6. "Alternate Emergency Coordinator - Full Name" (text)
+7. "Alternate Coordinator - Job Title" (text)
+8. "Alternate Coordinator - Phone Number" (tel)
+
+SECTION 3: SITE CHARACTERISTICS
+1. "Building Height in Feet" (number - optional, show if construction/high-rise)
+2. "Maximum Work Elevation in Feet" (number - optional, for elevated work)
+3. "Building Type Description" (text - "8-story steel frame commercial building")
+4. "Current Construction Phase" (text - optional - "Curtain wall installation floors 6-8")
+
+SECTION 4: HAZARDS PRESENT
+Make this a checkbox group with clear labels:
+"Check ALL hazards present at this site:"
+☐ Work at heights above 6 feet (fall hazards)
+☐ Confined spaces requiring entry
+☐ Crane or hoist operations
+☐ Hot work (welding, cutting, grinding)
+☐ Hazardous materials or chemicals
+☐ Swing stage or suspended scaffold operations
+☐ Excavation or trenching
+☐ High-voltage electrical work (>600V)
+☐ Roof work or roofing operations
+☐ Demolition activities
+
+SECTION 5: EQUIPMENT IN USE
+Multi-select checkboxes:
+"Select ALL equipment currently in use:"
+☐ Tower crane
+☐ Mobile crane
+☐ Swing stage / suspended scaffold
+☐ Scissor lifts
+☐ Boom lifts / aerial lifts
+☐ Forklifts
+☐ Personnel hoists
+☐ Material hoists
+☐ Scaffolding
+☐ Other: [text field]
+
+SECTION 6: EMERGENCY RESOURCES
+1. "Nearest Hospital Name" (text)
+2. "Hospital Street Address" (text)
+3. "Hospital Distance in Miles" (number)
+4. "Hospital Phone Number" (tel)
+5. "Hospital Trauma Level" (select: Level 1 / Level 2 / Level 3 / Not a trauma center)
+6. "Fire Department Phone Number" (tel - usually 911)
+7. "Fire Station District or Number" (text - optional - "Station 12")
+8. "Fire Department Estimated Response Time in Minutes" (number - optional)
+9. "Local Police Phone Number" (tel)
+10. "Police Jurisdiction" (text - "Indianapolis Metro Police")
+
+SECTION 7: ASSEMBLY AREAS
+1. "Primary Assembly Point Location" (text - "North parking lot, 200 feet from building entrance")
+2. "Primary Assembly Point GPS Coordinates" (text - optional - "39.7684, -86.1581")
+3. "Secondary Assembly Point Location" (text - "South parking lot near Main Street")
+4. "Secondary Assembly GPS Coordinates" (text - optional)
+
+SECTION 8: SAFETY SYSTEMS
+1. "Alarm Systems Available" (multi-select checkboxes):
+   ☐ Air horn
+   ☐ Two-way radios
+   ☐ PA system / loudspeakers
+   ☐ Text message alerts
+   ☐ Siren
+   ☐ Other: [text field]
+
+2. "Radio Channel for Emergencies" (text - optional - "Channel 3")
+
+3. "Weather Concerns for This Region" (multi-select checkboxes):
+   ☐ Tornadoes
+   ☐ High winds (>20mph common)
+   ☐ Lightning storms
+   ☐ Flooding
+   ☐ Extreme heat (>95°F)
+   ☐ Winter storms / ice
+   ☐ Hurricanes
+   
+4. "Site Access Notes" (text - optional - "Gated site - access code 1234 at east entrance")
+
+5. "Nearby Hazards" (text - optional - "Railroad tracks 100ft west, natural gas pipeline")
+
+6. "Rescue Capability" (select dropdown):
+   - Rely on local fire department / EMS
+   - Have trained employees for rescue
+   - Use contracted rescue service
+
+SECTION 9: ADDITIONAL INFORMATION
+1. "Any Other Site-Specific Information" (textarea - optional)
+
+Each question should have:
+- Clear, specific question text
+- Appropriate input type
+- Helpful placeholder showing format
+- Optional helpText for complex fields
+- Mark required vs optional clearly
+
+Rewrite ALL questions in the emergency-action-plan checklist to match this format.
+Make it feel like filling out a Google Form, not answering vague compliance questions.

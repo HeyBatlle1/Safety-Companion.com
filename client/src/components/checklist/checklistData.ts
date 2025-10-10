@@ -1063,15 +1063,15 @@ export const checklistData: ChecklistData = {
     aiContext: 'This questionnaire collects essential site information to automatically generate a fully OSHA-compliant Emergency Action Plan (EAP) document tailored to your specific worksite, hazards, and operations.',
     sections: [
       {
-        title: 'Basic Site Information',
-        description: 'Essential information about your worksite',
+        title: 'Section 1: Basic Site Information',
+        description: 'Essential information about your worksite location and operations',
         items: [
           {
             id: 'eap-company-name',
-            question: 'Company Name',
+            question: 'Company Legal Name',
             options: [],
             inputType: 'text',
-            placeholder: 'Enter your company name',
+            placeholder: 'Acme Construction LLC',
             required: true,
             critical: true,
             aiWeight: 10,
@@ -1080,10 +1080,10 @@ export const checklistData: ChecklistData = {
           },
           {
             id: 'eap-site-address',
-            question: 'Site Address',
+            question: 'Site Street Address',
             options: [],
             inputType: 'text',
-            placeholder: 'Street address of worksite',
+            placeholder: '123 Main Street',
             required: true,
             critical: true,
             aiWeight: 10,
@@ -1095,7 +1095,7 @@ export const checklistData: ChecklistData = {
             question: 'City',
             options: [],
             inputType: 'text',
-            placeholder: 'City',
+            placeholder: 'Indianapolis',
             required: true,
             aiWeight: 8,
             riskCategory: 'site_identification',
@@ -1104,9 +1104,14 @@ export const checklistData: ChecklistData = {
           {
             id: 'eap-state',
             question: 'State',
-            options: [],
-            inputType: 'text',
-            placeholder: 'State (e.g., IN, CA, TX)',
+            options: [
+              'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
+              'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
+              'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
+              'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
+              'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
+            ],
+            inputType: 'select',
             required: true,
             aiWeight: 8,
             riskCategory: 'site_identification',
@@ -1117,7 +1122,7 @@ export const checklistData: ChecklistData = {
             question: 'ZIP Code',
             options: [],
             inputType: 'text',
-            placeholder: '5-digit ZIP code',
+            placeholder: '46204',
             required: true,
             aiWeight: 7,
             riskCategory: 'site_identification',
@@ -1143,7 +1148,7 @@ export const checklistData: ChecklistData = {
             question: 'Project Description',
             options: [],
             inputType: 'textarea',
-            placeholder: 'Describe the project or operations at this site',
+            placeholder: 'e.g., "8-story commercial glass curtain wall installation" or "Manufacturing facility equipment installation"',
             required: true,
             critical: true,
             aiWeight: 9,
@@ -1153,15 +1158,15 @@ export const checklistData: ChecklistData = {
         ]
       },
       {
-        title: 'Personnel & Contacts',
-        description: 'Key personnel and emergency coordinator information',
+        title: 'Section 2: Personnel & Emergency Contacts',
+        description: 'Key personnel responsible for emergency response',
         items: [
           {
             id: 'eap-total-employees',
-            question: 'Total Number of Employees on Site',
+            question: 'Total Number of Workers on This Site',
             options: [],
             inputType: 'number',
-            placeholder: 'Number of employees',
+            placeholder: '25',
             required: true,
             critical: true,
             aiWeight: 9,
@@ -1170,10 +1175,10 @@ export const checklistData: ChecklistData = {
           },
           {
             id: 'eap-coordinator-name',
-            question: 'Emergency Coordinator Name',
+            question: 'Emergency Coordinator - Full Name',
             options: [],
             inputType: 'text',
-            placeholder: 'Full name of emergency coordinator',
+            placeholder: 'John Smith',
             required: true,
             critical: true,
             aiWeight: 10,
@@ -1182,10 +1187,10 @@ export const checklistData: ChecklistData = {
           },
           {
             id: 'eap-coordinator-title',
-            question: 'Emergency Coordinator Title/Position',
+            question: 'Emergency Coordinator - Job Title',
             options: [],
             inputType: 'text',
-            placeholder: 'Job title (e.g., Site Safety Manager)',
+            placeholder: 'Site Safety Manager',
             required: true,
             aiWeight: 9,
             riskCategory: 'emergency_contacts',
@@ -1193,10 +1198,10 @@ export const checklistData: ChecklistData = {
           },
           {
             id: 'eap-coordinator-phone',
-            question: 'Emergency Coordinator Phone Number',
+            question: 'Emergency Coordinator - Phone Number',
             options: [],
             inputType: 'tel',
-            placeholder: '(555) 123-4567',
+            placeholder: '555-123-4567',
             required: true,
             critical: true,
             aiWeight: 10,
@@ -1205,10 +1210,10 @@ export const checklistData: ChecklistData = {
           },
           {
             id: 'eap-coordinator-email',
-            question: 'Emergency Coordinator Email (Optional)',
+            question: 'Emergency Coordinator - Email Address (optional)',
             options: [],
             inputType: 'email',
-            placeholder: 'coordinator@company.com',
+            placeholder: 'j.smith@company.com',
             required: false,
             aiWeight: 6,
             riskCategory: 'emergency_contacts',
@@ -1216,10 +1221,10 @@ export const checklistData: ChecklistData = {
           },
           {
             id: 'eap-alternate-name',
-            question: 'Alternate Emergency Coordinator Name',
+            question: 'Alternate Emergency Coordinator - Full Name',
             options: [],
             inputType: 'text',
-            placeholder: 'Full name of alternate coordinator',
+            placeholder: 'Jane Doe',
             required: true,
             critical: true,
             aiWeight: 9,
@@ -1228,10 +1233,10 @@ export const checklistData: ChecklistData = {
           },
           {
             id: 'eap-alternate-title',
-            question: 'Alternate Coordinator Title/Position',
+            question: 'Alternate Coordinator - Job Title',
             options: [],
             inputType: 'text',
-            placeholder: 'Job title',
+            placeholder: 'Site Superintendent',
             required: true,
             aiWeight: 8,
             riskCategory: 'emergency_contacts',
@@ -1239,10 +1244,10 @@ export const checklistData: ChecklistData = {
           },
           {
             id: 'eap-alternate-phone',
-            question: 'Alternate Coordinator Phone Number',
+            question: 'Alternate Coordinator - Phone Number',
             options: [],
             inputType: 'tel',
-            placeholder: '(555) 123-4567',
+            placeholder: '555-987-6543',
             required: true,
             critical: true,
             aiWeight: 9,
@@ -1252,15 +1257,15 @@ export const checklistData: ChecklistData = {
         ]
       },
       {
-        title: 'Site Characteristics',
-        description: 'Physical characteristics of the worksite',
+        title: 'Section 3: Site Characteristics',
+        description: 'Physical characteristics and dimensions of the worksite',
         items: [
           {
             id: 'eap-building-height',
-            question: 'Building Height (feet)',
+            question: 'Building Height in Feet (if applicable)',
             options: [],
             inputType: 'number',
-            placeholder: 'Height in feet (optional)',
+            placeholder: '90',
             required: false,
             aiWeight: 7,
             riskCategory: 'site_physical',
@@ -1268,10 +1273,10 @@ export const checklistData: ChecklistData = {
           },
           {
             id: 'eap-work-elevation',
-            question: 'Maximum Work Elevation (feet)',
+            question: 'Maximum Work Elevation in Feet (if applicable)',
             options: [],
             inputType: 'number',
-            placeholder: 'Maximum work height in feet (optional)',
+            placeholder: '75',
             required: false,
             aiWeight: 8,
             riskCategory: 'fall_hazards',
@@ -1279,10 +1284,10 @@ export const checklistData: ChecklistData = {
           },
           {
             id: 'eap-building-type',
-            question: 'Building Type',
+            question: 'Building Type Description',
             options: [],
             inputType: 'text',
-            placeholder: 'e.g., "8-story commercial", "Single-story warehouse"',
+            placeholder: 'e.g., "8-story steel frame commercial building" or "Single-story warehouse with 30ft ceilings"',
             required: true,
             critical: true,
             aiWeight: 8,
@@ -1291,10 +1296,10 @@ export const checklistData: ChecklistData = {
           },
           {
             id: 'eap-construction-phase',
-            question: 'Construction Phase (if applicable)',
+            question: 'Current Construction Phase (if applicable)',
             options: [],
             inputType: 'text',
-            placeholder: 'e.g., "Curtain wall installation", "Foundation work"',
+            placeholder: 'e.g., "Curtain wall installation floors 6-8" or "Foundation work complete, framing in progress"',
             required: false,
             aiWeight: 7,
             riskCategory: 'operations',
@@ -1303,12 +1308,12 @@ export const checklistData: ChecklistData = {
         ]
       },
       {
-        title: 'Hazards Present',
-        description: 'Identify hazards present at your worksite',
+        title: 'Section 4: Hazards Present',
+        description: 'Check ALL hazards present at this worksite',
         items: [
           {
             id: 'eap-hazard-fall',
-            question: 'Fall from Height Hazards',
+            question: 'Work at heights above 6 feet (fall hazards)',
             options: ['Yes', 'No'],
             required: true,
             critical: true,
@@ -1318,7 +1323,7 @@ export const checklistData: ChecklistData = {
           },
           {
             id: 'eap-hazard-confined',
-            question: 'Confined Space Work',
+            question: 'Confined spaces requiring entry',
             options: ['Yes', 'No'],
             required: true,
             critical: true,
@@ -1328,7 +1333,7 @@ export const checklistData: ChecklistData = {
           },
           {
             id: 'eap-hazard-crane',
-            question: 'Crane Operations',
+            question: 'Crane or hoist operations',
             options: ['Yes', 'No'],
             required: true,
             critical: true,
@@ -1338,7 +1343,7 @@ export const checklistData: ChecklistData = {
           },
           {
             id: 'eap-hazard-hotwork',
-            question: 'Hot Work/Welding',
+            question: 'Hot work (welding, cutting, grinding)',
             options: ['Yes', 'No'],
             required: true,
             critical: true,
@@ -1348,7 +1353,7 @@ export const checklistData: ChecklistData = {
           },
           {
             id: 'eap-hazard-chemicals',
-            question: 'Hazardous Materials',
+            question: 'Hazardous materials or chemicals',
             options: ['Yes', 'No'],
             required: true,
             critical: true,
@@ -1358,7 +1363,7 @@ export const checklistData: ChecklistData = {
           },
           {
             id: 'eap-hazard-swing',
-            question: 'Swing Stage/Suspended Scaffolds',
+            question: 'Swing stage or suspended scaffold operations',
             options: ['Yes', 'No'],
             required: true,
             critical: true,
@@ -1368,7 +1373,7 @@ export const checklistData: ChecklistData = {
           },
           {
             id: 'eap-hazard-excavation',
-            question: 'Excavation/Trenching',
+            question: 'Excavation or trenching',
             options: ['Yes', 'No'],
             required: true,
             critical: true,
@@ -1378,7 +1383,7 @@ export const checklistData: ChecklistData = {
           },
           {
             id: 'eap-hazard-electrical',
-            question: 'Electrical High Voltage Work',
+            question: 'High-voltage electrical work (>600V)',
             options: ['Yes', 'No'],
             required: true,
             critical: true,
@@ -1388,7 +1393,7 @@ export const checklistData: ChecklistData = {
           },
           {
             id: 'eap-hazard-roof',
-            question: 'Roof Work',
+            question: 'Roof work or roofing operations',
             options: ['Yes', 'No'],
             required: true,
             critical: true,
@@ -1398,7 +1403,7 @@ export const checklistData: ChecklistData = {
           },
           {
             id: 'eap-hazard-demolition',
-            question: 'Demolition Work',
+            question: 'Demolition activities',
             options: ['Yes', 'No'],
             required: true,
             critical: true,
@@ -1409,12 +1414,12 @@ export const checklistData: ChecklistData = {
         ]
       },
       {
-        title: 'Equipment In Use',
-        description: 'Equipment and machinery present at the worksite',
+        title: 'Section 5: Equipment Currently In Use',
+        description: 'Select ALL equipment and machinery present at the worksite',
         items: [
           {
             id: 'eap-equipment',
-            question: 'Equipment and Machinery (Select all that apply)',
+            question: 'Equipment Currently in Use (comma-separated list or select all that apply)',
             options: [
               'Tower Crane',
               'Mobile Crane',
@@ -1429,6 +1434,8 @@ export const checklistData: ChecklistData = {
               'Boom Lifts',
               'Material Hoists'
             ],
+            inputType: 'text',
+            placeholder: 'Tower crane, Swing stage, Scissor lifts, Aerial lifts',
             required: true,
             critical: true,
             aiWeight: 8,
@@ -1438,15 +1445,15 @@ export const checklistData: ChecklistData = {
         ]
       },
       {
-        title: 'Emergency Resources',
-        description: 'Emergency services and response resources',
+        title: 'Section 6: Emergency Resources',
+        description: 'Emergency services contact information and response capabilities',
         items: [
           {
             id: 'eap-hospital-name',
             question: 'Nearest Hospital Name',
             options: [],
             inputType: 'text',
-            placeholder: 'Hospital name',
+            placeholder: 'Methodist Hospital',
             required: true,
             critical: true,
             aiWeight: 10,
@@ -1455,10 +1462,10 @@ export const checklistData: ChecklistData = {
           },
           {
             id: 'eap-hospital-address',
-            question: 'Hospital Address',
+            question: 'Hospital Street Address',
             options: [],
             inputType: 'text',
-            placeholder: 'Complete hospital address',
+            placeholder: '1701 N Senate Boulevard, Indianapolis, IN 46202',
             required: true,
             critical: true,
             aiWeight: 10,
@@ -1467,10 +1474,10 @@ export const checklistData: ChecklistData = {
           },
           {
             id: 'eap-hospital-distance',
-            question: 'Distance to Hospital (miles)',
+            question: 'Hospital Distance in Miles',
             options: [],
             inputType: 'number',
-            placeholder: 'Distance in miles',
+            placeholder: '2.5',
             required: true,
             critical: true,
             aiWeight: 9,
@@ -1482,7 +1489,7 @@ export const checklistData: ChecklistData = {
             question: 'Hospital Phone Number',
             options: [],
             inputType: 'tel',
-            placeholder: '(555) 123-4567',
+            placeholder: '317-962-2000',
             required: true,
             critical: true,
             aiWeight: 10,
@@ -1491,24 +1498,18 @@ export const checklistData: ChecklistData = {
           },
           {
             id: 'eap-hospital-trauma',
-            question: 'Trauma Level (if known)',
-            options: [],
-            inputType: 'text',
-            placeholder: 'e.g., Level 1, Level 2 (optional)',
+            question: 'Hospital Trauma Level (if known)',
+            options: [
+              'Level 1',
+              'Level 2',
+              'Level 3',
+              'Not a trauma center',
+              'Unknown'
+            ],
+            inputType: 'select',
             required: false,
             aiWeight: 7,
             riskCategory: 'emergency_medical',
-            complianceStandard: 'OSHA 1910.38'
-          },
-          {
-            id: 'eap-fire-district',
-            question: 'Fire Station District (if known)',
-            options: [],
-            inputType: 'text',
-            placeholder: 'Fire district or station number (optional)',
-            required: false,
-            aiWeight: 6,
-            riskCategory: 'fire_emergency',
             complianceStandard: 'OSHA 1910.38'
           },
           {
@@ -1516,7 +1517,7 @@ export const checklistData: ChecklistData = {
             question: 'Fire Department Phone Number',
             options: [],
             inputType: 'tel',
-            placeholder: '911 or local fire department number',
+            placeholder: '911',
             required: true,
             critical: true,
             aiWeight: 10,
@@ -1524,33 +1525,33 @@ export const checklistData: ChecklistData = {
             complianceStandard: 'OSHA 1910.38'
           },
           {
+            id: 'eap-fire-district',
+            question: 'Fire Station District or Number (if known)',
+            options: [],
+            inputType: 'text',
+            placeholder: 'Station 12',
+            required: false,
+            aiWeight: 6,
+            riskCategory: 'fire_emergency',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
             id: 'eap-fire-response',
-            question: 'Estimated Fire Response Time (minutes)',
+            question: 'Fire Department Estimated Response Time (minutes)',
             options: [],
             inputType: 'number',
-            placeholder: 'Estimated response time (optional)',
+            placeholder: '5',
             required: false,
             aiWeight: 7,
             riskCategory: 'fire_emergency',
             complianceStandard: 'OSHA 1910.38'
           },
           {
-            id: 'eap-police-jurisdiction',
-            question: 'Police Jurisdiction',
-            options: [],
-            inputType: 'text',
-            placeholder: 'e.g., Indianapolis Metro Police',
-            required: true,
-            aiWeight: 8,
-            riskCategory: 'police_emergency',
-            complianceStandard: 'OSHA 1910.38'
-          },
-          {
             id: 'eap-police-phone',
-            question: 'Police Department Phone Number',
+            question: 'Local Police Phone Number',
             options: [],
             inputType: 'tel',
-            placeholder: '911 or local police number',
+            placeholder: '911',
             required: true,
             critical: true,
             aiWeight: 9,
@@ -1558,8 +1559,19 @@ export const checklistData: ChecklistData = {
             complianceStandard: 'OSHA 1910.38'
           },
           {
+            id: 'eap-police-jurisdiction',
+            question: 'Police Jurisdiction',
+            options: [],
+            inputType: 'text',
+            placeholder: 'Indianapolis Metro Police Department',
+            required: true,
+            aiWeight: 8,
+            riskCategory: 'police_emergency',
+            complianceStandard: 'OSHA 1910.38'
+          },
+          {
             id: 'eap-rescue-option',
-            question: 'Rescue Service Provider',
+            question: 'Rescue Capability',
             options: [
               'Local Fire/EMS',
               'Trained Employees',
@@ -1571,48 +1583,19 @@ export const checklistData: ChecklistData = {
             aiWeight: 10,
             riskCategory: 'rescue_capabilities',
             complianceStandard: 'OSHA 1910.38'
-          },
-          {
-            id: 'eap-alarm-systems',
-            question: 'Alarm/Alert Systems (Select all that apply)',
-            options: [
-              'Air Horn',
-              'Two-way Radio',
-              'PA System',
-              'Text Alert System',
-              'Siren',
-              'Strobe Lights',
-              'Verbal Command'
-            ],
-            required: true,
-            critical: true,
-            aiWeight: 9,
-            riskCategory: 'communication',
-            complianceStandard: 'OSHA 1910.165'
-          },
-          {
-            id: 'eap-radio-channel',
-            question: 'Radio Channel (if applicable)',
-            options: [],
-            inputType: 'text',
-            placeholder: 'e.g., Channel 3, 462.550 MHz',
-            required: false,
-            aiWeight: 6,
-            riskCategory: 'communication',
-            complianceStandard: 'OSHA 1910.38'
           }
         ]
       },
       {
-        title: 'Assembly Areas',
-        description: 'Evacuation assembly points and environmental concerns',
+        title: 'Section 7: Assembly Areas & Safety Systems',
+        description: 'Evacuation assembly points and alarm systems',
         items: [
           {
             id: 'eap-primary-assembly',
             question: 'Primary Assembly Point Location',
             options: [],
             inputType: 'text',
-            placeholder: 'e.g., North parking lot, 100ft from building',
+            placeholder: 'North parking lot, 200 feet from building entrance',
             required: true,
             critical: true,
             aiWeight: 10,
@@ -1621,10 +1604,10 @@ export const checklistData: ChecklistData = {
           },
           {
             id: 'eap-primary-gps',
-            question: 'Primary Assembly GPS Coordinates (Optional)',
+            question: 'Primary Assembly Point GPS Coordinates (optional)',
             options: [],
             inputType: 'text',
-            placeholder: 'e.g., 39.7684° N, 86.1581° W',
+            placeholder: '39.7684, -86.1581',
             required: false,
             aiWeight: 6,
             riskCategory: 'evacuation',
@@ -1635,7 +1618,7 @@ export const checklistData: ChecklistData = {
             question: 'Secondary Assembly Point Location',
             options: [],
             inputType: 'text',
-            placeholder: 'e.g., Southwest corner, near main gate',
+            placeholder: 'South parking lot near Main Street',
             required: true,
             critical: true,
             aiWeight: 9,
@@ -1644,18 +1627,55 @@ export const checklistData: ChecklistData = {
           },
           {
             id: 'eap-secondary-gps',
-            question: 'Secondary Assembly GPS Coordinates (Optional)',
+            question: 'Secondary Assembly Point GPS Coordinates (optional)',
             options: [],
             inputType: 'text',
-            placeholder: 'GPS coordinates',
+            placeholder: '39.7670, -86.1590',
             required: false,
             aiWeight: 5,
             riskCategory: 'evacuation',
             complianceStandard: 'OSHA 1910.38'
           },
           {
+            id: 'eap-alarm-systems',
+            question: 'Alarm Systems Available (comma-separated)',
+            options: [
+              'Air Horn',
+              'Two-way Radio',
+              'PA System',
+              'Text Alert System',
+              'Siren',
+              'Strobe Lights',
+              'Verbal Command'
+            ],
+            inputType: 'text',
+            placeholder: 'Air horn, Two-way radios, PA system',
+            required: true,
+            critical: true,
+            aiWeight: 9,
+            riskCategory: 'communication',
+            complianceStandard: 'OSHA 1910.165'
+          },
+          {
+            id: 'eap-radio-channel',
+            question: 'Radio Channel for Emergencies (if applicable)',
+            options: [],
+            inputType: 'text',
+            placeholder: 'Channel 3',
+            required: false,
+            aiWeight: 6,
+            riskCategory: 'communication',
+            complianceStandard: 'OSHA 1910.38'
+          }
+        ]
+      },
+      {
+        title: 'Section 8: Weather & Environmental Concerns',
+        description: 'Weather hazards and environmental considerations for this region',
+        items: [
+          {
             id: 'eap-weather-concerns',
-            question: 'Weather/Environmental Concerns (Select all that apply)',
+            question: 'Weather Concerns for This Region (comma-separated)',
             options: [
               'Tornado Risk',
               'High Winds',
@@ -1667,6 +1687,8 @@ export const checklistData: ChecklistData = {
               'Earthquakes',
               'Wildfires'
             ],
+            inputType: 'text',
+            placeholder: 'Tornadoes, High winds, Lightning storms',
             required: true,
             critical: true,
             aiWeight: 8,
@@ -1676,15 +1698,15 @@ export const checklistData: ChecklistData = {
         ]
       },
       {
-        title: 'Additional Information',
-        description: 'Site access and special considerations',
+        title: 'Section 9: Additional Site Information',
+        description: 'Site access notes and other special considerations',
         items: [
           {
             id: 'eap-site-access',
-            question: 'Site Access Notes',
+            question: 'Site Access Notes (if any)',
             options: [],
             inputType: 'textarea',
-            placeholder: 'e.g., "Gated - code 1234", "Badge required at east entrance"',
+            placeholder: 'e.g., "Gated site - access code 1234 at east entrance" or "Badge required at main gate"',
             required: false,
             aiWeight: 7,
             riskCategory: 'site_access',
@@ -1692,10 +1714,10 @@ export const checklistData: ChecklistData = {
           },
           {
             id: 'eap-nearby-hazards',
-            question: 'Nearby External Hazards',
+            question: 'Nearby External Hazards (if any)',
             options: [],
             inputType: 'textarea',
-            placeholder: 'e.g., "Railroad tracks 100ft west", "Natural gas pipeline"',
+            placeholder: 'e.g., "Railroad tracks 100ft west, natural gas pipeline underground"',
             required: false,
             aiWeight: 8,
             riskCategory: 'external_hazards',
@@ -1703,10 +1725,10 @@ export const checklistData: ChecklistData = {
           },
           {
             id: 'eap-additional-info',
-            question: 'Additional Information or Special Notes',
+            question: 'Any Other Site-Specific Information (optional)',
             options: [],
             inputType: 'textarea',
-            placeholder: 'Any other relevant information for the Emergency Action Plan',
+            placeholder: 'Any additional details about the site, operations, or special considerations',
             required: false,
             aiWeight: 6,
             riskCategory: 'general',

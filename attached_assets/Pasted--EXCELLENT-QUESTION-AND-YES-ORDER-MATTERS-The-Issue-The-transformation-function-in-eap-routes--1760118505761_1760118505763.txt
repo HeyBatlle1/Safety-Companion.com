@@ -1,0 +1,273 @@
+
+EXCELLENT QUESTION - AND YES, ORDER MATTERS.
+
+The Issue:
+The transformation function in eap.routes.ts expects specific question IDs:
+
+typescript
+const get = (id: string): string => responses.get(id) || '';
+
+companyName: get('eap-company-name'),  // ← Looks for THIS exact ID
+siteAddress: get('eap-site-address'),  // ← Looks for THIS exact ID
+emergencyCoordinator: {
+  name: get('eap-coordinator-name'),   // ← Looks for THIS exact ID
+  title: get('eap-coordinator-title'),
+  phone: get('eap-coordinator-phone'),
+}
+If the question IDs don't match, the data won't map correctly.
+
+THE SOLUTION:
+Tell Claude Replit:
+
+CRITICAL: The question IDs must EXACTLY match what the transformation function expects.
+
+When you rewrite the questions to be more specific and user-friendly, you MUST keep these exact IDs:
+
+SECTION 1: BASIC SITE INFORMATION
+✅ id: 'eap-company-name'
+   question: "Company Legal Name"
+   
+✅ id: 'eap-site-address'
+   question: "Site Street Address"
+   
+✅ id: 'eap-city'
+   question: "City"
+   
+✅ id: 'eap-state'
+   question: "State"
+   inputType: 'select'
+   options: ['AL', 'AK', 'AZ', ... all 50 states]
+   
+✅ id: 'eap-zip'
+   question: "ZIP Code"
+   
+✅ id: 'eap-site-type'
+   question: "Site Type"
+   inputType: 'select'
+   options: ['construction', 'general_industry', 'maritime']
+   
+✅ id: 'eap-project-description'
+   question: "Project Description"
+   inputType: 'textarea'
+
+SECTION 2: PERSONNEL & CONTACTS
+✅ id: 'eap-total-employees'
+   question: "Total Number of Workers on This Site"
+   inputType: 'number'
+   
+✅ id: 'eap-coordinator-name'
+   question: "Emergency Coordinator - Full Name"
+   
+✅ id: 'eap-coordinator-title'
+   question: "Emergency Coordinator - Job Title"
+   
+✅ id: 'eap-coordinator-phone'
+   question: "Emergency Coordinator - Phone Number"
+   inputType: 'tel'
+   
+✅ id: 'eap-coordinator-email'
+   question: "Emergency Coordinator - Email (optional)"
+   inputType: 'email'
+   required: false
+   
+✅ id: 'eap-alt-coordinator-name'
+   question: "Alternate Emergency Coordinator - Full Name"
+   
+✅ id: 'eap-alt-coordinator-title'
+   question: "Alternate Coordinator - Job Title"
+   
+✅ id: 'eap-alt-coordinator-phone'
+   question: "Alternate Coordinator - Phone Number"
+   inputType: 'tel'
+   
+✅ id: 'eap-alt-coordinator-email'
+   question: "Alternate Coordinator - Email (optional)"
+   inputType: 'email'
+   required: false
+
+SECTION 3: SITE CHARACTERISTICS
+✅ id: 'eap-building-height'
+   question: "Building Height in Feet (if applicable)"
+   inputType: 'number'
+   required: false
+   
+✅ id: 'eap-work-elevation'
+   question: "Maximum Work Elevation in Feet (if applicable)"
+   inputType: 'number'
+   required: false
+   
+✅ id: 'eap-building-type'
+   question: "Building Type Description"
+   placeholder: "e.g., 8-story steel frame commercial building"
+   
+✅ id: 'eap-construction-phase'
+   question: "Current Construction Phase (if applicable)"
+   placeholder: "e.g., Curtain wall installation floors 6-8"
+   required: false
+
+SECTION 4: HAZARDS PRESENT (Checkboxes - response should be "yes" or "no")
+✅ id: 'eap-hazard-fall'
+   question: "Work at heights above 6 feet (fall hazards)"
+   inputType: 'checkbox'
+   
+✅ id: 'eap-hazard-confined'
+   question: "Confined spaces requiring entry"
+   inputType: 'checkbox'
+   
+✅ id: 'eap-hazard-crane'
+   question: "Crane or hoist operations"
+   inputType: 'checkbox'
+   
+✅ id: 'eap-hazard-hotwork'
+   question: "Hot work (welding, cutting, grinding)"
+   inputType: 'checkbox'
+   
+✅ id: 'eap-hazard-hazmat'
+   question: "Hazardous materials or chemicals"
+   inputType: 'checkbox'
+   
+✅ id: 'eap-hazard-swingstage'
+   question: "Swing stage or suspended scaffold operations"
+   inputType: 'checkbox'
+   
+✅ id: 'eap-hazard-excavation'
+   question: "Excavation or trenching"
+   inputType: 'checkbox'
+   
+✅ id: 'eap-hazard-electrical'
+   question: "High-voltage electrical work (>600V)"
+   inputType: 'checkbox'
+   
+✅ id: 'eap-hazard-roof'
+   question: "Roof work or roofing operations"
+   inputType: 'checkbox'
+   
+✅ id: 'eap-hazard-demolition'
+   question: "Demolition activities"
+   inputType: 'checkbox'
+
+SECTION 5: EQUIPMENT IN USE
+✅ id: 'eap-equipment'
+   question: "Equipment Currently in Use (select all that apply)"
+   inputType: 'multiselect' or 'textarea'
+   helpText: "Comma-separated list: Tower crane, Swing stage, Scissor lifts, etc."
+   placeholder: "Tower crane, Swing stage, Aerial lifts"
+
+SECTION 6: EMERGENCY RESOURCES
+✅ id: 'eap-hospital-name'
+   question: "Nearest Hospital Name"
+   
+✅ id: 'eap-hospital-address'
+   question: "Hospital Street Address"
+   
+✅ id: 'eap-hospital-distance'
+   question: "Hospital Distance in Miles"
+   inputType: 'number'
+   
+✅ id: 'eap-hospital-phone'
+   question: "Hospital Phone Number"
+   inputType: 'tel'
+   
+✅ id: 'eap-hospital-trauma'
+   question: "Hospital Trauma Level (if known)"
+   inputType: 'select'
+   options: ['Level 1', 'Level 2', 'Level 3', 'Not a trauma center', 'Unknown']
+   required: false
+   
+✅ id: 'eap-fire-phone'
+   question: "Fire Department Phone Number"
+   inputType: 'tel'
+   placeholder: "911 or local station direct line"
+   
+✅ id: 'eap-fire-district'
+   question: "Fire Station District or Number (if known)"
+   placeholder: "Station 12"
+   required: false
+   
+✅ id: 'eap-fire-response'
+   question: "Fire Department Estimated Response Time (minutes)"
+   inputType: 'number'
+   required: false
+   
+✅ id: 'eap-police-phone'
+   question: "Local Police Phone Number"
+   inputType: 'tel'
+   
+✅ id: 'eap-police-jurisdiction'
+   question: "Police Jurisdiction"
+   placeholder: "Indianapolis Metro Police"
+
+SECTION 7: ASSEMBLY AREAS
+✅ id: 'eap-assembly-primary'
+   question: "Primary Assembly Point Location"
+   placeholder: "North parking lot, 200 feet from building entrance"
+   
+✅ id: 'eap-assembly-primary-gps'
+   question: "Primary Assembly GPS Coordinates (optional)"
+   placeholder: "39.7684, -86.1581"
+   required: false
+   
+✅ id: 'eap-assembly-secondary'
+   question: "Secondary Assembly Point Location"
+   placeholder: "South parking lot near Main Street"
+   
+✅ id: 'eap-assembly-secondary-gps'
+   question: "Secondary Assembly GPS Coordinates (optional)"
+   required: false
+
+SECTION 8: SAFETY SYSTEMS
+✅ id: 'eap-alarm-systems'
+   question: "Alarm Systems Available (comma-separated)"
+   placeholder: "Air horn, Two-way radios, PA system"
+   helpText: "List all alarm methods: air horn, radios, siren, text alerts, etc."
+   
+✅ id: 'eap-radio-channel'
+   question: "Radio Channel for Emergencies (if applicable)"
+   placeholder: "Channel 3"
+   required: false
+   
+✅ id: 'eap-weather-concerns'
+   question: "Weather Concerns for This Region (comma-separated)"
+   placeholder: "Tornadoes, High winds, Lightning"
+   helpText: "List applicable weather hazards: tornadoes, high winds, flooding, etc."
+   
+✅ id: 'eap-site-access'
+   question: "Site Access Notes (if any)"
+   placeholder: "Gated site - access code 1234 at east entrance"
+   required: false
+   
+✅ id: 'eap-nearby-hazards'
+   question: "Nearby Hazards (if any)"
+   placeholder: "Railroad tracks 100ft west, natural gas pipeline"
+   required: false
+   
+✅ id: 'eap-rescue-option'
+   question: "Rescue Capability"
+   inputType: 'select'
+   options: ['local_fire_ems', 'trained_employees', 'contracted_service']
+   displayLabels: ['Rely on local fire/EMS', 'Trained employees on site', 'Contracted rescue service']
+
+SECTION 9: ADDITIONAL INFORMATION
+✅ id: 'eap-additional-info'
+   question: "Any Other Site-Specific Information (optional)"
+   inputType: 'textarea'
+   placeholder: "Any additional details about the site, operations, or special considerations"
+   required: false
+
+CRITICAL RULES:
+1. DO NOT change any question IDs
+2. DO make the question text clear and specific
+3. DO add helpful placeholders showing format
+4. DO add helpText where needed
+5. DO set appropriate inputType (text, number, tel, email, select, checkbox, textarea)
+6. DO mark optional fields with required: false
+7. DO group related questions in logical sections
+
+The order within each section doesn't matter as long as the IDs match the transformation function.
+WHY THIS WORKS:
+The transformation function uses a Map lookup by ID, not by position:
+
+typescript
+responses.set(item.id, item.response);  // ← Stores by ID
+const get = (id: string) => responses.get(id) || '';  // ← Retrieves by ID
+So as long as the IDs are correct, the order doesn't matter.
