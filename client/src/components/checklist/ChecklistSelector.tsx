@@ -62,12 +62,20 @@ const primaryTemplates: Template[] = [
     iconColor: '#6B7280'
   },
   {
+    id: 'emergency-action-plan',
+    title: 'Emergency Action Plan Generator',
+    icon: ChecklistBuilding,
+    description: 'Generate comprehensive OSHA-compliant Emergency Action Plans',
+    color: 'from-blue-600 via-purple-600 to-cyan-600',
+    iconColor: '#8B5CF6'
+  },
+  {
     id: 'emergency-action',
     title: '(BACKUP) Emergency Action Plan',
     icon: ChecklistBuilding,
     description: 'Critical incident protocols with automated alerts',
-    color: 'from-blue-600 via-purple-600 to-cyan-600',
-    iconColor: '#8B5CF6'
+    color: 'from-gray-600 to-gray-700',
+    iconColor: '#6B7280'
   },
   {
     id: 'ppe',
