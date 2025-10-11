@@ -8,6 +8,8 @@ import {
   GeneratedEAP,
   RequiredEmergency
 } from '../types/eap.types.js';
+import { db } from '../db.js';
+import { agentOutputs } from '../../shared/schema.js';
 
 dotenv.config();
 
@@ -24,15 +26,37 @@ export class EAPGeneratorService {
 
   /**
    * Main entry point - orchestrates 4-agent EAP generation pipeline
+   * @param questionnaire - The EAP questionnaire data
+   * @param analysisId - Optional analysis_history record ID for tracking agent outputs
    */
-  async generateEAP(questionnaire: EAPQuestionnaire): Promise<GeneratedEAP> {
+  async generateEAP(questionnaire: EAPQuestionnaire, analysisId?: string): Promise<GeneratedEAP> {
     try {
       console.log('📝 Starting EAP generation pipeline...');
 
       // AGENT 1: Validate questionnaire data (Temperature 0.3 - precise)
       console.log('✅ Agent 1: Validating questionnaire data...');
+      const validationStartTime = Date.now();
       const validation = await this.validateQuestionnaire(questionnaire);
+      const validationDuration = Date.now() - validationStartTime;
       console.log(`✓ Validation complete: ${validation.readyToGenerate ? 'Ready' : 'Incomplete'}`);
+
+      // Save Agent 1 output
+      if (analysisId) {
+        await db.insert(agentOutputs).values({
+          analysisId,
+          agentId: 'eap_agent_1',
+          agentName: 'Data Validator',
+          agentType: 'eap_generator',
+          outputData: validation,
+          executionMetadata: {
+            temperature: 0.3,
+            executionTime: validationDuration,
+            model: 'javascript_validation',
+            purpose: 'Validate questionnaire data and check for missing fields'
+          },
+          success: validation.readyToGenerate
+        });
+      }
 
       if (!validation.readyToGenerate) {
         throw new Error(`Incomplete questionnaire: ${validation.missingRequired.join(', ')}`);
@@ -40,28 +64,89 @@ export class EAPGeneratorService {
 
       // AGENT 2: Classify required emergencies (Temperature 0.5 - analytical)
       console.log('🔍 Agent 2: Classifying required emergency procedures...');
+      const classificationStartTime = Date.now();
       const classification = await this.classifyEmergencies(questionnaire);
+      const classificationDuration = Date.now() - classificationStartTime;
       console.log(`✓ Identified ${classification.requiredEmergencies.length} required emergency procedures`);
+
+      // Save Agent 2 output
+      if (analysisId) {
+        await db.insert(agentOutputs).values({
+          analysisId,
+          agentId: 'eap_agent_2',
+          agentName: 'Emergency Classifier',
+          agentType: 'eap_generator',
+          outputData: classification,
+          executionMetadata: {
+            temperature: 0.5,
+            executionTime: classificationDuration,
+            model: 'gemini-2.5-flash',
+            purpose: 'Classify required emergency procedures based on facility characteristics'
+          },
+          success: true
+        });
+      }
 
       // AGENT 3: Generate procedures for each emergency (Temperature 0.7 - detailed)
       console.log('📋 Agent 3: Generating site-specific procedures...');
       const procedures: EmergencyProcedure[] = [];
+      const procedureStartTime = Date.now();
       for (const emergency of classification.requiredEmergencies) {
         console.log(`  Writing procedure: ${emergency.type}...`);
         const procedure = await this.generateProcedure(questionnaire, emergency);
         procedures.push(procedure);
       }
+      const procedureDuration = Date.now() - procedureStartTime;
       console.log(`✓ Generated ${procedures.length} procedures`);
+
+      // Save Agent 3 output
+      if (analysisId) {
+        await db.insert(agentOutputs).values({
+          analysisId,
+          agentId: 'eap_agent_3',
+          agentName: 'Procedure Generator',
+          agentType: 'eap_generator',
+          outputData: { procedures },
+          executionMetadata: {
+            temperature: 0.7,
+            executionTime: procedureDuration,
+            model: 'gemini-2.5-flash',
+            procedureCount: procedures.length,
+            purpose: 'Generate site-specific emergency procedures'
+          },
+          success: true
+        });
+      }
 
       // AGENT 4: Assemble final document (Temperature 0.3 - structured)
       console.log('📄 Agent 4: Assembling OSHA-compliant document...');
+      const assemblyStartTime = Date.now();
       const eapDocument = await this.assembleDocument(
         questionnaire,
         validation,
         classification,
         procedures
       );
+      const assemblyDuration = Date.now() - assemblyStartTime;
       console.log('✓ EAP generation complete!');
+
+      // Save Agent 4 output
+      if (analysisId) {
+        await db.insert(agentOutputs).values({
+          analysisId,
+          agentId: 'eap_agent_4',
+          agentName: 'Document Assembler',
+          agentType: 'eap_generator',
+          outputData: { metadata: eapDocument.metadata, sectionCount: Object.keys(eapDocument.sections).length },
+          executionMetadata: {
+            temperature: 0.3,
+            executionTime: assemblyDuration,
+            model: 'gemini-2.5-flash',
+            purpose: 'Assemble final OSHA-compliant EAP document'
+          },
+          success: true
+        });
+      }
 
       return eapDocument;
 

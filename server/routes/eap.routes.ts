@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { EAPGeneratorService } from '../services/eapGenerator.js';
 import { EAPQuestionnaire } from '../types/eap.types.js';
+import { db } from '../db.js';
+import { analysisHistory } from '../../shared/schema.js';
 
 const router = Router();
 const eapGenerator = new EAPGeneratorService();
@@ -20,8 +22,32 @@ router.post('/generate', async (req, res) => {
     // Transform checklist responses into EAPQuestionnaire format
     const questionnaire = transformChecklistToQuestionnaire(checklistData);
     
-    // Generate the EAP document
-    const eapDocument = await eapGenerator.generateEAP(questionnaire);
+    // Create analysis_history record to link agent outputs
+    const userId = (req as any).session?.userId || null;
+    const [analysisRecord] = await db.insert(analysisHistory).values({
+      userId: userId,
+      query: `Emergency Action Plan - ${questionnaire.companyName || 'Unknown Company'}`,
+      response: 'Generating EAP...', // Will be updated after generation
+      type: 'eap_generation',
+    }).returning();
+    
+    // Generate the EAP document with analysis ID for agent output tracking
+    const eapDocument = await eapGenerator.generateEAP(questionnaire, analysisRecord.id);
+    
+    // Update analysis_history with final EAP document
+    const finalEAPText = Object.entries(eapDocument.sections)
+      .map(([key, content]) => content)
+      .join('\n\n');
+    
+    await db.update(analysisHistory)
+      .set({ 
+        response: finalEAPText,
+        metadata: { 
+          questionnaire,
+          generatedAt: new Date().toISOString()
+        }
+      })
+      .where({ id: analysisRecord.id });
     
     // Return the generated document
     res.json({
