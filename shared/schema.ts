@@ -67,6 +67,24 @@ export const analysisHistory = pgTable("analysis_history", {
   createdAtIdx: index("analysis_history_created_at_idx").on(table.createdAt),
 }));
 
+// Agent outputs - Individual agent execution results for data harvesting
+export const agentOutputs = pgTable("agent_outputs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  analysisId: uuid("analysis_id").references(() => analysisHistory.id, { onDelete: "cascade" }),
+  agentId: text("agent_id").notNull(), // e.g., "agent_1", "agent_2_risk_assessor"
+  agentName: text("agent_name").notNull(), // e.g., "Data Validator", "Risk Assessor"
+  agentType: text("agent_type").notNull(), // e.g., "eap_generator", "multi_agent_safety"
+  outputData: jsonb("output_data").notNull(), // The actual output from the agent
+  executionMetadata: jsonb("execution_metadata"), // model, temperature, maxTokens, execution_time, etc.
+  success: boolean("success").default(true).notNull(),
+  errorDetails: text("error_details"), // If success = false
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  analysisIdIdx: index("agent_outputs_analysis_id_idx").on(table.analysisId),
+  agentTypeIdx: index("agent_outputs_agent_type_idx").on(table.agentType),
+  createdAtIdx: index("agent_outputs_created_at_idx").on(table.createdAt),
+}));
+
 // User interaction analytics - Phase 1 Silent Tracking
 export const userInteractionAnalytics = pgTable("user_interaction_analytics", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -231,6 +249,11 @@ export const insertAnalysisHistorySchema = createInsertSchema(analysisHistory).o
   id: true,
   createdAt: true,
   updatedAt: true,
+});
+
+export const insertAgentOutputSchema = createInsertSchema(agentOutputs).omit({
+  id: true,
+  createdAt: true,
 });
 
 export const insertRiskAssessmentSchema = createInsertSchema(riskAssessments).omit({
