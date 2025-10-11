@@ -1,5 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { SafetyIntelligenceService } from './safetyIntelligenceService';
+import { db } from '../db.js';
+import { agentOutputs } from '../../shared/schema.js';
 
 const gemini = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || '');
 const safetyIntelligence = new SafetyIntelligenceService();
@@ -105,8 +107,11 @@ export class MultiAgentSafetyAnalysis {
 
   /**
    * Main entry point - orchestrates the 4-agent pipeline
+   * @param checklistData - The checklist data to analyze
+   * @param weatherData - Weather data for the site
+   * @param analysisId - Optional analysis_history record ID for tracking agent outputs
    */
-  async analyze(checklistData: any, weatherData: any): Promise<AnalysisResult> {
+  async analyze(checklistData: any, weatherData: any, analysisId?: string): Promise<AnalysisResult> {
     this.pipelineStartTime = Date.now();
     const agentTimings: any = {};
     
@@ -132,6 +137,19 @@ export class MultiAgentSafetyAnalysis {
       lastKnownDataQuality = validation.dataQuality;
       console.log(`✓ Data quality: ${validation.dataQuality} (score: ${validation.qualityScore}/10)`);
 
+      // Save Agent 1 output
+      if (analysisId) {
+        await db.insert(agentOutputs).values({
+          analysisId,
+          agentId: 'safety_agent_1',
+          agentName: 'Data Validator',
+          agentType: 'multi_agent_safety',
+          outputData: validation,
+          executionMetadata: agentTimings.agent1_validator,
+          success: true
+        });
+      }
+
       // AGENT 2: Risk Assessment (Temperature 0.7 - analytical)
       console.log('⚠️  Agent 2: Assessing risks with OSHA data...');
       const agent2Start = Date.now();
@@ -146,6 +164,19 @@ export class MultiAgentSafetyAnalysis {
       };
       lastKnownTopRiskScore = risk.hazards[0]?.riskScore || 0;
       console.log(`✓ Identified ${risk.hazards.length} hazards`);
+
+      // Save Agent 2 output
+      if (analysisId) {
+        await db.insert(agentOutputs).values({
+          analysisId,
+          agentId: 'safety_agent_2',
+          agentName: 'Risk Assessor',
+          agentType: 'multi_agent_safety',
+          outputData: risk,
+          executionMetadata: agentTimings.agent2_risk_assessor,
+          success: true
+        });
+      }
 
       // AGENT 3: Incident Prediction (Temperature 1.0 - creative reasoning)
       console.log('🔮 Agent 3: Predicting incident scenarios...');
@@ -162,6 +193,19 @@ export class MultiAgentSafetyAnalysis {
       lastKnownConfidence = prediction.confidence;
       console.log(`✓ Predicted: ${prediction.incidentName} (confidence: ${prediction.confidence})`);
 
+      // Save Agent 3 output
+      if (analysisId) {
+        await db.insert(agentOutputs).values({
+          analysisId,
+          agentId: 'safety_agent_3',
+          agentName: 'Incident Predictor',
+          agentType: 'multi_agent_safety',
+          outputData: prediction,
+          executionMetadata: agentTimings.agent3_incident_predictor,
+          success: true
+        });
+      }
+
       // AGENT 4: Report Synthesis (Temperature 0.5 - structured)
       console.log('📄 Agent 4: Synthesizing final report...');
       const agent4Start = Date.now();
@@ -175,6 +219,22 @@ export class MultiAgentSafetyAnalysis {
         responseLength: report.length  // Alias for consistency with other agents
       };
       console.log('✓ Pipeline complete!');
+
+      // Save Agent 4 output
+      if (analysisId) {
+        await db.insert(agentOutputs).values({
+          analysisId,
+          agentId: 'safety_agent_4',
+          agentName: 'Report Synthesizer',
+          agentType: 'multi_agent_safety',
+          outputData: { 
+            fullReport: report,
+            reportLength: report.length 
+          },
+          executionMetadata: agentTimings.agent4_report_synthesizer,
+          success: true
+        });
+      }
 
       const totalExecutionTime = Date.now() - this.pipelineStartTime;
 
