@@ -22,6 +22,7 @@ import checklistAnalysisRoutes from './routes/checklistAnalysis';
 import monitoringRoutes from './routes/monitoring';
 import multiAgentTestRoutes from './routes/multiAgentTest';
 import eapRoutes from './routes/eap.routes.js';
+import agentOutputsRoutes from './routes/agentOutputs.js';
 import { logError } from "./utils/logger";
 import './types/session';
 import { geminiAnalytics } from "./services/geminiAnalytics";
@@ -1317,6 +1318,9 @@ Please provide a comprehensive, grounded response that helps ensure workplace sa
   
   // Add Emergency Action Plan (EAP) generator routes
   app.use('/api/eap', eapRoutes);
+  
+  // Add agent outputs routes for retrieving agent metadata
+  app.use('/api/agent-outputs', agentOutputsRoutes);
 
   return httpServer;
 }

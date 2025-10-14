@@ -22,6 +22,7 @@ import {
   AnalysisRecord
 } from '../../services/history';
 import { showToast } from '../common/ToastContainer';
+import AgentMetadataDisplay from './AgentMetadataDisplay';
 
 interface AnalysisHistoryViewerProps {
   type?: AnalysisRecord['type'];
@@ -135,6 +136,8 @@ const AnalysisHistoryViewer: React.FC<AnalysisHistoryViewerProps> = ({
         return <FileText className="w-4 h-4 text-green-400" />;
       case 'chat_response':
         return <MessageCircle className="w-4 h-4 text-purple-400" />;
+      case 'eap_generation':
+        return <Shield className="w-4 h-4 text-cyan-400" />;
       default:
         return <FileText className="w-4 h-4 text-gray-400" />;
     }
@@ -150,6 +153,8 @@ const AnalysisHistoryViewer: React.FC<AnalysisHistoryViewerProps> = ({
         return 'SDS Analysis';
       case 'chat_response':
         return 'Chat Response';
+      case 'eap_generation':
+        return 'Emergency Action Plan';
       default:
         return 'Unknown';
     }
@@ -214,6 +219,7 @@ const AnalysisHistoryViewer: React.FC<AnalysisHistoryViewerProps> = ({
           <option value="risk_assessment">Risk Assessments</option>
           <option value="sds_analysis">SDS Analyses</option>
           <option value="chat_response">Chat Responses</option>
+          <option value="eap_generation">Emergency Action Plans</option>
         </select>
       </div>
       
@@ -300,6 +306,13 @@ const AnalysisHistoryViewer: React.FC<AnalysisHistoryViewerProps> = ({
                           <div className="p-3 bg-slate-700/50 rounded-lg text-white text-sm">
                             <pre className="whitespace-pre-wrap font-sans">{JSON.stringify(record.metadata, null, 2)}</pre>
                           </div>
+                        </div>
+                      )}
+                      
+                      {/* Agent Metadata Display */}
+                      {record.id && (
+                        <div className="mb-4">
+                          <AgentMetadataDisplay analysisId={record.id} />
                         </div>
                       )}
                       
