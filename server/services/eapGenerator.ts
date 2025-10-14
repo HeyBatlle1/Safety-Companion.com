@@ -166,34 +166,27 @@ export class EAPGeneratorService {
     const warnings: string[] = [];
     const mismatches: string[] = [];
 
-    // Check mandatory fields
+    // Check ONLY truly mandatory OSHA-required fields
+    // Per OSHA 29 CFR 1926.35, only these are absolutely required:
     if (!q.companyName) missing.push('Company name');
     if (!q.siteAddress) missing.push('Site address');
-    if (!q.city) missing.push('City');
-    if (!q.state) missing.push('State');
-    if (!q.zipCode) missing.push('ZIP code');
-    if (!q.projectDescription) missing.push('Project description');
-    if (!q.buildingType) missing.push('Building type');
-    
-    // Check personnel
     if (!q.emergencyCoordinator.name) missing.push('Emergency coordinator name');
-    if (!q.emergencyCoordinator.title) missing.push('Emergency coordinator title');
     if (!q.emergencyCoordinator.phone) missing.push('Emergency coordinator phone');
-    if (!q.alternateCoordinator.name) missing.push('Alternate coordinator name');
-    if (!q.alternateCoordinator.phone) missing.push('Alternate coordinator phone');
-    
-    // Check emergency resources
-    if (!q.nearestHospital.name) missing.push('Hospital name');
-    if (!q.nearestHospital.phone) missing.push('Hospital phone');
-    if (!q.fireStation.phone) missing.push('Fire department phone');
-    if (!q.localPolice.phone) missing.push('Police phone');
-    
-    // Check assembly areas
     if (!q.primaryAssembly.location) missing.push('Primary assembly location');
-    if (!q.secondaryAssembly.location) missing.push('Secondary assembly location');
     
-    // Check alarm systems
-    if (!q.alarmSystems || q.alarmSystems.length === 0) missing.push('At least one alarm system');
+    // Warnings for recommended but not mandatory fields
+    if (!q.state) warnings.push('State not specified');
+    if (!q.zipCode) warnings.push('ZIP code not specified');
+    if (!q.buildingType) warnings.push('Building type not specified');
+    if (!q.projectDescription) warnings.push('Project description not specified');
+    if (!q.emergencyCoordinator.title) warnings.push('Emergency coordinator title not specified');
+    if (!q.alternateCoordinator.name) warnings.push('Alternate coordinator not specified');
+    if (!q.nearestHospital.name) warnings.push('Hospital name not specified');
+    if (!q.nearestHospital.phone) warnings.push('Hospital phone not specified');
+    if (!q.fireStation.phone) warnings.push('Fire department phone not specified');
+    if (!q.localPolice.phone) warnings.push('Police phone not specified');
+    if (!q.secondaryAssembly.location) warnings.push('Secondary assembly location not specified');
+    if (!q.alarmSystems || q.alarmSystems.length === 0) warnings.push('No alarm system specified');
     
     // Check hazard-equipment alignment
     if (q.hazards.craneOperations && !q.equipment.some(e => e.toLowerCase().includes('crane'))) {
