@@ -61,6 +61,7 @@ const ChecklistForm = () => {
   const [aiResponse, setAiResponse] = useState<string | null>(null);
   const [riskProfile, setRiskProfile] = useState<RiskProfile | null>(null);
   const [safetyAnalysis, setSafetyAnalysis] = useState<SafetyAnalysis | null>(null);
+  const [currentAnalysisId, setCurrentAnalysisId] = useState<string | null>(null);
   const [analysisMode] = useState<'standard'>('standard');
   const [uploadingBlueprints, setUploadingBlueprints] = useState<Record<string, boolean>>({});
   const formRef = useRef<HTMLFormElement>(null);
@@ -325,6 +326,7 @@ const ChecklistForm = () => {
                     .join('\n\n');
                   
                   setAiResponse(formattedEAP);
+                  setCurrentAnalysisId(eapResult.analysisId || null); // Store analysisId for agent output viewing
                   setProcessingStatus('Complete!');
                   showToast('Emergency Action Plan generated successfully!', 'success');
                 }
@@ -403,6 +405,7 @@ const ChecklistForm = () => {
           requestAnimationFrame(() => {
             if (currentRunId === runIdRef.current) {
               setAiResponse(analysisResult);
+              setCurrentAnalysisId(result.analysisId || null); // Store analysisId for agent output viewing
               setProcessingStatus('Analysis complete!');
               showToast('Predictive JHA analysis with agent pipeline completed!', 'success');
             }
@@ -1537,6 +1540,16 @@ Progress: ${Math.round(calculateProgress())}% complete
                   <Save className="w-4 h-4" />
                   <span>Save</span>
                 </button>
+                {currentAnalysisId && (
+                  <button
+                    onClick={() => navigate(`/history/${currentAnalysisId}`)}
+                    className="px-3 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 rounded-lg transition-colors duration-200 flex items-center space-x-2 text-sm"
+                    data-testid="button-view-agent-outputs"
+                  >
+                    <Eye className="w-4 h-4" />
+                    <span>View Agent Outputs</span>
+                  </button>
+                )}
               </div>
             </div>
             <div className="prose prose-invert max-w-none">

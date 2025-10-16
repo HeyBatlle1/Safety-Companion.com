@@ -50,10 +50,11 @@ router.post('/generate', async (req, res) => {
       })
       .where(eq(analysisHistory.id, analysisRecord.id));
     
-    // Return the generated document
+    // Return the generated document with analysisId for agent output viewing
     res.json({
       success: true,
       document: eapDocument,
+      analysisId: analysisRecord.id,
       message: 'Emergency Action Plan generated successfully'
     });
     

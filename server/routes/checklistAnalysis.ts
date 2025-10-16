@@ -1,11 +1,15 @@
 import express from 'express';
-import { geminiWeatherAnalyzer } from '../services/geminiWithWeather';
+import { multiAgentSafety } from '../services/multiAgentSafety';
+import { db } from '../db';
+import { analysisHistory } from '../../shared/schema';
+import { eq } from 'drizzle-orm';
 
 const router = express.Router();
 
 /**
  * POST /api/checklist-analysis
  * Analyze checklist data with predictive incident forecasting and weather integration
+ * Using 4-agent pipeline with complete agent output tracking
  */
 router.post('/checklist-analysis', async (req, res) => {
   try {
@@ -32,17 +36,44 @@ router.post('/checklist-analysis', async (req, res) => {
     const { getWeatherForSafetyAnalysis } = await import('../services/weatherFunction');
     const weatherData = await getWeatherForSafetyAnalysis(siteLocation);
     
-    // Use Gemini with weather passed as SEPARATE parameter (proper architecture)
-    const analysis = await geminiWeatherAnalyzer.analyzeChecklistWithWeather(
-      checklistData,  // ← First parameter: checklist
-      weatherData     // ← Second parameter: weather (NOT embedded!)
-    );
+    // Create analysis_history record to link agent outputs
+    const userId = (req as any).session?.userId || null;
+    const [analysisRecord] = await db.insert(analysisHistory).values({
+      userId: userId,
+      query: `JHA Analysis - ${checklistData.template || 'Site Analysis'}`,
+      response: 'Generating multi-agent safety analysis...', // Will be updated after generation
+      type: 'jha_multi_agent_analysis',
+    }).returning();
+    
+    // Run the 4-agent pipeline with agent output tracking
+    const result = await multiAgentSafety.analyze(checklistData, weatherData, analysisRecord.id);
+    
+    // Update analysis_history with final report
+    await db.update(analysisHistory)
+      .set({ 
+        response: result.report,
+        metadata: {
+          ...result.metadata,
+          siteLocation,
+          weatherData,
+          templateId: checklistData.templateId,
+          generatedAt: new Date().toISOString()
+        }
+      })
+      .where(eq(analysisHistory.id, analysisRecord.id));
 
-    console.log(`✅ Predictive incident forecast completed`);
+    console.log(`✅ Predictive incident forecast completed with agent tracking`);
 
-    // Return plain text for frontend compatibility
-    res.set('Content-Type', 'text/plain');
-    res.send(analysis);
+    // Return JSON with analysisId for agent output viewing
+    res.json({
+      success: true,
+      analysis: result.report,
+      analysisId: analysisRecord.id,
+      metadata: result.metadata,
+      weather_integrated: true,
+      site_location: siteLocation,
+      timestamp: new Date().toISOString()
+    });
 
   } catch (error) {
     console.error('Predictive analysis error:', error);
