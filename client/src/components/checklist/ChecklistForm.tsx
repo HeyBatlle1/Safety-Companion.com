@@ -353,8 +353,32 @@ const ChecklistForm = () => {
           }
         }
       } else if (templateId === 'master-jha') {
-        // Master JHA route with weather integration
-        setProcessingStatus('Analyzing job hazards with multi-agent AI...');
+        // Master JHA route with weather integration and progress tracking
+        setProcessingStatus('Initializing 4-agent JHA pipeline...');
+        showToast('Running predictive incident analysis...', 'info');
+        
+        // Add progress tracking similar to EAP
+        const jhaProgressInterval = setInterval(() => {
+          // Exit immediately if this is no longer the active run
+          if (currentRunId !== runIdRef.current) {
+            return;
+          }
+          
+          const statusMessages = [
+            'Agent 1: Validating checklist data quality...',
+            'Agent 2: Assessing risks with OSHA statistics...',
+            'Agent 3: Predicting incident using Swiss Cheese Model...',
+            'Agent 4: Synthesizing comprehensive safety report...',
+            'Finalizing predictive analysis...'
+          ];
+          setProcessingStatus(prev => {
+            const currentIndex = statusMessages.indexOf(prev);
+            if (currentIndex < statusMessages.length - 1) {
+              return statusMessages[currentIndex + 1];
+            }
+            return prev;
+          });
+        }, 30000); // Update every 30 seconds
         
         const response = await fetch('/api/checklist-analysis', {
           method: 'POST',
@@ -364,12 +388,15 @@ const ChecklistForm = () => {
           body: JSON.stringify(checklistData)
         });
 
+        clearInterval(jhaProgressInterval); // Clear immediately after fetch completes
+
         if (!response.ok) {
           throw new Error('Analysis failed');
         }
 
-        const analysisResult = await response.text();
-        
+        const result = await response.json();
+        const analysisResult = result.analysis || result;
+      
         // Only update state if this is still the active run
         if (currentRunId === runIdRef.current) {
           // Use requestAnimationFrame for smooth state update
@@ -377,7 +404,7 @@ const ChecklistForm = () => {
             if (currentRunId === runIdRef.current) {
               setAiResponse(analysisResult);
               setProcessingStatus('Analysis complete!');
-              showToast('Weather-integrated Master JHA analysis completed!', 'success');
+              showToast('Predictive JHA analysis with agent pipeline completed!', 'success');
             }
           });
         }
