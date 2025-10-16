@@ -1,6 +1,6 @@
 # Overview
 
-This is a comprehensive Safety Companion application built as a full-stack web platform for construction and workplace safety management. The application provides AI-powered safety assistance, real-time chat support, SDS (Safety Data Sheet) analysis, safety reporting, video training resources, interactive maps, and project management tools. The centerpiece is a professional-grade Job Hazard Analysis (JHA) form with text inputs, file attachments, blueprint uploads, and intelligent AI analysis using real OSHA data integration. The homepage features stunning animated building graphics that serve as the visual centerpiece. It serves as a digital safety companion for field workers, project managers, and safety administrators in construction and industrial environments.
+This Safety Companion is a full-stack web platform for construction and workplace safety management. It provides AI-powered safety assistance, real-time chat, SDS analysis, safety reporting, video training, interactive maps, and project management. A professional Job Hazard Analysis (JHA) form with AI analysis using OSHA data is a core feature. The application also includes an Emergency Action Plan (EAP) Generator. It serves as a digital safety companion for field workers, project managers, and safety administrators in construction and industrial environments.
 
 # User Preferences
 
@@ -16,7 +16,6 @@ Profile System: Tabbed interface with personal info, certifications, safety reco
 Database Setup: Optimized migration order (tables→RLS→indexes→triggers) with comprehensive testing
 Performance: Strategic indexes optimized for mid-sized construction operations with sub-100ms query targets
 Security Testing: Comprehensive RLS policy validation with role isolation verification
-Migration Status: Comprehensive Supabase cleanup completed - removed 20+ outdated migrations, preserved existing data, created safe user_profiles setup
 Authentication Status: Production-ready authentication system with sessionStorage persistence, role-based signup (field_worker, supervisor, project_manager, safety_manager, admin), and eliminated loading loops
 JHA Form Status: Professional-grade Job Hazard Analysis form implemented with text inputs, file attachments, blueprint uploads, and intelligent AI analysis using real OSHA data integration
 Deployment Status: Production-ready with comprehensive security hardening completed - removed all console logs, implemented input validation on all endpoints, added rate limiting, secured CORS, fixed TypeScript errors, and created secure error handling. Netlify deployment configuration complete with serverless functions for cost-effective hosting.
@@ -42,52 +41,54 @@ Professional Cloud Migration Achievement: Successfully migrated from local devel
 AI Vector Intelligence System: FULLY OPERATIONAL - Deployed production-ready vector embeddings infrastructure using pgvector v0.8.0 extension with Google Gemini API integration. All 7 existing safety analyses enhanced with 768-dimensional semantic vectors enabling contextual search capabilities (69-79% accuracy improvement over keyword search). Semantic intelligence allows "height safety" queries to intelligently find fall protection requirements, "chemical procedures" to connect with handling protocols, and "site inspection" to discover relevant assessments. Platform transformed from basic safety software to AI-powered intelligence system with genuine semantic understanding beyond keyword matching
 Multi-Agent Safety Pipeline: PRODUCTION READY - Implemented 4-agent parallel pipeline (Data Validator, Risk Assessor, Incident Predictor, Report Synthesizer) using gemini-2.5-flash with specialized temperatures (0.3/0.7/1.0/0.5) generating hybrid reports combining traditional JHA Executive Summary with AI-powered predictive incident analysis. Complete agent output tracking system persists each agent's full output, execution metadata, and timing to agent_outputs table linked to analysis_history records. Pipeline delivers 60-95 second analysis time with HIGH confidence predictions using Swiss Cheese causation model and real OSHA BLS 2023 statistics. Data harvesting infrastructure enables reasoning chain analysis, quality control tracking, and comprehensive actuarial analytics for insurance purposes.
 Emergency Action Plan (EAP) Generator: PRODUCTION READY - Implemented 4-agent sequential pipeline generating OSHA-compliant Emergency Action Plans from simplified questionnaire input. Agent architecture: (1) Data Validator (temp 0.3) - validates and enriches questionnaire responses with OSHA compliance checks, (2) Emergency Classifier (temp 0.5) - identifies required emergency procedures based on facility characteristics and hazards, (3) Procedure Generator (temp 0.7) - creates site-specific emergency procedures with evacuation routes, emergency contacts, and regulatory compliance, (4) Document Assembler (temp 0.3) - compiles professional OSHA-compliant EAP document with all required sections. Pipeline accessible via /checklists → Emergency Action Plan Generator, routes to /api/eap/generate endpoint. Generation time 60-90 seconds. Complete agent output tracking system stores all agent outputs with agent_id, agent_name, execution_metadata, and full output data in agent_outputs table for data harvesting, reasoning chain analysis, and quality control tracking.
+Agent Output Viewing System: PRODUCTION READY - Both JHA and EAP pipelines now feature real-time progress tracking with 30-second status updates showing agent execution stages and time estimates. Post-analysis, a cyan "View Agent Outputs" button appears enabling one-click navigation to /history/:analysisId for detailed inspection of all agent reasoning chains. Implementation includes AbortController cleanup for both pipelines ensuring proper interval clearance on cancellation or navigation, runId-based race condition protection preventing stale updates, and complete parity between JHA and EAP user experiences. Frontend stores currentAnalysisId in state, backend returns analysisId in JSON responses, and History module displays full agent metadata including agent_name, execution_metadata, and complete outputs for quality control and actuarial analysis.
 
 # System Architecture
 
-## Frontend Architecture
-- **Framework**: React 18 with TypeScript for type safety and modern development practices
-- **Routing**: React Router for client-side navigation and private route protection
-- **Styling**: Tailwind CSS with custom design system and dark theme optimized for construction environments
-- **UI Components**: Radix UI primitives with shadcn/ui component library for consistent, accessible interface
-- **Animation**: Framer Motion for smooth transitions and interactive elements
-- **State Management**: React Context API for authentication state and React hooks for local state
-- **Build Tool**: Vite for fast development and optimized production builds
+## Frontend
+- **Framework**: React 18 with TypeScript
+- **Routing**: React Router
+- **Styling**: Tailwind CSS with dark theme
+- **UI Components**: Radix UI primitives with shadcn/ui
+- **Animation**: Framer Motion
+- **State Management**: React Context API and React hooks
+- **Build Tool**: Vite
 
-## Backend Architecture
-- **Runtime**: Node.js with Express.js server framework
-- **Language**: TypeScript for type safety across the full stack
-- **Database ORM**: Drizzle ORM for type-safe database operations and migrations
-- **Session Management**: express-session with PostgreSQL store for secure user sessions
-- **Authentication**: Custom authentication system with bcrypt password hashing
-- **API Design**: RESTful API structure with centralized error handling middleware
-- **File Structure**: Monorepo structure with shared schema between client and server
+## Backend
+- **Runtime**: Node.js with Express.js
+- **Language**: TypeScript
+- **Database ORM**: Drizzle ORM
+- **Session Management**: express-session with PostgreSQL store
+- **Authentication**: Custom authentication with bcrypt
+- **API Design**: RESTful API with centralized error handling
+- **File Structure**: Monorepo with shared schema
 
-## Data Storage Solutions
-- **Primary Database**: PostgreSQL with Drizzle ORM for schema management
-- **Database Provider**: Neon Database for managed PostgreSQL hosting
-- **Vector Database**: pgvector v0.8.0 extension for AI embeddings and semantic search
-- **Schema Definition**: Centralized schema in `/shared/schema.ts` for type consistency
-- **Migrations**: Drizzle Kit for database schema migrations and version control
-- **Local Storage**: Browser localStorage for offline functionality and user preferences
-- **Session Storage**: PostgreSQL-backed sessions for secure authentication state
-- **AI Intelligence**: 768-dimensional vector embeddings for semantic search with 100% data coverage
+## Data Storage
+- **Primary Database**: PostgreSQL via Neon Database
+- **Vector Database**: pgvector v0.8.0 for AI embeddings
+- **Schema Definition**: Centralized in `/shared/schema.ts`
+- **Migrations**: Drizzle Kit
+- **Local Storage**: Browser localStorage for offline functionality
+- **Session Storage**: PostgreSQL-backed sessions
 
 ## Authentication and Authorization
-- **Authentication Strategy**: Custom email/password authentication with session-based security
-- **Session Management**: Server-side sessions stored in PostgreSQL with configurable expiration
-- **Password Security**: bcrypt hashing with salt rounds for secure password storage
-- **Route Protection**: Private route components with authentication checks
-- **Role-Based Access**: User roles (admin, project_manager, field_worker) with appropriate permissions
-- **Security Headers**: CORS configuration and security middleware for API protection
+- **Strategy**: Custom email/password with session-based security
+- **Session Management**: Server-side sessions in PostgreSQL
+- **Password Security**: bcrypt hashing
+- **Route Protection**: Private route components
+- **Role-Based Access**: User roles (admin, project_manager, field_worker)
+- **Security Headers**: CORS configuration and security middleware
 
-## External Dependencies
-- **AI Services**: Google Gemini AI for intelligent safety analysis, chat responses, and vector embeddings generation
-- **Vector Intelligence**: Google Gemini text-embedding-004 model for 768-dimensional semantic vectors
-- **Maps Integration**: Google Maps API for location services and route planning
-- **Video Platform**: YouTube Data API for safety training video content
-- **Weather Data**: Open-Meteo API for real-time weather information affecting site safety
-- **Building Animations**: Framer Motion powered interactive building graphics as homepage centerpiece
-- **Chemical Data**: PubChem API for Safety Data Sheet information and chemical analysis
-- **UI Framework**: Radix UI and shadcn/ui for accessible component primitives
-- **Development Tools**: Replit integration for cloud-based development environment
+## AI & Data Intelligence
+- **AI Embeddings**: 768-dimensional semantic vectors using pgvector and Google Gemini
+- **Multi-Agent Pipelines**: For JHA and EAP generation, utilizing 4-agent parallel/sequential architectures with `gemini-2.5-flash`
+
+# External Dependencies
+
+- **AI Services**: Google Gemini AI (for analysis, chat, vector embeddings, pattern analysis)
+- **Maps Integration**: Google Maps API
+- **Video Platform**: YouTube Data API
+- **Weather Data**: Open-Meteo API
+- **Building Animations**: Framer Motion
+- **Chemical Data**: PubChem API
+- **UI Framework**: Radix UI and shadcn/ui
