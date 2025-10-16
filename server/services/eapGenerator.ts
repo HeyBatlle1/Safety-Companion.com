@@ -1518,30 +1518,54 @@ ${q.emergencyCoordinator.email || ''}
 
   // ==================== UTILITY METHODS ====================
   
-  private async callGemini(prompt: string, temperature: number, maxTokens: number): Promise<string> {
-    try {
-      const result = await this.model.generateContent({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature,
-          maxOutputTokens: maxTokens
+  private async callGemini(prompt: string, temperature: number, maxTokens: number, retries: number = 3): Promise<string> {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        const result = await this.model.generateContent({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature,
+            maxOutputTokens: maxTokens
+          }
+        });
+        
+        const responseText = result.response.text();
+        console.log(`📡 Gemini response (temp ${temperature}, attempt ${attempt}/${retries}): ${responseText.length} chars`);
+        
+        // Check for empty or blocked response
+        if (!responseText || responseText.trim() === '') {
+          console.error(`⚠️  Empty response from Gemini (attempt ${attempt}/${retries})`);
+          
+          // Check if safety blocked
+          if (result.response.candidates?.[0]?.finishReason === 'SAFETY') {
+            console.error('🛡️ Response blocked by Gemini safety filters');
+          }
+          
+          if (attempt < retries) {
+            console.log(`🔄 Retrying with adjusted temperature...`);
+            // Slightly adjust temperature for retry
+            temperature = Math.max(0.1, temperature - 0.1);
+            continue;
+          }
+          
+          throw new Error('Empty response from AI after all retries');
         }
-      });
-      
-      const responseText = result.response.text();
-      console.log(`📡 Gemini response (temp ${temperature}): ${responseText.length} chars`);
-      
-      // Check for safety blocks
-      if (!responseText || responseText.trim() === '') {
-        console.error('⚠️  Empty response from Gemini');
-        throw new Error('Empty response from AI');
+        
+        return responseText;
+      } catch (error: any) {
+        console.error(`❌ Gemini API error (attempt ${attempt}/${retries}):`, error.message);
+        
+        if (attempt < retries) {
+          console.log(`🔄 Retrying in 1 second...`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          continue;
+        }
+        
+        throw error;
       }
-      
-      return responseText;
-    } catch (error: any) {
-      console.error('❌ Gemini API error:', error.message);
-      throw error;
     }
+    
+    throw new Error('Failed to get response from Gemini after all retries');
   }
 
   private extractJSON(text: string): string {
