@@ -8,8 +8,9 @@ import { neon } from "@neondatabase/serverless";
 import { eq, like, and, desc } from "drizzle-orm";
 import { oshaInjuryRates, industryBenchmarks, safetyIntelligence, jhsaTemplates } from "../../shared/schema";
 
+// Use NeonDB for OSHA reference data (knowledge pool)
 const sql = neon(process.env.DATABASE_URL!);
-const db = drizzle(sql);
+const oshaDb = drizzle(sql);
 
 export interface RiskProfile {
   naicsCode: string;
@@ -60,8 +61,8 @@ export class SafetyIntelligenceService {
    * Get comprehensive risk profile for NAICS industry code using real OSHA data
    */
   async getRiskProfile(naicsCode: string): Promise<RiskProfile> {
-    // Get injury rate data
-    const [injuryData] = await db
+    // Get injury rate data from NeonDB OSHA reference pool
+    const [injuryData] = await oshaDb
       .select()
       .from(oshaInjuryRates)
       .where(and(
@@ -70,8 +71,8 @@ export class SafetyIntelligenceService {
       ))
       .limit(1);
 
-    // Get fatality data
-    const [fatalityData] = await db
+    // Get fatality data from NeonDB OSHA reference pool
+    const [fatalityData] = await oshaDb
       .select()
       .from(oshaInjuryRates)
       .where(and(
@@ -175,7 +176,7 @@ export class SafetyIntelligenceService {
 
     // Save to database if userId provided
     if (userId) {
-      await db.insert(jhsaTemplates).values({
+      await oshaDb.insert(jhsaTemplates).values({
         userId,
         naicsCode,
         jobTitle,
