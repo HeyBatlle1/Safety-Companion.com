@@ -307,17 +307,23 @@ const ChecklistForm = () => {
           const eapResult = await response.json();
           
           if (eapResult.success && eapResult.document) {
-            // Use requestAnimationFrame to batch state updates
-            requestAnimationFrame(() => {
-              // Format the EAP document for display
-              const formattedEAP = Object.entries(eapResult.document.sections)
-                .map(([key, content]) => content)
-                .join('\n\n');
-              
-              setAiResponse(formattedEAP);
-              setProcessingStatus('Complete!');
-              showToast('Emergency Action Plan generated successfully!', 'success');
-            });
+            // Only update state if this is still the active run
+            if (currentRunId === runIdRef.current) {
+              // Use requestAnimationFrame to batch state updates
+              requestAnimationFrame(() => {
+                // Double-check run is still active inside animation frame
+                if (currentRunId === runIdRef.current) {
+                  // Format the EAP document for display
+                  const formattedEAP = Object.entries(eapResult.document.sections)
+                    .map(([key, content]) => content)
+                    .join('\n\n');
+                  
+                  setAiResponse(formattedEAP);
+                  setProcessingStatus('Complete!');
+                  showToast('Emergency Action Plan generated successfully!', 'success');
+                }
+              });
+            }
             
             // Save to database async (don't block UI)
             saveChecklistResponse(
@@ -355,12 +361,17 @@ const ChecklistForm = () => {
 
         const analysisResult = await response.text();
         
-        // Use requestAnimationFrame for smooth state update
-        requestAnimationFrame(() => {
-          setAiResponse(analysisResult);
-          setProcessingStatus('Analysis complete!');
-          showToast('Weather-integrated Master JHA analysis completed!', 'success');
-        });
+        // Only update state if this is still the active run
+        if (currentRunId === runIdRef.current) {
+          // Use requestAnimationFrame for smooth state update
+          requestAnimationFrame(() => {
+            if (currentRunId === runIdRef.current) {
+              setAiResponse(analysisResult);
+              setProcessingStatus('Analysis complete!');
+              showToast('Weather-integrated Master JHA analysis completed!', 'success');
+            }
+          });
+        }
       } else {
         // Collect all blueprints and images for multi-modal analysis
         const allBlueprints: BlueprintUpload[] = [];
@@ -401,8 +412,11 @@ const ChecklistForm = () => {
             allImages.length
           );
           
-          setAiResponse(formattedReport);
-          showToast('Complete AI analysis with blueprint pattern recognition finished!', 'success');
+          // Only update state if this is still the active run
+          if (currentRunId === runIdRef.current) {
+            setAiResponse(formattedReport);
+            showToast('Complete AI analysis with blueprint pattern recognition finished!', 'success');
+          }
         } else {
           // Standard intelligent analysis without visual data
           const intelligentAnalysis = await safetyCompanionAPI.analyzeChecklist(checklistData, oshaRiskProfile || undefined);
@@ -420,13 +434,17 @@ const ChecklistForm = () => {
           
           // Format the response as professional markdown
           const formattedReport = ReportFormatter.formatStandardSafetyReport(reportData, template.title);
-          setAiResponse(formattedReport);
-          setSafetyAnalysis(intelligentAnalysis);
+          
+          // Only update state if this is still the active run
+          if (currentRunId === runIdRef.current) {
+            setAiResponse(formattedReport);
+            setSafetyAnalysis(intelligentAnalysis);
 
-          if (oshaRiskProfile) {
-            showToast(`Analysis complete! Risk Level: ${intelligentAnalysis.risk_level.toUpperCase()}`, 'success');
-          } else {
-            showToast('Analysis complete using Supabase OSHA intelligence', 'success');
+            if (oshaRiskProfile) {
+              showToast(`Analysis complete! Risk Level: ${intelligentAnalysis.risk_level.toUpperCase()}`, 'success');
+            } else {
+              showToast('Analysis complete using Supabase OSHA intelligence', 'success');
+            }
           }
         }
       }
@@ -449,8 +467,12 @@ Please provide a structured analysis including:
 Format your response professionally with clear sections and actionable insights.`;
 
         const aiAnalysis = await getMSDSResponse(prompt);
-        setAiResponse(aiAnalysis);
-        showToast('Standard analysis completed successfully!', 'success');
+        
+        // Only update state if this is still the active run
+        if (currentRunId === runIdRef.current) {
+          setAiResponse(aiAnalysis);
+          showToast('Standard analysis completed successfully!', 'success');
+        }
       }
 
       // Save to database (handle gracefully if fails)
@@ -465,15 +487,18 @@ Format your response professionally with clear sections and actionable insights.
         showToast('Analysis completed! (Database save pending - check connection)', 'warning');
       }
     } catch (error) {
-      
-      setError(error instanceof Error ? error.message : 'Failed to process checklist');
-      showToast('Error processing checklist', 'error');
-      setProcessingStatus('');
-    } finally {
-      setIsProcessing(false);
-      
-      // Only clear status if this is still the active run (prevents race condition)
+      // Only update error state if this is still the active run
       if (currentRunId === runIdRef.current) {
+        setError(error instanceof Error ? error.message : 'Failed to process checklist');
+        showToast('Error processing checklist', 'error');
+        setProcessingStatus('');
+      }
+    } finally {
+      // Only reset processing state if this is still the active run
+      if (currentRunId === runIdRef.current) {
+        setIsProcessing(false);
+        
+        // Clear status after brief delay to show completion
         statusCleanupTimeout.current = setTimeout(() => {
           // Double-check we're still on the same run before clearing
           if (currentRunId === runIdRef.current) {
