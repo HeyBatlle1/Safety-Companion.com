@@ -359,57 +359,77 @@ const ChecklistForm = () => {
         setProcessingStatus('Initializing 4-agent JHA pipeline...');
         showToast('Running predictive incident analysis...', 'info');
         
-        // Add progress tracking similar to EAP
-        const jhaProgressInterval = setInterval(() => {
-          // Exit immediately if this is no longer the active run
-          if (currentRunId !== runIdRef.current) {
-            return;
-          }
-          
-          const statusMessages = [
-            'Agent 1: Validating checklist data quality...',
-            'Agent 2: Assessing risks with OSHA statistics...',
-            'Agent 3: Predicting incident using Swiss Cheese Model...',
-            'Agent 4: Synthesizing comprehensive safety report...',
-            'Finalizing predictive analysis...'
-          ];
-          setProcessingStatus(prev => {
-            const currentIndex = statusMessages.indexOf(prev);
-            if (currentIndex < statusMessages.length - 1) {
-              return statusMessages[currentIndex + 1];
-            }
-            return prev;
-          });
-        }, 30000); // Update every 30 seconds
+        // Create abort controller for this request
+        const thisAbortController = new AbortController();
+        analysisAbortController.current = thisAbortController;
         
-        const response = await fetch('/api/checklist-analysis', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(checklistData)
-        });
-
-        clearInterval(jhaProgressInterval); // Clear immediately after fetch completes
-
-        if (!response.ok) {
-          throw new Error('Analysis failed');
-        }
-
-        const result = await response.json();
-        const analysisResult = result.analysis || result;
-      
-        // Only update state if this is still the active run
-        if (currentRunId === runIdRef.current) {
-          // Use requestAnimationFrame for smooth state update
-          requestAnimationFrame(() => {
-            if (currentRunId === runIdRef.current) {
-              setAiResponse(analysisResult);
-              setCurrentAnalysisId(result.analysisId || null); // Store analysisId for agent output viewing
-              setProcessingStatus('Analysis complete!');
-              showToast('Predictive JHA analysis with agent pipeline completed!', 'success');
+        // Declare interval variable outside try block for cleanup access
+        let jhaProgressInterval: NodeJS.Timeout | null = null;
+        
+        try {
+          // Add progress tracking similar to EAP
+          jhaProgressInterval = setInterval(() => {
+            // Exit immediately if this is no longer the active run
+            if (currentRunId !== runIdRef.current) {
+              return;
             }
+            
+            const statusMessages = [
+              'Agent 1: Validating checklist data quality...',
+              'Agent 2: Assessing risks with OSHA statistics...',
+              'Agent 3: Predicting incident using Swiss Cheese Model...',
+              'Agent 4: Synthesizing comprehensive safety report...',
+              'Finalizing predictive analysis...'
+            ];
+            setProcessingStatus(prev => {
+              const currentIndex = statusMessages.indexOf(prev);
+              if (currentIndex < statusMessages.length - 1) {
+                return statusMessages[currentIndex + 1];
+              }
+              return prev;
+            });
+          }, 30000); // Update every 30 seconds
+          
+          const response = await fetch('/api/checklist-analysis', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(checklistData),
+            signal: thisAbortController.signal
           });
+
+          if (jhaProgressInterval) {
+            clearInterval(jhaProgressInterval); // Clear immediately after fetch completes
+          }
+
+          if (!response.ok) {
+            throw new Error('Analysis failed');
+          }
+
+          const result = await response.json();
+          const analysisResult = result.analysis || result;
+        
+          // Only update state if this is still the active run
+          if (currentRunId === runIdRef.current) {
+            // Use requestAnimationFrame for smooth state update
+            requestAnimationFrame(() => {
+              if (currentRunId === runIdRef.current) {
+                setAiResponse(analysisResult);
+                setCurrentAnalysisId(result.analysisId || null); // Store analysisId for agent output viewing
+                setProcessingStatus('Analysis complete!');
+                showToast('Predictive JHA analysis with agent pipeline completed!', 'success');
+              }
+            });
+          }
+        } finally {
+          if (jhaProgressInterval) {
+            clearInterval(jhaProgressInterval);
+          }
+          // Only clear if this is still our controller instance
+          if (analysisAbortController.current === thisAbortController) {
+            analysisAbortController.current = null;
+          }
         }
       } else {
         // Collect all blueprints and images for multi-modal analysis
