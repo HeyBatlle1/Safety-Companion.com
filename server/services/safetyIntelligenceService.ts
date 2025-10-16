@@ -7,8 +7,9 @@ import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
 import { eq, like, and, desc } from "drizzle-orm";
 import { oshaInjuryRates, industryBenchmarks, safetyIntelligence, jhsaTemplates } from "../../shared/schema";
+import { db } from "../db";
 
-// Use NeonDB for OSHA reference data (knowledge pool)
+// NeonDB for OSHA reference data ONLY (read-only knowledge pool)
 const sql = neon(process.env.DATABASE_URL!);
 const oshaDb = drizzle(sql);
 
@@ -174,9 +175,9 @@ export class SafetyIntelligenceService {
       jobSteps
     };
 
-    // Save to database if userId provided
+    // Save to Supabase database if userId provided (user-generated data)
     if (userId) {
-      await oshaDb.insert(jhsaTemplates).values({
+      await db.insert(jhsaTemplates).values({
         userId,
         naicsCode,
         jobTitle,
