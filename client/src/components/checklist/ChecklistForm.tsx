@@ -57,12 +57,14 @@ const ChecklistForm = () => {
   const [shareSuccess, setShareSuccess] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingStatus, setProcessingStatus] = useState<string>('');
   const [aiResponse, setAiResponse] = useState<string | null>(null);
   const [riskProfile, setRiskProfile] = useState<RiskProfile | null>(null);
   const [safetyAnalysis, setSafetyAnalysis] = useState<SafetyAnalysis | null>(null);
   const [analysisMode] = useState<'standard'>('standard');
   const [uploadingBlueprints, setUploadingBlueprints] = useState<Record<string, boolean>>({});
   const formRef = useRef<HTMLFormElement>(null);
+  const analysisAbortController = useRef<AbortController | null>(null);
 
   const handleResponse = (itemId: string, value: string) => {
     const updatedResponses = {
@@ -170,6 +172,20 @@ const ChecklistForm = () => {
     }
   };
 
+  // Prevent navigation during analysis
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isProcessing) {
+        e.preventDefault();
+        e.returnValue = 'Analysis in progress. Are you sure you want to leave? You will lose your results.';
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isProcessing]);
+
   useEffect(() => {
     // Load previous responses from localStorage
     const savedResponses = localStorage.getItem(`checklist-${templateId}-responses`);
@@ -236,49 +252,83 @@ const ChecklistForm = () => {
 
       // Route Emergency Action Plan Generator to EAP endpoint
       if (templateId === 'emergency-action-plan') {
+        // Create abort controller for this request
+        analysisAbortController.current = new AbortController();
+        
+        setProcessingStatus('Initializing 4-agent EAP pipeline...');
         showToast('Generating OSHA-compliant Emergency Action Plan...', 'info');
         
-        const response = await fetch('/api/eap/generate', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(checklistData)
-        });
-
-        if (!response.ok) {
-          throw new Error('EAP generation failed');
-        }
-
-        const eapResult = await response.json();
+        // Simulate progress updates (since backend doesn't stream)
+        const progressInterval = setInterval(() => {
+          const statusMessages = [
+            'Agent 1: Validating questionnaire data...',
+            'Agent 2: Classifying emergency procedures...',
+            'Agent 3: Generating site-specific procedures...',
+            'Agent 4: Assembling OSHA-compliant document...',
+            'Finalizing Emergency Action Plan...'
+          ];
+          setProcessingStatus(prev => {
+            const currentIndex = statusMessages.indexOf(prev);
+            if (currentIndex < statusMessages.length - 1) {
+              return statusMessages[currentIndex + 1];
+            }
+            return prev;
+          });
+        }, 30000); // Update every 30 seconds
         
-        if (eapResult.success && eapResult.document) {
-          // Format the EAP document for display
-          const formattedEAP = Object.entries(eapResult.document.sections)
-            .map(([key, content]) => content)
-            .join('\n\n');
+        try {
+          const response = await fetch('/api/eap/generate', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(checklistData),
+            signal: analysisAbortController.current.signal
+          });
+
+          clearInterval(progressInterval);
+
+          if (!response.ok) {
+            throw new Error('EAP generation failed');
+          }
+
+          const eapResult = await response.json();
           
-          setAiResponse(formattedEAP);
-          showToast('Emergency Action Plan generated successfully!', 'success');
-          
-          // Save to database
-          try {
-            await saveChecklistResponse(
+          if (eapResult.success && eapResult.document) {
+            // Use requestAnimationFrame to batch state updates
+            requestAnimationFrame(() => {
+              // Format the EAP document for display
+              const formattedEAP = Object.entries(eapResult.document.sections)
+                .map(([key, content]) => content)
+                .join('\n\n');
+              
+              setAiResponse(formattedEAP);
+              setProcessingStatus('Complete!');
+              showToast('Emergency Action Plan generated successfully!', 'success');
+            });
+            
+            // Save to database async (don't block UI)
+            saveChecklistResponse(
               templateId || 'unknown',
               template.title,
               responses
-            );
-          } catch (saveError) {
-            showToast('EAP generated! (Database save pending)', 'warning');
+            ).catch(() => {
+              showToast('EAP generated! (Database save pending)', 'warning');
+            });
+            
+            // Early return to prevent fallback analysis from running
+            return;
+          } else {
+            throw new Error('Invalid EAP response');
           }
-          
-          // Early return to prevent fallback analysis from running
-          return;
-        } else {
-          throw new Error('Invalid EAP response');
+        } finally {
+          clearInterval(progressInterval);
+          analysisAbortController.current = null;
         }
       } else if (templateId === 'master-jha') {
         // Master JHA route with weather integration
+        setProcessingStatus('Analyzing job hazards with multi-agent AI...');
+        
         const response = await fetch('/api/checklist-analysis', {
           method: 'POST',
           headers: {
@@ -292,8 +342,13 @@ const ChecklistForm = () => {
         }
 
         const analysisResult = await response.text();
-        setAiResponse(analysisResult);
-        showToast('Weather-integrated Master JHA analysis completed!', 'success');
+        
+        // Use requestAnimationFrame for smooth state update
+        requestAnimationFrame(() => {
+          setAiResponse(analysisResult);
+          setProcessingStatus('Analysis complete!');
+          showToast('Weather-integrated Master JHA analysis completed!', 'success');
+        });
       } else {
         // Collect all blueprints and images for multi-modal analysis
         const allBlueprints: BlueprintUpload[] = [];
@@ -401,8 +456,16 @@ Format your response professionally with clear sections and actionable insights.
       
       setError(error instanceof Error ? error.message : 'Failed to process checklist');
       showToast('Error processing checklist', 'error');
+      setProcessingStatus('');
     } finally {
       setIsProcessing(false);
+      // Reset processing status after a brief delay to show completion
+      setTimeout(() => setProcessingStatus(''), 1000);
+      
+      // Clean up abort controller
+      if (analysisAbortController.current) {
+        analysisAbortController.current = null;
+      }
     }
   };
 
@@ -1312,12 +1375,18 @@ Progress: ${Math.round(calculateProgress())}% complete
           whileTap={{ scale: 0.95 }}
           onClick={handleSubmit}
           disabled={isProcessing}
+          data-testid="button-submit-analysis"
           className="w-full py-4 px-6 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-medium flex items-center justify-center space-x-3 hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
         >
           {isProcessing ? (
             <>
               <Loader className="w-6 h-6 animate-spin" />
-              <span>Processing Analysis...</span>
+              <div className="flex flex-col items-center">
+                <span className="font-semibold">Processing Analysis...</span>
+                {processingStatus && (
+                  <span className="text-sm text-cyan-200 mt-1">{processingStatus}</span>
+                )}
+              </div>
             </>
           ) : (
             <>
@@ -1327,6 +1396,25 @@ Progress: ${Math.round(calculateProgress())}% complete
             </>
           )}
         </motion.button>
+        
+        {/* Progress Status Display */}
+        {isProcessing && processingStatus && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg"
+          >
+            <div className="flex items-center space-x-3">
+              <Loader className="w-5 h-5 animate-spin text-blue-400" />
+              <div className="flex-1">
+                <p className="text-sm text-blue-300 font-medium">{processingStatus}</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  This may take 2-3 minutes. Please don't close this page.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
 
 
