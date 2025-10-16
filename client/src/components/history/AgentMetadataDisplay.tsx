@@ -38,6 +38,17 @@ const AgentMetadataDisplay: React.FC<AgentMetadataDisplayProps> = ({ analysisId 
     const fetchAgentOutputs = async () => {
       try {
         setLoading(true);
+        
+        // Only fetch if analysisId is a valid UUID (database-stored analysis)
+        // Skip localStorage IDs like "analysis_1760571585948_6wak1ny"
+        const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (!uuidPattern.test(analysisId)) {
+          // This is a localStorage ID, no agent outputs available
+          setAgentOutputs([]);
+          setLoading(false);
+          return;
+        }
+        
         const response = await fetch(`/api/agent-outputs/${analysisId}`);
         const data = await response.json();
         

@@ -3,6 +3,7 @@ import { EAPGeneratorService } from '../services/eapGenerator.js';
 import { EAPQuestionnaire } from '../types/eap.types.js';
 import { db } from '../db.js';
 import { analysisHistory } from '../../shared/schema.js';
+import { eq } from 'drizzle-orm';
 
 const router = Router();
 const eapGenerator = new EAPGeneratorService();
@@ -47,7 +48,7 @@ router.post('/generate', async (req, res) => {
           generatedAt: new Date().toISOString()
         }
       })
-      .where({ id: analysisRecord.id });
+      .where(eq(analysisHistory.id, analysisRecord.id));
     
     // Return the generated document
     res.json({
