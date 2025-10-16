@@ -65,6 +65,8 @@ const ChecklistForm = () => {
   const [uploadingBlueprints, setUploadingBlueprints] = useState<Record<string, boolean>>({});
   const formRef = useRef<HTMLFormElement>(null);
   const analysisAbortController = useRef<AbortController | null>(null);
+  const statusCleanupTimeout = useRef<NodeJS.Timeout | null>(null);
+  const runIdRef = useRef<number>(0);
 
   const handleResponse = (itemId: string, value: string) => {
     const updatedResponses = {
@@ -211,6 +213,16 @@ const ChecklistForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    
+    // Clear any pending status cleanup from previous run
+    if (statusCleanupTimeout.current) {
+      clearTimeout(statusCleanupTimeout.current);
+      statusCleanupTimeout.current = null;
+    }
+    
+    // Increment run ID to track this specific analysis
+    const currentRunId = ++runIdRef.current;
+    
     setIsProcessing(true);
     setAiResponse(null);
     setSafetyAnalysis(null);
@@ -459,8 +471,16 @@ Format your response professionally with clear sections and actionable insights.
       setProcessingStatus('');
     } finally {
       setIsProcessing(false);
-      // Reset processing status after a brief delay to show completion
-      setTimeout(() => setProcessingStatus(''), 1000);
+      
+      // Only clear status if this is still the active run (prevents race condition)
+      if (currentRunId === runIdRef.current) {
+        statusCleanupTimeout.current = setTimeout(() => {
+          // Double-check we're still on the same run before clearing
+          if (currentRunId === runIdRef.current) {
+            setProcessingStatus('');
+          }
+        }, 1000);
+      }
       
       // Clean up abort controller
       if (analysisAbortController.current) {
@@ -853,7 +873,10 @@ Progress: ${Math.round(calculateProgress())}% complete
       >
         {/* Header */}
         <div className="flex items-center justify-between">
-          <BackButton />
+          <BackButton 
+            disabled={isProcessing} 
+            onDisabledClick={() => showToast('Please wait for analysis to complete', 'warning')}
+          />
           
           <div className="flex-1 text-center">
             <div className="flex items-center justify-center space-x-3 mb-2">
