@@ -99,7 +99,7 @@ export class SafetyIntelligenceService {
    * Get industry benchmark data for comparative analysis
    */
   async getIndustryBenchmark(naicsPrefix: string): Promise<IndustryBenchmark[]> {
-    const results = await db
+    const results = await oshaDb
       .select()
       .from(oshaInjuryRates)
       .where(and(
@@ -118,7 +118,7 @@ export class SafetyIntelligenceService {
    * Find industries with similar injury rates for comparative analysis
    */
   async searchSimilarIndustries(injuryRateTarget: number, tolerance: number = 0.5): Promise<any[]> {
-    const allData = await db
+    const allData = await oshaDb
       .select()
       .from(oshaInjuryRates)
       .where(eq(oshaInjuryRates.dataSource, "BLS_Table_1_2023"));
