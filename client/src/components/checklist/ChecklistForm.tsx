@@ -264,14 +264,20 @@ const ChecklistForm = () => {
 
       // Route Emergency Action Plan Generator to EAP endpoint
       if (templateId === 'emergency-action-plan') {
-        // Create abort controller for this request
-        analysisAbortController.current = new AbortController();
+        // Create abort controller for this request and store instance
+        const thisAbortController = new AbortController();
+        analysisAbortController.current = thisAbortController;
         
         setProcessingStatus('Initializing 4-agent EAP pipeline...');
         showToast('Generating OSHA-compliant Emergency Action Plan...', 'info');
         
         // Simulate progress updates (since backend doesn't stream)
         const progressInterval = setInterval(() => {
+          // Exit immediately if this is no longer the active run
+          if (currentRunId !== runIdRef.current) {
+            return;
+          }
+          
           const statusMessages = [
             'Agent 1: Validating questionnaire data...',
             'Agent 2: Classifying emergency procedures...',
@@ -341,7 +347,10 @@ const ChecklistForm = () => {
           }
         } finally {
           clearInterval(progressInterval);
-          analysisAbortController.current = null;
+          // Only clear if this is still our controller instance
+          if (analysisAbortController.current === thisAbortController) {
+            analysisAbortController.current = null;
+          }
         }
       } else if (templateId === 'master-jha') {
         // Master JHA route with weather integration
@@ -391,7 +400,11 @@ const ChecklistForm = () => {
 
         // Get real OSHA risk profile first
         const oshaRiskProfile = await safetyCompanionAPI.getRiskProfile(templateId || 'general-construction', checklistData);
-        setRiskProfile(oshaRiskProfile);
+        
+        // Only update state if this is still the active run
+        if (currentRunId === runIdRef.current) {
+          setRiskProfile(oshaRiskProfile);
+        }
 
         // Perform multi-modal analysis if blueprints or images exist
         if (allBlueprints.length > 0 || allImages.length > 0) {
@@ -507,10 +520,7 @@ Format your response professionally with clear sections and actionable insights.
         }, 1000);
       }
       
-      // Clean up abort controller
-      if (analysisAbortController.current) {
-        analysisAbortController.current = null;
-      }
+      // Note: Abort controller cleanup handled in EAP branch's finally block
     }
   };
 
