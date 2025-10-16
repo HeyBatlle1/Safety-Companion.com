@@ -64,12 +64,15 @@ Agent Output Viewing System: PRODUCTION READY - Both JHA and EAP pipelines now f
 - **File Structure**: Monorepo with shared schema
 
 ## Data Storage
-- **Primary Database**: PostgreSQL via Neon Database
-- **Vector Database**: pgvector v0.8.0 for AI embeddings
+- **Dual Database Architecture**: 
+  - **Supabase** (Primary): All user data, profiles, analysis_history, agent_outputs, JHSA templates
+  - **NeonDB** (Reference Only): OSHA injury rates, industry benchmarks, safety intelligence (read-only knowledge pool)
+- **Vector Database**: pgvector v0.8.0 for AI embeddings in Supabase
 - **Schema Definition**: Centralized in `/shared/schema.ts`
-- **Migrations**: Drizzle Kit
+- **Database Connections**: `db`/`supabaseDb` for user operations, `neonDb` for OSHA reference reads
+- **Migrations**: Drizzle Kit for schema management
 - **Local Storage**: Browser localStorage for offline functionality
-- **Session Storage**: PostgreSQL-backed sessions
+- **Session Storage**: PostgreSQL-backed sessions in Supabase
 
 ## Authentication and Authorization
 - **Strategy**: Custom email/password with session-based security
