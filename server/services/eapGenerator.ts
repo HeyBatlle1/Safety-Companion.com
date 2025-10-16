@@ -130,14 +130,19 @@ export class EAPGeneratorService {
       const assemblyDuration = Date.now() - assemblyStartTime;
       console.log('✓ EAP generation complete!');
 
-      // Save Agent 4 output
+      // Save Agent 4 output - COMPLETE document for data harvesting
       if (analysisId) {
         await db.insert(agentOutputs).values({
           analysisId,
           agentId: 'eap_agent_4',
           agentName: 'Document Assembler',
           agentType: 'eap_generator',
-          outputData: { metadata: eapDocument.metadata, sectionCount: Object.keys(eapDocument.sections).length },
+          outputData: { 
+            fullDocument: eapDocument,  // Complete EAP document for examination
+            metadata: eapDocument.metadata, 
+            sectionCount: Object.keys(eapDocument.sections).length,
+            sectionTitles: Object.keys(eapDocument.sections)
+          },
           executionMetadata: {
             temperature: 0.3,
             executionTime: assemblyDuration,
