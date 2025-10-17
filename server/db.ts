@@ -21,7 +21,10 @@ if (!supabaseUrl) {
 
 const supabasePool = new PgPool({ 
   connectionString: supabaseUrl,
-  ssl: { rejectUnauthorized: false }
+  ssl: { rejectUnauthorized: false },
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
 });
 export const supabaseDb = pgDrizzle(supabasePool, { schema });
 
