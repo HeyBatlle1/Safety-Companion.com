@@ -60,7 +60,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           if (session?.user) {
             try {
               const { data: userData, error: dbError } = await supabase
-                .from('users')
+                .from('user_profiles')
                 .select('*')
                 .eq('id', session.user.id)
                 .single();
@@ -109,7 +109,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (session?.user) {
         try {
           const { data: userData } = await supabase
-            .from('users')
+            .from('user_profiles')
             .select('*')
             .eq('id', session.user.id)
             .single();
@@ -151,7 +151,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (data.user) {
         const { data: userData } = await supabase
-          .from('users')
+          .from('user_profiles')
           .select('*')
           .eq('id', data.user.id)
           .single();
@@ -185,7 +185,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (authData.user) {
         const { error: dbError } = await supabase
-          .from('users')
+          .from('user_profiles')
           .insert({
             id: authData.user.id,
             email: authData.user.email,

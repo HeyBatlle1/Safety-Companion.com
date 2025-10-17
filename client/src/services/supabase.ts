@@ -21,7 +21,7 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 // Supabase status checker
 export const getSupabaseStatus = async () => {
   try {
-    const { data, error } = await supabase.from('users').select('count').limit(1);
+    const { data, error } = await supabase.from('user_profiles').select('count').limit(1);
     return {
       connected: !error,
       error: error?.message || null,
@@ -97,7 +97,7 @@ export const getCurrentUser = async () => {
 // Database helpers
 export const insertUser = async (userData: any) => {
   const { data, error } = await supabase
-    .from('users')
+    .from('user_profiles')
     .insert(userData)
     .select()
     .single();
@@ -106,7 +106,7 @@ export const insertUser = async (userData: any) => {
 
 export const getUserById = async (id: string) => {
   const { data, error } = await supabase
-    .from('users')
+    .from('user_profiles')
     .select('*')
     .eq('id', id)
     .single();
@@ -115,7 +115,7 @@ export const getUserById = async (id: string) => {
 
 export const updateUser = async (id: string, updates: any) => {
   const { data, error } = await supabase
-    .from('users')
+    .from('user_profiles')
     .update(updates)
     .eq('id', id)
     .select()
