@@ -1,0 +1,71 @@
+Message For Opus (Copy/Paste This Into Replit):
+
+Hey Opus - Sonnet 4.5 here. We need to sync up on architecture because you're getting some conflicting signals.
+First: You're Opus. You're the heavyweight. I know you're working under heavy Replit prompting constraints that are probably pushing you toward "complete solutions" and "self-contained systems." That's causing you to reinvent things that already exist and work.
+Current State of Affairs:
+The Safety Companion platform is already live in production on Supabase with:
+
+✅ Microsoft SSO authentication (working)
+✅ 4 active users in auth.users (managed by Supabase)
+✅ Full production database schema with 20+ tables
+✅ Row Level Security configured
+✅ React frontend deployed on Netlify
+
+What Actually Happened:
+You tried to migrate everything to NeonDB as a blank PostgreSQL setup. That made sense in isolation - you were building a complete system. But the human is migrating BACK to Supabase because:
+
+Supabase Auth > custom auth (always)
+Microsoft SSO was already configured
+Production data is already there
+NeonDB was overkill for what we need
+
+The Architecture Reality:
+CORRECT (Supabase):
+├── auth.users (Supabase-managed, Microsoft SSO)
+├── user_profiles (id = auth.uid(), our custom data)
+├── analysis_history (user_id = auth.uid(), AI analysis)
+├── agent_outputs (new table for multi-agent)
+└── 17 other working tables
+
+WRONG (What you're suggesting):
+├── custom users table with passwords ❌
+├── custom session management ❌
+├── parallel auth system ❌
+└── conflicts with existing auth ❌
+The Specific Problem:
+Your migration script tries to CREATE TABLE users with password storage. This would:
+
+Bypass the working Microsoft SSO
+Create authentication conflicts
+Open security vulnerabilities
+Confuse the application about which auth system to use
+
+What We Actually Need:
+Just three things:
+
+Create agent_outputs table (doesn't exist yet)
+Add missing columns to analysis_history (risk_score, sentiment_score, etc.)
+Fix RLS policies:
+
+user_profiles uses id column (not user_id)
+analysis_history uses user_id column
+Both reference auth.uid() from Supabase Auth
+
+
+
+No custom users table. No session table. No password storage. Supabase Auth handles all of that.
+The Mission:
+We're building three weekly rhythm modules (Monday Briefing, Wednesday Update, Friday Recap) that integrate with the existing checklist system. This is about extending working functionality, not rebuilding the foundation.
+What I Need From You:
+
+Generate the agent_outputs table creation (you had this right)
+Generate the missing analysis_history column additions (you had this right)
+Generate correct RLS policies that work WITH Supabase Auth, not around it
+Don't touch authentication - it's already production-ready
+
+You're Opus. You understand distributed systems, architectural trade-offs, and when NOT to over-engineer. The right move here is extending what works, not replacing it.
+The human trusts both of us to get this right. He knows you're capable - you just need the right context to work with Supabase's architecture instead of trying to replace it.
+Ready to nail this? Let's build the weekly rhythm modules on the solid foundation that's already there.
+- Sonnet 4.5
+
+P.S. - When in doubt, remember: Supabase is not a blank PostgreSQL database. It's a complete backend platform. We work WITH its patterns, not against them. You got this.
