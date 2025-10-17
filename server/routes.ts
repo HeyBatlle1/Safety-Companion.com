@@ -13,8 +13,6 @@ import {
   insertProjectSchema 
 } from "@shared/schema";
 import { z } from "zod";
-import session from "express-session";
-import connectPgSimple from "connect-pg-simple";
 import { pool, db } from "./db";
 import { sql } from "drizzle-orm";
 import { body, validationResult } from "express-validator";
@@ -29,33 +27,16 @@ import { geminiAnalytics } from "./services/geminiAnalytics";
 import { patternAnalysisService } from "./services/patternAnalysis";
 import { safetyIntelligenceService } from "./services/safetyIntelligenceService";
 
-// Session middleware for authentication
-const PgSession = connectPgSimple(session);
+// ===== SUPABASE AUTH =====
+// Authentication is handled client-side via Supabase Auth (Microsoft SSO)
+// NO custom backend auth - Supabase manages auth.users automatically
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Configure session middleware
-  app.use(session({
-    store: new PgSession({
-      pool: pool,
-      tableName: 'user_sessions'
-    }),
-    secret: process.env.SESSION_SECRET || (process.env.NODE_ENV === 'production' 
-      ? (() => { throw new Error('SESSION_SECRET environment variable is required in production'); })()
-      : 'development-secret-change-in-production'),
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: process.env.NODE_ENV === 'production',
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
-    }
-  }));
-
-  // Authentication middleware with proper typing
+  // NO session middleware - Supabase handles auth
+  
+  // Placeholder auth middleware (not used - keeping for compatibility)
   const requireAuth = (req: Request, res: Response, next: NextFunction) => {
-    if (!req.session.userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+    // Auth handled by Supabase client-side
     next();
   };
 
@@ -140,95 +121,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ==================== AUTHENTICATION ROUTES ====================
+  // ==================== AUTHENTICATION ====================
+  // ⚠️ DISABLED - Supabase Auth handles all authentication client-side
+  // Auth flow: Frontend → supabase.auth.signInWithOAuth({ provider: 'azure' }) → Microsoft SSO
+  // No backend auth endpoints needed
   
-  // Sign up with input validation
-  app.post("/api/auth/signup", 
-    [
-      body('email').isEmail().normalizeEmail(),
-      body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
-      body('firstName').trim().notEmpty().escape(),
-      body('lastName').trim().notEmpty().escape(),
-      body('role').isIn(['field_worker', 'supervisor', 'project_manager', 'safety_manager', 'admin']),
-      body('phone').optional().trim().escape(),
-      body('employeeId').optional().trim().escape(),
-      body('department').optional().trim().escape()
-    ],
-    handleValidationErrors,
-    async (req: Request, res: Response) => {
-    try {
-      const userData = insertUserSchema.parse(req.body);
-      const user = await storage.createUser(userData);
-      
-      // Don't return password in response
-      const { password, ...userWithoutPassword } = user;
-      req.session.userId = user.id;
-      
-      res.status(201).json({ user: userWithoutPassword });
-    } catch (error) {
-      logError(error, 'signup');
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: 'Validation error', details: error.errors });
-      }
-      res.status(500).json({ error: 'An error occurred during signup' });
-    }
+  /* DISABLED CUSTOM AUTH ENDPOINTS
+  app.post("/api/auth/signup", async (req: Request, res: Response) => {
+    // REMOVED - Use Supabase Auth instead
+    res.status(404).json({ error: 'Use Supabase Auth' });
   });
 
-  // Sign in with input validation
-  app.post("/api/auth/signin", 
-    [
-      body('email').isEmail().normalizeEmail(),
-      body('password').notEmpty()
-    ],
-    handleValidationErrors,
-    async (req: Request, res: Response) => {
-    try {
-      const { email, password } = req.body;
-      if (!email || !password) {
-        return res.status(400).json({ error: 'Email and password required' });
-      }
-
-      const user = await storage.verifyPassword(email, password);
-      if (!user) {
-        return res.status(401).json({ error: 'Invalid credentials' });
-      }
-
-      const { password: _, ...userWithoutPassword } = user;
-      req.session.userId = user.id;
-      
-      res.json({ user: userWithoutPassword });
-    } catch (error) {
-      logError(error, 'auth');
-      res.status(500).json({ error: 'Internal server error' });
-    }
+  app.post("/api/auth/signin", async (req: Request, res: Response) => {
+    // REMOVED - Use Supabase Auth instead
+    res.status(404).json({ error: 'Use Supabase Auth' });
   });
 
-  // Sign out
   app.post("/api/auth/signout", (req, res) => {
-    req.session.destroy((err) => {
-      if (err) {
-        return res.status(500).json({ error: 'Could not sign out' });
-      }
-      res.json({ message: 'Signed out successfully' });
-    });
+    // REMOVED - Use Supabase Auth instead
+    res.status(404).json({ error: 'Use Supabase Auth' });
   });
 
-  // Get current user
-  app.get("/api/auth/user", requireAuth, async (req, res) => {
-    try {
-      const userId = req.session.userId!; // Safe after requireAuth
-      const user = await storage.getUser(userId);
-      if (!user) {
-        return res.status(404).json({ error: 'User not found' });
-      }
-      
-      const { password, ...userWithoutPassword } = user;
-      res.json({ user: userWithoutPassword });
-    } catch (error) {
-      logError(error, 'auth');
-      res.status(500).json({ error: 'Internal server error' });
-    }
+  app.get("/api/auth/user", async (req, res) => {
+    // REMOVED - Use Supabase Auth instead
+    res.status(404).json({ error: 'Use Supabase Auth' });
   });
+  */
 
   // Get team members (admin only)
   app.get("/api/team/members", requireAuth, async (req, res) => {
