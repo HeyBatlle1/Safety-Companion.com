@@ -1,15 +1,17 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
+import { Pool as NeonPool, neonConfig } from '@neondatabase/serverless';
+import { drizzle as neonDrizzle } from 'drizzle-orm/neon-serverless';
+import { drizzle as pgDrizzle } from 'drizzle-orm/node-postgres';
+import { Pool as PgPool } from 'pg';
 import ws from "ws";
 import * as schema from "@shared/schema";
 
 neonConfig.webSocketConstructor = ws;
 
 // Dual Database Architecture:
-// - Supabase: User data, analysis history, agent outputs (main operations)
-// - NeonDB: OSHA reference data only (knowledge pool)
+// - Supabase: User data, analysis history, agent outputs (main operations) - uses standard pg driver
+// - NeonDB: OSHA reference data only (knowledge pool) - uses Neon driver
 
-// SUPABASE CONNECTION - Main database for user operations
+// SUPABASE CONNECTION - Main database for user operations (standard postgres)
 const supabaseUrl = process.env.SUPABASE_DATABASE_URL;
 if (!supabaseUrl) {
   throw new Error(
@@ -17,10 +19,10 @@ if (!supabaseUrl) {
   );
 }
 
-const supabasePool = new Pool({ connectionString: supabaseUrl });
-export const supabaseDb = drizzle(supabasePool, { schema });
+const supabasePool = new PgPool({ connectionString: supabaseUrl });
+export const supabaseDb = pgDrizzle(supabasePool, { schema });
 
-// NEONDB CONNECTION - OSHA reference data only
+// NEONDB CONNECTION - OSHA reference data only (Neon serverless)
 const neonUrl = process.env.DATABASE_URL;
 if (!neonUrl) {
   throw new Error(
@@ -28,8 +30,8 @@ if (!neonUrl) {
   );
 }
 
-const neonPool = new Pool({ connectionString: neonUrl });
-export const neonDb = drizzle(neonPool, { schema });
+const neonPool = new NeonPool({ connectionString: neonUrl });
+export const neonDb = neonDrizzle(neonPool, { schema });
 
 // Default export for backward compatibility (points to Supabase)
 export const db = supabaseDb;
