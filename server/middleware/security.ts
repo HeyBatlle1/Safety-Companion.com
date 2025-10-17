@@ -56,11 +56,12 @@ export function userRateLimit(windowMs: number, max: number) {
   const userRequests = new Map<string, { count: number; resetTime: number }>();
   
   return (req: Request, res: Response, next: NextFunction) => {
-    if (!req.session?.userId) {
+    // Skip rate limiting if user is not authenticated
+    if (!req.user?.id) {
       return next();
     }
     
-    const userId = req.session.userId;
+    const userId = req.user.id;
     const now = Date.now();
     const userRecord = userRequests.get(userId);
     

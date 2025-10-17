@@ -28,16 +28,20 @@ import { patternAnalysisService } from "./services/patternAnalysis";
 import { safetyIntelligenceService } from "./services/safetyIntelligenceService";
 
 // ===== SUPABASE AUTH =====
-// Authentication is handled client-side via Supabase Auth (Microsoft SSO)
-// NO custom backend auth - Supabase manages auth.users automatically
+// Authentication is handled via Supabase Auth (Microsoft SSO)
+// Backend verifies JWT tokens from Authorization header
+import { verifySupabaseToken, optionalSupabaseAuth } from './middleware/supabaseAuth';
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // NO session middleware - Supabase handles auth
-  
-  // Placeholder auth middleware (not used - keeping for compatibility)
-  const requireAuth = (req: Request, res: Response, next: NextFunction) => {
-    // Auth handled by Supabase client-side
-    next();
+  // Supabase JWT verification middleware
+  const requireAuth = verifySupabaseToken;
+
+  // Helper to get user ID from Supabase auth (replaces session)
+  const getUserId = (req: Request): string => {
+    if (!req.user?.id) {
+      throw new Error('User not authenticated');
+    }
+    return req.user.id;
   };
 
   // Validation error handler
@@ -151,7 +155,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get team members (admin only)
   app.get("/api/team/members", requireAuth, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const userId = getUserId(req);
       const user = await storage.getUser(userId);
       
       if (!user || user.role !== 'admin') {
@@ -171,7 +175,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Export users data (admin only)
   app.get("/api/admin/export/users", requireAuth, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const userId = getUserId(req);
       const user = await storage.getUser(userId);
       
       if (!user || user.role !== 'admin') {
@@ -200,7 +204,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update user profile
   app.patch("/api/users/profile", requireAuth, async (req, res) => {
     try {
-      const userId = req.session.userId!; // Safe after requireAuth
+      const userId = getUserId(req); // Safe after requireAuth
       const updates = req.body;
       const user = await storage.updateUser(userId, updates);
       if (!user) {
@@ -220,7 +224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get notification preferences
   app.get("/api/users/notification-preferences", requireAuth, async (req, res) => {
     try {
-      const userId = req.session.userId!; // Safe after requireAuth
+      const userId = getUserId(req); // Safe after requireAuth
       const preferences = await storage.getUserNotificationPreferences(userId);
       res.json({ preferences });
     } catch (error) {
@@ -232,7 +236,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update notification preferences
   app.patch("/api/users/notification-preferences", requireAuth, async (req, res) => {
     try {
-      const userId = req.session.userId!; // Safe after requireAuth
+      const userId = getUserId(req); // Safe after requireAuth
       const updates = req.body;
       const preferences = await storage.updateNotificationPreferences(userId, updates);
       res.json({ preferences });
@@ -247,7 +251,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get analysis history
   app.get("/api/analysis-history", requireAuth, async (req, res) => {
     try {
-      const userId = req.session.userId!; // Safe after requireAuth
+      const userId = getUserId(req); // Safe after requireAuth
       const limit = parseInt(req.query.limit as string) || 50;
       const history = await storage.getAnalysisHistory(userId, limit);
       res.json({ history });
@@ -269,7 +273,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     handleValidationErrors,
     async (req: Request, res: Response) => {
     try {
-      const userId = req.session.userId!; // Safe after requireAuth
+      const userId = getUserId(req); // Safe after requireAuth
       const analysisData = insertAnalysisHistorySchema.parse({
         ...req.body,
         userId: userId
@@ -333,7 +337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const reportData = insertSafetyReportSchema.parse({
         ...req.body,
-        userId: req.session.userId
+        userId: getUserId(req)
       });
       const report = await storage.createSafetyReport(reportData);
       res.status(201).json({ report });
@@ -367,7 +371,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get chat messages
   app.get("/api/chat-messages", requireAuth, async (req, res) => {
     try {
-      const userId = req.session.userId!; // Safe after requireAuth
+      const userId = getUserId(req); // Safe after requireAuth
       const limit = parseInt(req.query.limit as string) || 100;
       const messages = await storage.getChatMessages(userId, limit);
       res.json({ messages });
@@ -380,7 +384,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create chat message
   app.post("/api/chat-messages", requireAuth, async (req, res) => {
     try {
-      const userId = req.session.userId!; // Safe after requireAuth
+      const userId = getUserId(req); // Safe after requireAuth
       const messageData = insertChatMessageSchema.parse({
         ...req.body,
         userId: userId
@@ -401,7 +405,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get watched videos
   app.get("/api/watched-videos", requireAuth, async (req, res) => {
     try {
-      const userId = req.session.userId!; // Safe after requireAuth
+      const userId = getUserId(req); // Safe after requireAuth
       const watchedVideos = await storage.getWatchedVideos(userId);
       res.json({ watchedVideos });
     } catch (error) {
@@ -418,7 +422,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Video ID required' });
       }
       
-      const userId = req.session.userId!; // Safe after requireAuth
+      const userId = getUserId(req); // Safe after requireAuth
       const watchedVideo = await storage.markVideoWatched(userId, videoId);
       res.status(201).json({ watchedVideo });
     } catch (error) {
@@ -471,7 +475,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get user projects
   app.get("/api/users/projects", requireAuth, async (req, res) => {
     try {
-      const userId = req.session.userId!; // Safe after requireAuth
+      const userId = getUserId(req); // Safe after requireAuth
       const projects = await storage.getUserProjects(userId);
       res.json({ projects });
     } catch (error) {
@@ -562,7 +566,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/chat", requireAuth, async (req, res) => {
     try {
       const { text } = req.body;
-      const userId = req.session.userId!;
+      const userId = getUserId(req);
       
       if (!text?.trim()) {
         return res.status(400).json({ error: 'Message text is required' });
@@ -722,7 +726,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         metadata
       } = req.body;
 
-      const userId = req.session.userId!;
+      const userId = getUserId(req);
       
       // Save to analysis history with insurance metrics
       const analysis = await storage.createAnalysisHistory({
@@ -754,7 +758,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { companyId } = req.params;
       
       // Only allow admin access to analytics dashboard
-      if (req.session.userRole !== 'admin') {
+      if (req.user?.role !== 'admin') {
         return res.status(403).json({ error: 'Admin access required' });
       }
 
@@ -798,7 +802,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/analytics/export/:industryCode', requireAuth, async (req, res) => {
     try {
       // Only allow admin access to export data
-      if (req.session.userRole !== 'admin') {
+      if (req.user?.role !== 'admin') {
         return res.status(403).json({ error: 'Admin access required' });
       }
 
@@ -861,7 +865,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   ], handleValidationErrors, async (req: Request, res: Response) => {
     try {
       // Check admin permissions
-      if (req.session.userRole !== 'admin') {
+      if (req.user?.role !== 'admin') {
         return res.status(403).json({ error: 'Admin access required' });
       }
       
@@ -902,7 +906,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/users', requireAuth, async (req: Request, res: Response) => {
     try {
       // Only allow admin, project_manager, and safety_manager roles
-      if (!['admin', 'project_manager', 'safety_manager'].includes(req.session.userRole || '')) {
+      if (!['admin', 'project_manager', 'safety_manager'].includes(req.user?.role || '')) {
         return res.status(403).json({ error: 'Administrative access required' });
       }
       
@@ -917,7 +921,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin: Export reports
   app.get('/api/admin/export/:type', requireAuth, async (req: Request, res: Response) => {
     try {
-      if (!['admin', 'project_manager', 'safety_manager'].includes(req.session.userRole || '')) {
+      if (!['admin', 'project_manager', 'safety_manager'].includes(req.user?.role || '')) {
         return res.status(403).json({ error: 'Administrative access required' });
       }
       
@@ -951,7 +955,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin: Safety metrics
   app.get('/api/admin/safety-metrics', requireAuth, async (req, res) => {
     try {
-      if (req.session.userRole !== 'admin') {
+      if (req.user?.role !== 'admin') {
         return res.status(403).json({ error: 'Admin access required' });
       }
       
@@ -998,9 +1002,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const newUser = await storage.createUser(userData);
       
-      // Create session for immediate login
-      req.session.userId = newUser.id;
-      req.session.userRole = newUser.role;
+      // Note: User must sign in via Supabase Auth after registration
       
       res.json({
         message: 'User registered successfully',
@@ -1029,7 +1031,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   ], handleValidationErrors, async (req: Request, res: Response) => {
     try {
       const { videoId, watchDuration, totalDuration, completionRate } = req.body;
-      const userId = req.session.userId!; // Safe after requireAuth
+      const userId = getUserId(req); // Safe after requireAuth
       
       await storage.markVideoWatched(userId, videoId);
       
@@ -1054,7 +1056,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/analytics/video-activity', requireAuth, async (req, res) => {
     try {
-      if (req.session.userRole !== 'admin') {
+      if (req.user?.role !== 'admin') {
         return res.status(403).json({ error: 'Admin access required' });
       }
       
@@ -1160,7 +1162,7 @@ Please provide a comprehensive, grounded response that helps ensure workplace sa
   ], handleValidationErrors, async (req: Request, res: Response) => {
     try {
       const { naicsCode, jobTitle, customTasks } = req.body;
-      const userId = req.session.userId!;
+      const userId = getUserId(req);
       
       const jhsaTemplate = await safetyIntelligenceService.generateJHSATemplate(
         naicsCode, 

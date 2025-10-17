@@ -42,6 +42,7 @@ AI Vector Intelligence System: FULLY OPERATIONAL - Deployed production-ready vec
 Multi-Agent Safety Pipeline: PRODUCTION READY - Implemented 4-agent parallel pipeline (Data Validator, Risk Assessor, Incident Predictor, Report Synthesizer) using gemini-2.5-flash with specialized temperatures (0.3/0.7/1.0/0.5) generating hybrid reports combining traditional JHA Executive Summary with AI-powered predictive incident analysis. Complete agent output tracking system persists each agent's full output, execution metadata, and timing to agent_outputs table linked to analysis_history records. Pipeline delivers 60-95 second analysis time with HIGH confidence predictions using Swiss Cheese causation model and real OSHA BLS 2023 statistics. Data harvesting infrastructure enables reasoning chain analysis, quality control tracking, and comprehensive actuarial analytics for insurance purposes.
 Emergency Action Plan (EAP) Generator: PRODUCTION READY - Implemented 4-agent sequential pipeline generating OSHA-compliant Emergency Action Plans from simplified questionnaire input. Agent architecture: (1) Data Validator (temp 0.3) - validates and enriches questionnaire responses with OSHA compliance checks, (2) Emergency Classifier (temp 0.5) - identifies required emergency procedures based on facility characteristics and hazards, (3) Procedure Generator (temp 0.7) - creates site-specific emergency procedures with evacuation routes, emergency contacts, and regulatory compliance, (4) Document Assembler (temp 0.3) - compiles professional OSHA-compliant EAP document with all required sections. Pipeline accessible via /checklists → Emergency Action Plan Generator, routes to /api/eap/generate endpoint. Generation time 60-90 seconds. Complete agent output tracking system stores all agent outputs with agent_id, agent_name, execution_metadata, and full output data in agent_outputs table for data harvesting, reasoning chain analysis, and quality control tracking.
 Agent Output Viewing System: PRODUCTION READY - Both JHA and EAP pipelines now feature real-time progress tracking with 30-second status updates showing agent execution stages and time estimates. Post-analysis, a cyan "View Agent Outputs" button appears enabling one-click navigation to /history/:analysisId for detailed inspection of all agent reasoning chains. Implementation includes AbortController cleanup for both pipelines ensuring proper interval clearance on cancellation or navigation, runId-based race condition protection preventing stale updates, and complete parity between JHA and EAP user experiences. Frontend stores currentAnalysisId in state, backend returns analysisId in JSON responses, and History module displays full agent metadata including agent_name, execution_metadata, and complete outputs for quality control and actuarial analysis.
+Supabase Auth Migration: COMPLETED - Successfully removed all custom backend authentication (express-session, /api/auth/signin, /api/auth/signup) and implemented Supabase JWT verification middleware. All routes migrated from req.session.userId to req.user.id using getUserId(req) helper. Authentication flow: Frontend uses Supabase Auth with Microsoft SSO → Backend verifies JWT tokens → req.user populated with Supabase user context. Server running cleanly on port 5000 with no errors. Production-ready for Microsoft SSO deployment.
 
 # System Architecture
 
@@ -58,8 +59,7 @@ Agent Output Viewing System: PRODUCTION READY - Both JHA and EAP pipelines now f
 - **Runtime**: Node.js with Express.js
 - **Language**: TypeScript
 - **Database ORM**: Drizzle ORM
-- **Session Management**: express-session with PostgreSQL store
-- **Authentication**: Custom authentication with bcrypt
+- **Authentication**: Supabase Auth with Microsoft SSO (JWT verification)
 - **API Design**: RESTful API with centralized error handling
 - **File Structure**: Monorepo with shared schema
 
@@ -72,15 +72,15 @@ Agent Output Viewing System: PRODUCTION READY - Both JHA and EAP pipelines now f
 - **Database Connections**: `db`/`supabaseDb` for user operations, `neonDb` for OSHA reference reads
 - **Migrations**: Drizzle Kit for schema management
 - **Local Storage**: Browser localStorage for offline functionality
-- **Session Storage**: PostgreSQL-backed sessions in Supabase
 
 ## Authentication and Authorization
-- **Strategy**: Custom email/password with session-based security
-- **Session Management**: Server-side sessions in PostgreSQL
-- **Password Security**: bcrypt hashing
-- **Route Protection**: Private route components
-- **Role-Based Access**: User roles (admin, project_manager, field_worker)
+- **Strategy**: Supabase Auth with Microsoft SSO (JWT-based)
+- **Token Verification**: Backend verifies Supabase JWT tokens via middleware
+- **User Context**: `req.user` populated with Supabase user data (id, email, role)
+- **Route Protection**: `requireAuth` middleware validates JWT before route access
+- **Role-Based Access**: User roles (admin, project_manager, field_worker, supervisor, safety_manager)
 - **Security Headers**: CORS configuration and security middleware
+- **Authentication Flow**: Frontend → Supabase Auth → Backend JWT verification → req.user populated
 
 ## AI & Data Intelligence
 - **AI Embeddings**: 768-dimensional semantic vectors using pgvector and Google Gemini
