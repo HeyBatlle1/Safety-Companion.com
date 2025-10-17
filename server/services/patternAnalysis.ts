@@ -2,7 +2,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Initialize Google Gemini AI with server-side API key
-const gemini = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const gemini = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || '');
 
 interface PatternAnalysisResult {
   analysisId: string;

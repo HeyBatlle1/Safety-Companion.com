@@ -7,7 +7,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Initialize Gemini for embeddings generation
-const gemini = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const gemini = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || '');
 
 interface EmbeddingResult {
   text: string;
