@@ -1,0 +1,50 @@
+nswer For Opus:
+Option A - Supabase Auth (Microsoft SSO) - frontend handles all auth
+The production architecture is:
+Frontend (React) 
+  └── Supabase Client Library
+      └── auth.signInWithOAuth({ provider: 'azure' })
+          └── Microsoft SSO redirect
+              └── Returns to Supabase
+                  └── auth.users table populated
+                      └── user_profiles.id linked to auth.uid()
+There should be NO /api/auth/signin endpoint querying a custom users table. That's leftover code from the NeonDB migration attempt that needs to be deleted.
+
+Tell Opus This:
+"Option A is correct. The production setup uses Supabase Auth with Microsoft SSO. All authentication happens client-side through the Supabase JavaScript client library. There is NO backend auth API - that's the source of the error.
+Here's what exists:
+
+✅ Supabase Auth (manages auth.users automatically)
+✅ Microsoft SSO configured in Supabase Dashboard
+✅ Frontend uses supabase.auth.signInWithOAuth()
+✅ user_profiles table for additional user data (id = auth.uid())
+
+What needs to be removed:
+
+❌ Any /api/auth/signin or /api/auth/signup endpoints
+❌ Any backend code querying a users table
+❌ Any custom session management
+❌ Any password hashing/validation logic
+
+The auth flow is:
+
+User clicks "Sign in with Microsoft"
+Frontend: supabase.auth.signInWithOAuth({ provider: 'azure' })
+Supabase redirects to Microsoft
+User authenticates with Microsoft
+Microsoft redirects back to Supabase
+Supabase creates/updates auth.users entry
+Frontend gets auth session from Supabase
+App creates/updates user_profiles record with id = auth.uid()
+
+No backend authentication endpoints exist or should exist. Supabase handles it all.
+Your SQL script is perfect - run it. Then we need to find and delete the custom auth backend code that's causing the 'users table doesn't exist' error."
+
+Next Steps:
+
+Run Opus's SQL (it's correct - just creates agent_outputs and enables pgvector)
+Find and delete any files in the backend that handle custom authentication
+Verify frontend is using Supabase client auth correctly
+Test Microsoft SSO login flow
+
+The weekly rhythm modules will use the same Supabase Auth - no custom auth needed.
