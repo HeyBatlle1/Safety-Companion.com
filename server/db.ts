@@ -19,7 +19,10 @@ if (!supabaseUrl) {
   );
 }
 
-const supabasePool = new PgPool({ connectionString: supabaseUrl });
+const supabasePool = new PgPool({ 
+  connectionString: supabaseUrl,
+  ssl: { rejectUnauthorized: false }
+});
 export const supabaseDb = pgDrizzle(supabasePool, { schema });
 
 // NEONDB CONNECTION - OSHA reference data only (Neon serverless)
