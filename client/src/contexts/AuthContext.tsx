@@ -47,57 +47,85 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         
-        if (error) throw error;
+        if (error) {
+          console.error('Auth session error:', error);
+          if (isMounted) {
+            setUser(null);
+            setLoading(false);
+          }
+          return;
+        }
 
         if (isMounted) {
           if (session?.user) {
-            const { data: userData } = await supabase
-              .from('users')
-              .select('*')
-              .eq('id', session.user.id)
-              .single();
+            try {
+              const { data: userData, error: dbError } = await supabase
+                .from('users')
+                .select('*')
+                .eq('id', session.user.id)
+                .single();
 
-            setUser({
-              id: session.user.id,
-              email: session.user.email || '',
-              role: userData?.role || 'field_worker'
-            });
+              if (dbError) {
+                console.error('User data fetch error:', dbError);
+              }
+
+              setUser({
+                id: session.user.id,
+                email: session.user.email || '',
+                role: userData?.role || 'field_worker'
+              });
+            } catch (err) {
+              console.error('Error fetching user data:', err);
+              setUser({
+                id: session.user.id,
+                email: session.user.email || '',
+                role: 'field_worker'
+              });
+            }
           } else {
             setUser(null);
           }
+          setLoading(false);
         }
       } catch (error) {
+        console.error('Auth initialization error:', error);
         if (isMounted) {
           setUser(null);
-        }
-      } finally {
-        if (isMounted) {
           setLoading(false);
         }
       }
     };
 
     const fallbackTimeout = setTimeout(() => {
-      if (isMounted && loading) {
+      if (isMounted) {
+        console.warn('Auth initialization timeout - forcing load complete');
         setLoading(false);
       }
-    }, 5000);
+    }, 3000);
 
     initializeAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
-        const { data: userData } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
+        try {
+          const { data: userData } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
 
-        setUser({
-          id: session.user.id,
-          email: session.user.email || '',
-          role: userData?.role || 'field_worker'
-        });
+          setUser({
+            id: session.user.id,
+            email: session.user.email || '',
+            role: userData?.role || 'field_worker'
+          });
+        } catch (err) {
+          setUser({
+            id: session.user.id,
+            email: session.user.email || '',
+            role: 'field_worker'
+          });
+        }
       } else {
         setUser(null);
       }
