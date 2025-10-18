@@ -8,12 +8,22 @@ const safetyIntelligence = new SafetyIntelligenceService();
 
 interface ValidationResult {
   qualityScore: number;
-  missingCritical: string[];
-  noResponses: string[];
   dataQuality: 'HIGH' | 'MEDIUM' | 'LOW';
-  concerns: string[];
+  missingCritical: string[];
+  insufficientResponses?: Array<{ field: string; issue: string }>;
   weatherPresent: boolean;
+  weatherRisks?: string[];
+  concerns: {
+    CRITICAL?: string[];
+    HIGH?: string[];
+    MEDIUM?: string[];
+    LOW?: string[];
+  };
+  tradeSpecificGaps?: string[];
+  recommendedAction?: 'PROCEED' | 'REQUEST_CLARIFICATION' | 'REJECT_UNSAFE';
   weatherData?: any;
+  // Legacy fields for backward compatibility
+  noResponses?: string[];
 }
 
 interface RiskHazard {
@@ -103,6 +113,91 @@ export class MultiAgentSafetyAnalysis {
     this.model = gemini.getGenerativeModel({
       model: 'gemini-2.5-flash',
     });
+  }
+
+  /**
+   * Helper: Get all concerns as flat array (backward compatibility)
+   */
+  private getAllConcerns(validation: ValidationResult): string[] {
+    if (Array.isArray(validation.concerns)) {
+      // Old format: concerns is array
+      return validation.concerns as any;
+    }
+    // New format: concerns is object with CRITICAL/HIGH/MEDIUM/LOW
+    const allConcerns: string[] = [];
+    if (validation.concerns.CRITICAL) allConcerns.push(...validation.concerns.CRITICAL);
+    if (validation.concerns.HIGH) allConcerns.push(...validation.concerns.HIGH);
+    if (validation.concerns.MEDIUM) allConcerns.push(...validation.concerns.MEDIUM);
+    if (validation.concerns.LOW) allConcerns.push(...validation.concerns.LOW);
+    return allConcerns;
+  }
+
+  /**
+   * Helper: Get trade-specific critical fields based on work type
+   */
+  private getTradeSpecificFields(workType: string): string {
+    const workTypeLower = (workType || '').toLowerCase();
+    
+    if (workTypeLower.includes('electric') || workTypeLower.includes('electrical')) {
+      return `   Electrical Trade Critical Fields:
+   - LOTO (Lock-Out Tag-Out) procedures with specific energy sources
+   - Arc flash PPE category (0-4) with calorie rating
+   - Voltage testing procedure (must use rated test equipment)
+   - Qualified person certifications (NFPA 70E or equivalent)
+   - Energized work permit (if working on live circuits)`;
+    }
+    
+    if (workTypeLower.includes('roofing') || workTypeLower.includes('roof')) {
+      return `   Roofing Trade Critical Fields:
+   - Fall protection system type (guardrails, nets, or PFAS)
+   - Roof edge setback distance (minimum 6 feet from edge)
+   - Weather monitoring for high winds/rain (specific wind speed limits)
+   - Ladder tie-off and 3-point contact
+   - Material storage away from roof edge`;
+    }
+    
+    if (workTypeLower.includes('scaffold') || workTypeLower.includes('height') || workTypeLower.includes('fall')) {
+      return `   Work at Height Critical Fields:
+   - Fall protection anchor points with 5,000lb capacity certification
+   - Competent person inspection of harnesses/lanyards (signed & dated)
+   - Rescue plan with 6-minute response time capability
+   - Scaffold load rating and capacity placard visible
+   - Guardrail height 42" ± 3" with midrail and toeboard`;
+    }
+    
+    if (workTypeLower.includes('crane') || workTypeLower.includes('lift') || workTypeLower.includes('hoist')) {
+      return `   Crane/Lifting Critical Fields:
+   - Crane operator certification (CCO or NCCCO)
+   - Load chart present and load within rated capacity
+   - Wind speed monitoring with specific mph stop-work limit
+   - Swing radius barricaded and exclusion zone marked
+   - Signal person identified and hand signals reviewed`;
+    }
+    
+    if (workTypeLower.includes('concrete') || workTypeLower.includes('masonry')) {
+      return `   Concrete/Masonry Critical Fields:
+   - Form integrity inspection before pour (signed by engineer)
+   - Shoring/reshoring plan for multi-level structures
+   - Silica exposure control (wet methods or HEPA vacuum)
+   - Vibration tool anti-vibration gloves and time limits
+   - Reinforcement bar impalement protection (caps on vertical rebar)`;
+    }
+    
+    if (workTypeLower.includes('excavat') || workTypeLower.includes('trench')) {
+      return `   Excavation/Trenching Critical Fields:
+   - Competent person daily trench inspection (atmospheric testing)
+   - Soil type classification (Type A/B/C) with shoring/sloping accordingly
+   - Ladder within 25 feet of workers at all times
+   - Utility locate (call 811) with marked lines on site
+   - Spoil pile setback minimum 2 feet from edge`;
+    }
+    
+    // Generic construction
+    return `   General Construction Critical Fields:
+   - Site-specific hazard assessment (minimum 3 hazards identified)
+   - Emergency assembly point with marked route
+   - First aid kit location and trained first aid provider on site
+   - Competent person for each major hazard category identified by name`;
   }
 
   /**
@@ -311,40 +406,112 @@ export class MultiAgentSafetyAnalysis {
    * Task: Validate data quality and identify gaps
    */
   private async validateData(checklistData: any, weatherData: any): Promise<ValidationResult> {
-    const prompt = `You are a construction safety data validator. Analyze the provided checklist and weather data for completeness and quality.
+    // Fetch OSHA industry context
+    let naicsCode = '238'; // Default: Specialty Trade Contractors
+    let industryName = 'Construction';
+    let injuryRate = 35;
+    
+    try {
+      // Try to get industry-specific data from OSHA database
+      const riskProfile = await safetyIntelligence.getRiskProfile('238');
+      if (riskProfile) {
+        naicsCode = riskProfile.naicsCode;
+        industryName = riskProfile.industryName;
+        injuryRate = riskProfile.injuryRate || 35;
+      }
+    } catch (error) {
+      console.warn('Could not fetch OSHA data for validation, using defaults');
+    }
+    
+    // Extract work type from checklist
+    const workType = checklistData.sections?.[0]?.responses?.[1]?.response || 
+                     checklistData.workType || 
+                     'General Construction';
+    
+    const prompt = `You are a construction safety data validator with expertise in OSHA 1926 standards. 
+Analyze the provided checklist and weather data for completeness, quality, and safety adequacy.
 
 INPUT DATA:
 Checklist: ${JSON.stringify(checklistData, null, 2)}
 Weather: ${JSON.stringify(weatherData, null, 2)}
+Industry: NAICS ${naicsCode} (${industryName})
+Baseline Injury Rate: ${injuryRate} per 100 workers
 
-VALIDATION CHECKLIST:
-1. Check for missing CRITICAL fields: emergency plan, worker certifications, equipment specifications
-2. Identify all "No response" answers
-3. Flag contradictory or vague responses (e.g., "same", "yes", one-word answers)
-4. Assess weather data completeness (temperature, wind speed, conditions)
-5. Calculate overall data quality score (1-10)
+VALIDATION REQUIREMENTS:
 
-SCORING RUBRIC:
-10 = Complete, detailed responses for all critical fields
-7-9 = Minor gaps, most critical data present
-4-6 = Significant gaps in critical areas
-1-3 = Insufficient data for safe analysis
+1. CRITICAL FIELD VERIFICATION:
+   Universal Critical Fields:
+   - Emergency evacuation plan with specific assembly point
+   - Worker certifications (must list cert types: OSHA 10/30, etc.)
+   - Equipment specifications (manufacturer, model, or last inspection date)
+   - PPE requirements (specific types: hard hat, safety glasses, gloves, etc.)
+   - Hazard identification (minimum 3 specific hazards listed)
+   
+   ${this.getTradeSpecificFields(workType)}
+
+2. RESPONSE QUALITY CHECK:
+   - Flag "No response", "N/A", "Same", "Yes/No" without details
+   - Flag responses < 3 words for critical fields
+   - Flag contradictory answers (e.g., "no hazards" but lists PPE requirements)
+   - Flag generic responses (e.g., "be careful" instead of specific control measures)
+
+3. WEATHER RISK ASSESSMENT:
+   ${weatherData ? `
+   Current Conditions:
+   - Temperature: ${weatherData.temperature}°F
+   - Wind: ${weatherData.windSpeed} mph
+   - Conditions: ${weatherData.conditions}
+   - Precipitation: ${weatherData.precipitation || 'None'}
+   
+   Flag if:
+   - Temp < 32°F or > 95°F AND no heat/cold stress plan
+   - Wind > 25mph AND work involves cranes/scaffolding
+   - Rain/snow present AND no slip prevention measures
+   - Visibility < 1 mile AND no enhanced barriers mentioned
+   ` : 'Weather data unavailable - FLAG as CRITICAL concern'}
+
+4. INDUSTRY-SPECIFIC VALIDATION:
+   Based on injury rate of ${injuryRate}/100 workers, verify checklist addresses:
+   - Top industry hazards for this trade
+   - Controls proportional to risk level
+   - Emergency response procedures adequate for common incidents
+
+5. SCORING (Objective Criteria):
+   10 = All critical fields present, responses >5 words with specifics, weather risks addressed
+   8-9 = 90%+ critical fields present, minor brevity in non-critical areas
+   6-7 = 70-89% critical fields present, some generic responses
+   4-5 = 50-69% critical fields present, multiple vague responses
+   1-3 = <50% critical fields present, insufficient for safe analysis
+   0 = Checklist empty or malformed
 
 OUTPUT REQUIREMENTS:
-Respond with ONLY valid JSON, no other text. Use this exact structure:
+Respond ONLY with valid JSON. No markdown, no explanations, just JSON:
 
 {
-  "qualityScore": <number 1-10>,
-  "missingCritical": ["field name 1", "field name 2"],
-  "noResponses": ["question with no response 1", "question 2"],
+  "qualityScore": <number 0-10>,
   "dataQuality": "HIGH|MEDIUM|LOW",
-  "concerns": ["specific concern 1", "specific concern 2"],
-  "weatherPresent": <true|false>
-}`;
+  "missingCritical": ["specific field name 1", "field 2"],
+  "insufficientResponses": [
+    {"field": "PPE Requirements", "issue": "One-word response, needs specific PPE types"},
+    {"field": "Hazard Controls", "issue": "Says 'be careful' - not a control measure"}
+  ],
+  "weatherPresent": <true|false>,
+  "weatherRisks": ["High winds 35mph - crane ops need halt plan", "Temp 28°F - cold stress plan missing"],
+  "concerns": {
+    "CRITICAL": ["No fall protection for 30ft work", "No emergency exits marked"],
+    "HIGH": ["Equipment last inspected 90 days ago (30-day max required)"],
+    "MEDIUM": ["Generic hazard descriptions"],
+    "LOW": ["Emergency contact area codes missing"]
+  },
+  "tradeSpecificGaps": ["Electrical LOTO not mentioned", "Arc flash PPE rating not specified"],
+  "recommendedAction": "PROCEED|REQUEST_CLARIFICATION|REJECT_UNSAFE"
+}
+
+CRITICAL: Output must be parseable JSON. Any non-JSON text will cause system failure.`;
 
     let result = '';
     try {
-      result = await this.callGemini(prompt, 0.3, 4000); // 2.5-flash thinking + response
+      result = await this.callGemini(prompt, 0.3, 4000);
       const extracted = this.extractJSON(result);
       console.log('🔍 Agent 1 extracted JSON length:', extracted.length);
       const parsed = JSON.parse(extracted);
@@ -360,9 +527,13 @@ Respond with ONLY valid JSON, no other text. Use this exact structure:
       return {
         qualityScore: 5,
         missingCritical: ['Unable to parse validation'],
-        noResponses: [],
         dataQuality: 'MEDIUM',
-        concerns: ['Data validation failed - proceeding with caution'],
+        concerns: {
+          CRITICAL: [],
+          HIGH: ['Data validation failed - proceeding with caution'],
+          MEDIUM: [],
+          LOW: []
+        },
         weatherPresent: !!weatherData,
         weatherData: weatherData
       };
@@ -915,7 +1086,7 @@ supported by real OSHA statistical data, with documented control failures eviden
 - ✅ Quality Score: ${validation.qualityScore}/10
 - ${validation.weatherPresent ? '✅' : '❌'} Weather Data: ${validation.weatherPresent ? 'Present and analyzed' : 'MISSING - reduces prediction accuracy'}
 - ${validation.missingCritical.length === 0 ? '✅' : '⚠️'} Missing Critical Fields: ${validation.missingCritical.length === 0 ? 'None' : validation.missingCritical.join(', ')}
-- ${validation.concerns.length === 0 ? '✅' : '⚠️'} Data Quality Concerns: ${validation.concerns.length === 0 ? 'None identified' : validation.concerns.length + ' concerns flagged'}
+- ${this.getAllConcerns(validation).length === 0 ? '✅' : '⚠️'} Data Quality Concerns: ${this.getAllConcerns(validation).length === 0 ? 'None identified' : this.getAllConcerns(validation).length + ' concerns flagged'}
 
 ${validation.dataQuality === 'LOW' ? `
 ⚠️ **LOW DATA QUALITY WARNING:**
@@ -935,7 +1106,7 @@ ${checklistData.sections?.find((s: any) => s.title?.toLowerCase().includes('emer
 
 **Adequacy Analysis:**
 - ${prediction.incidentName.toLowerCase().includes('fall') ? 
-    `Fall Rescue Capability: ${validation.concerns.some(c => c.toLowerCase().includes('rescue')) ? 
+    `Fall Rescue Capability: ${this.getAllConcerns(validation).some(c => c.toLowerCase().includes('rescue')) ? 
       '❌ INADEQUATE - No documented rescue plan' : 
       '⚠️ REQUIRES VERIFICATION - Rescue capability mentioned but not detailed'}` : ''}
 - First Aid Equipment: ${checklistData.sections?.some((s: any) => 
@@ -1038,8 +1209,8 @@ ${standards.map(s => `- ${s}: Compliance requires verification of documented pro
 ${validation.missingCritical.length > 0 ? 
   `- Missing critical documentation: ${validation.missingCritical.join(', ')}` : 
   '- No critical documentation gaps identified'}
-${validation.concerns.length > 0 ? 
-  `- Data quality issues: ${validation.concerns.slice(0, 3).join('; ')}` : ''}
+${this.getAllConcerns(validation).length > 0 ? 
+  `- Data quality issues: ${this.getAllConcerns(validation).slice(0, 3).join('; ')}` : ''}
 ${risk.hazards[0]?.inadequateControls.length > 0 ? 
   `- Inadequate controls identified: ${risk.hazards[0].inadequateControls.length} gaps requiring correction` : ''}
 
