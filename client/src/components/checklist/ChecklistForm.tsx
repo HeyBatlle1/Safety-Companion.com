@@ -415,7 +415,12 @@ const ChecklistForm = () => {
             // Use requestAnimationFrame for smooth state update
             requestAnimationFrame(() => {
               if (currentRunId === runIdRef.current) {
-                setAiResponse(analysisResult);
+                // Check if we received the new structured FinalJHAReport format
+                const formattedResult = (analysisResult && typeof analysisResult === 'object' && analysisResult.metadata)
+                  ? ReportFormatter.formatStructuredJHAReport(analysisResult)
+                  : analysisResult;
+                
+                setAiResponse(formattedResult);
                 setCurrentAnalysisId(result.analysisId || null); // Store analysisId for agent output viewing
                 setProcessingStatus('Analysis complete!');
                 showToast('Predictive JHA analysis with agent pipeline completed!', 'success');

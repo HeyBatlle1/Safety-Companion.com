@@ -8,6 +8,55 @@ interface SafetyAnalysisReport {
   summary: string;
 }
 
+interface FinalJHAReport {
+  metadata: {
+    reportId: string;
+    generatedAt: Date;
+    projectName: string;
+    location: string;
+    workType: string;
+    supervisor: string;
+  };
+  executiveSummary: {
+    decision: any;
+    overallRiskLevel: string;
+    topThreats: string[];
+    criticalActions: string[];
+    incidentProbability: number;
+  };
+  dataQuality: {
+    score: number;
+    rating: string;
+    missingCritical: string[];
+    concerns: any[];
+  };
+  riskAssessment: {
+    hazards: any[];
+    industryContext: string;
+    oshaStatistics: any;
+  };
+  incidentPrediction: {
+    scenario: string;
+    probability: number;
+    timeframe: string;
+    causalChain: any[];
+    leadingIndicators: any;
+  };
+  weatherAnalysis: any;
+  complianceGaps: any[];
+  emergencyReadiness: any;
+  actionItems: any[];
+  recommendedInterventions: {
+    preventive: string[];
+    mitigative: string[];
+  };
+  approvals: {
+    requiredSignatures: string[];
+    competentPersonReview: boolean;
+    managementReview: boolean;
+  };
+}
+
 interface MultiModalAnalysisResult {
   overallRiskScore: number;
   blueprintAnalysis: {
@@ -338,5 +387,234 @@ This is an automated report. Please do not reply to this email.`
         insurance_compatible: true
       }
     };
+  }
+
+  static formatStructuredJHAReport(report: FinalJHAReport): string {
+    const timestamp = new Date(report.metadata.generatedAt).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    const decisionIcon = report.executiveSummary.decision.decision === 'GO' ? '✅' :
+                        report.executiveSummary.decision.decision === 'GO_WITH_CONDITIONS' ? '⚠️' : '🛑';
+
+    return `# Predictive Job Hazard Analysis Report
+
+**Project:** ${report.metadata.projectName}  
+**Location:** ${report.metadata.location}  
+**Work Type:** ${report.metadata.workType}  
+**Supervisor:** ${report.metadata.supervisor}  
+**Date:** ${timestamp}  
+**Report ID:** ${report.metadata.reportId}
+
+---
+
+## Executive Decision: ${decisionIcon} ${report.executiveSummary.decision.decision}
+
+**Overall Risk Level:** ${report.executiveSummary.overallRiskLevel}  
+**Incident Probability (Next 4 Hours):** ${(report.executiveSummary.incidentProbability * 100).toFixed(1)}%
+
+${report.executiveSummary.decision.reasons.length > 0 ? `
+### Decision Reasons:
+${report.executiveSummary.decision.reasons.map((r: string) => `- ${r}`).join('\n')}
+` : ''}
+
+${report.executiveSummary.decision.conditions.length > 0 ? `
+### Required Conditions:
+${report.executiveSummary.decision.conditions.map((c: string) => `- ✓ ${c}`).join('\n')}
+` : ''}
+
+### Top Threats Identified:
+${report.executiveSummary.topThreats.map((threat: string) => `- ${threat}`).join('\n')}
+
+### Critical Actions Required:
+${report.executiveSummary.criticalActions.length > 0 ?
+  report.executiveSummary.criticalActions.map((action: string) => `- **${action}**`).join('\n') :
+  '*No critical actions required.*'}
+
+---
+
+## Data Quality Assessment
+
+**Quality Score:** ${report.dataQuality.score}/10  
+**Rating:** ${report.dataQuality.rating}
+
+${report.dataQuality.missingCritical.length > 0 ? `
+### Missing Critical Information:
+${report.dataQuality.missingCritical.map((item: string) => `- ⚠️ ${item}`).join('\n')}
+` : ''}
+
+${report.dataQuality.concerns.length > 0 ? `
+### Data Quality Concerns:
+${report.dataQuality.concerns.slice(0, 5).map((concern: any) => 
+  `- **[${concern.severity}]** ${concern.concern}`
+).join('\n')}
+` : ''}
+
+---
+
+## Risk Assessment
+
+**Industry Context:** ${report.riskAssessment.industryContext}
+
+${report.riskAssessment.oshaStatistics ? `
+### OSHA Statistics (BLS 2023):
+- **Industry:** ${report.riskAssessment.oshaStatistics.industryName}
+- **NAICS Code:** ${report.riskAssessment.oshaStatistics.naicsCode}
+- **Injury Rate:** ${report.riskAssessment.oshaStatistics.injuryRate} per 100 workers
+` : ''}
+
+### Identified Hazards:
+${report.riskAssessment.hazards.slice(0, 5).map((hazard: any, i: number) => `
+#### ${i + 1}. ${hazard.name} (Risk Score: ${hazard.riskScore}/100)
+
+**Probability:** ${(hazard.probability * 100).toFixed(1)}%  
+**Consequence:** ${hazard.consequence}  
+**Category:** ${hazard.category || 'General'}
+
+${hazard.oshaContext ? `**OSHA Context:** ${hazard.oshaContext}` : ''}
+
+${hazard.inadequateControls && hazard.inadequateControls.length > 0 ? `
+**Inadequate Controls:**
+${hazard.inadequateControls.map((ctrl: string) => `- ${ctrl}`).join('\n')}
+` : ''}
+
+${hazard.recommendedControls && hazard.recommendedControls.length > 0 ? `
+**Recommended Controls:**
+${hazard.recommendedControls.map((ctrl: string) => `- ${ctrl}`).join('\n')}
+` : ''}
+`).join('\n')}
+
+---
+
+## Incident Prediction (Swiss Cheese Model)
+
+**Predicted Scenario:** ${report.incidentPrediction.scenario}  
+**Timeframe:** ${report.incidentPrediction.timeframe}  
+**Probability:** ${(report.incidentPrediction.probability * 100).toFixed(1)}%
+
+### Causal Chain Analysis:
+${report.incidentPrediction.causalChain.map((stage: any, i: number) => `
+**${i + 1}. ${stage.stage}**  
+${stage.description}
+${stage.evidence ? `\n*Evidence:* ${stage.evidence}` : ''}
+${stage.intervention ? `\n*Intervention:* ${stage.intervention}` : ''}
+`).join('\n')}
+
+${report.incidentPrediction.leadingIndicators ? `
+### Leading Indicators Present:
+${Object.entries(report.incidentPrediction.leadingIndicators).map(([category, indicators]: [string, any]) => `
+**${category}:**
+${Array.isArray(indicators) ? indicators.map((ind: string) => `- ${ind}`).join('\n') : indicators}
+`).join('\n')}
+` : ''}
+
+---
+
+## Weather Impact Analysis
+
+${report.weatherAnalysis ? `
+**Status:** ${report.weatherAnalysis.status}  
+**Impact:** ${report.weatherAnalysis.impact}
+
+${report.weatherAnalysis.risks && report.weatherAnalysis.risks.length > 0 ? `
+### Weather Risks:
+${report.weatherAnalysis.risks.map((risk: string) => `- ${risk}`).join('\n')}
+` : ''}
+
+${report.weatherAnalysis.recommendations && report.weatherAnalysis.recommendations.length > 0 ? `
+### Recommendations:
+${report.weatherAnalysis.recommendations.map((rec: string) => `- ${rec}`).join('\n')}
+` : ''}
+` : '*Weather analysis unavailable.*'}
+
+---
+
+## Compliance Gaps
+
+${report.complianceGaps.length > 0 ? 
+  report.complianceGaps.map((gap: any) => `
+### ${gap.standard || 'Compliance Issue'}
+**Severity:** ${gap.severity}  
+**Gap:** ${gap.gap}  
+${gap.correctiveAction ? `**Corrective Action:** ${gap.correctiveAction}` : ''}
+`).join('\n') : 
+  '*No compliance gaps identified.*'}
+
+---
+
+## Emergency Readiness Assessment
+
+${report.emergencyReadiness ? `
+**Status:** ${report.emergencyReadiness.status}  
+**Adequacy:** ${report.emergencyReadiness.adequacy}
+
+${report.emergencyReadiness.gaps && report.emergencyReadiness.gaps.length > 0 ? `
+### Gaps:
+${report.emergencyReadiness.gaps.map((gap: string) => `- ${gap}`).join('\n')}
+` : ''}
+
+${report.emergencyReadiness.requiredEquipment && report.emergencyReadiness.requiredEquipment.length > 0 ? `
+### Required Equipment:
+${report.emergencyReadiness.requiredEquipment.map((eq: string) => `- ${eq}`).join('\n')}
+` : ''}
+` : '*Emergency readiness assessment unavailable.*'}
+
+---
+
+## Action Items
+
+${report.actionItems.length > 0 ?
+  report.actionItems.map((item: any, i: number) => `
+### ${i + 1}. [${item.priority}] ${item.action}
+
+**Timeline:** ${item.timeline}  
+**Responsible Party:** ${item.responsibleParty}
+${item.verification ? `**Verification Method:** ${item.verification}` : ''}
+`).join('\n') :
+  '*No action items required.*'}
+
+---
+
+## Recommended Interventions
+
+### Preventive Measures:
+${report.recommendedInterventions.preventive.length > 0 ?
+  report.recommendedInterventions.preventive.map((measure: string) => `- ${measure}`).join('\n') :
+  '*No preventive measures recommended.*'}
+
+### Mitigative Measures:
+${report.recommendedInterventions.mitigative.length > 0 ?
+  report.recommendedInterventions.mitigative.map((measure: string) => `- ${measure}`).join('\n') :
+  '*No mitigative measures recommended.*'}
+
+---
+
+## Required Approvals & Sign-offs
+
+${report.approvals.requiredSignatures.length > 0 ? `
+### Required Signatures:
+${report.approvals.requiredSignatures.map((sig: string) => `- [ ] ${sig}`).join('\n')}
+` : ''}
+
+- ${report.approvals.competentPersonReview ? '[x]' : '[ ]'} Competent Person Review Required
+- ${report.approvals.managementReview ? '[x]' : '[ ]'} Management Review Required
+
+---
+
+## Report Details
+
+- **Generated by:** Safety Companion AI - Multi-Agent Pipeline
+- **Analysis Type:** Predictive Job Hazard Analysis
+- **Agent Pipeline:** 4-Agent System (Validator → Risk Assessor → Incident Predictor → Report Synthesizer)
+- **Data Sources:** OSHA BLS 2023, Real-time Weather, Site Checklist
+- **Next Review:** ${new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString()}
+
+---
+
+*This predictive analysis combines traditional Job Hazard Analysis with AI-powered incident forecasting using the Swiss Cheese causation model. Review all recommendations with qualified safety personnel before proceeding with work.*`;
   }
 }
