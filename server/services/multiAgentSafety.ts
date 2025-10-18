@@ -1722,15 +1722,52 @@ CRITICAL: Output ONLY valid JSON. Any non-JSON text will cause parsing failure.`
   }
 
   /**
-   * Helper: Generate overall assessment section (LEGACY - kept for backward compatibility)
+   * Helper: Generate overall assessment section (LEGACY - for backward compatibility with markdown reports)
    */
   private generateOverallAssessment(validation: ValidationResult, risk: RiskAssessment, weatherData: any): string {
     const topRisk = risk.hazards[0];
+    const qualityNote = validation.dataQuality === 'LOW' ? 
+      'However, data quality concerns limit analysis confidence. ' : '';
     
-    // Evaluate stop-work triggers
-    if (validation.dataQuality === 'LOW') {
-      stopWorkReasons.push('Insufficient data quality for safe operations');
-      decision = 'NO-GO';
+    const weatherNote = weatherData?.windSpeed && weatherData.windSpeed > 15 ? 
+      `Current wind conditions (${weatherData.windSpeed} mph) present significant operational concerns. ` : '';
+    
+    return `This JHA addresses key aspects of ${risk.hazards[0]?.name || 'the construction project'}. ${qualityNote}${weatherNote}The analysis identifies ${risk.hazards.length} distinct hazards requiring attention, with ${risk.hazards.filter(h => h.riskScore > 70).length} rated as high-risk (>70/100). ${validation.dataQuality === 'HIGH' ? 'Comprehensive data quality enables high-confidence predictions.' : 'Additional data would improve prediction accuracy.'}`;
+  }
+
+  /**
+   * Helper: Generate compliance status text (LEGACY - for backward compatibility with markdown reports)
+   */
+  private generateComplianceStatus(validation: ValidationResult, risk: RiskAssessment, checklistData: any): string {
+    const standards = [
+      'OSHA 1926.502 (Fall Protection)',
+      'OSHA 1926.550 (Cranes and Derricks)',
+      'OSHA 1926.95 (PPE Requirements)',
+      'ANSI/IWCA I-14.1 (Swing Stage Safety)',
+      'OSHA 1926.250 (Material Storage)'
+    ];
+    
+    return `**Referenced Standards:**
+${standards.map(s => `- ${s}: Compliance requires verification of documented procedures`).join('\n')}
+
+**Compliance Concerns:**
+${validation.missingCritical.length > 0 ? 
+  `- Missing critical documentation: ${validation.missingCritical.join(', ')}` : 
+  '- No critical documentation gaps identified'}
+${this.getAllConcerns(validation).length > 0 ? 
+  `- Data quality issues: ${this.getAllConcerns(validation).slice(0, 3).join('; ')}` : ''}
+${risk.hazards[0]?.inadequateControls.length > 0 ? 
+  `- Inadequate controls identified: ${risk.hazards[0].inadequateControls.length} gaps requiring correction` : ''}
+
+**Overall Compliance Status:** ${validation.dataQuality === 'HIGH' && validation.missingCritical.length === 0 ? 
+  'LIKELY COMPLIANT - Pending verification' : 
+  'GAPS IDENTIFIED - Corrective action required before full compliance'}`;
+  }
+
+  /**
+   * Helper: Get emergency requirements for incident types
+   */
+  private getEmergencyRequirements(incidentName: string): string {
     }
     
     if (weatherData?.windSpeed) {
