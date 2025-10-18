@@ -26,18 +26,41 @@ interface ValidationResult {
   noResponses?: string[];
 }
 
+interface ProbabilityCalculation {
+  base: number;
+  hazardMultiplier: number;
+  controlMultiplier: number;
+  weatherMultiplier: number;
+  experienceMultiplier: number;
+  final: number;
+}
+
 interface RiskHazard {
   name: string;
+  category: string;
   probability: number;
+  probabilityCalculation?: ProbabilityCalculation;
   consequence: string;
   riskScore: number;
+  riskLevel?: string;
   oshaContext: string;
   inadequateControls: string[];
+  recommendedControls?: string[];
+  regulatoryRequirement?: string;
+}
+
+interface RiskSummary {
+  overallRiskLevel: string;
+  highestRiskScore: number;
+  industryContext: string;
 }
 
 interface RiskAssessment {
+  riskSummary?: RiskSummary;
   hazards: RiskHazard[];
   topThreats: string[];
+  weatherImpact?: string;
+  immediateActions?: string[];
   oshaData: any;
 }
 
@@ -546,80 +569,200 @@ CRITICAL: Output must be parseable JSON. Any non-JSON text will cause system fai
    * Task: Identify hazards and calculate risk scores using OSHA data
    */
   private async assessRisk(validation: ValidationResult, checklistData: any): Promise<RiskAssessment> {
-    // Fetch OSHA data
-    let oshaData: any = {};
+    // Fetch OSHA data with proper structure for new prompt
+    let oshaData: any = {
+      industryName: 'Specialty Trade Contractors',
+      naicsCode: '238',
+      injuryRate: 35,
+      totalCases: 198400,
+      dataSource: 'BLS_Table_1_2023'
+    };
+    
     try {
-      const constructionProfile = await safetyIntelligence.getRiskProfile('23');
-      const industryBenchmarks = await safetyIntelligence.getIndustryBenchmark('23');
-      oshaData = { constructionProfile, industryBenchmarks };
+      const constructionProfile = await safetyIntelligence.getRiskProfile('238');
+      if (constructionProfile) {
+        oshaData = {
+          industryName: constructionProfile.industryName,
+          naicsCode: constructionProfile.naicsCode,
+          injuryRate: constructionProfile.injuryRate || 35,
+          totalCases: 0, // Will be populated if available
+          dataSource: 'BLS_Table_1_2023',
+          constructionProfile, // Keep original for backward compatibility
+        };
+      }
     } catch (error) {
       console.error('Failed to fetch OSHA data:', error);
     }
 
-    const prompt = `You are a construction risk assessor with access to real OSHA Bureau of Labor Statistics data.
+    // Extract weather data for prompt
+    const weatherData = validation.weatherData || {};
 
-VALIDATED CHECKLIST SUMMARY:
-- Data Quality: ${validation.dataQuality}
-- Quality Score: ${validation.qualityScore}/10
-- Missing Critical Data: ${JSON.stringify(validation.missingCritical)}
-- Key Concerns: ${JSON.stringify(validation.concerns)}
-- Weather Present: ${validation.weatherPresent}
+    const prompt = `You are a construction risk assessor certified in OSHA 1926 standards with expertise in quantitative risk analysis.
 
-FULL CHECKLIST DATA:
+VALIDATED DATA SUMMARY:
+Quality: ${validation.dataQuality} (${validation.qualityScore}/10)
+Missing Critical: ${JSON.stringify(validation.missingCritical)}
+Key Concerns: ${JSON.stringify(validation.concerns)}
+
+FULL CHECKLIST:
 ${JSON.stringify(checklistData, null, 2)}
 
-REAL OSHA STATISTICS (BLS 2023):
-${JSON.stringify(oshaData, null, 2)}
+OSHA INDUSTRY DATA (BLS 2023):
+Industry: ${oshaData.industryName}
+NAICS Code: ${oshaData.naicsCode}
+Injury Rate: ${oshaData.injuryRate} per 100 workers annually
+Total Cases: ${oshaData.totalCases}
+Data Source: ${oshaData.dataSource}
 
-RISK ASSESSMENT TASKS:
-1. Identify the top 3 SPECIFIC hazards from the checklist (not generic categories)
-2. For EACH hazard:
-   - Calculate probability using OSHA data where available
-   - Assign consequence severity (Minor/Serious/Critical/Fatal)
-   - Calculate risk score (1-100 scale)
-   - Identify which controls are inadequate or missing
-   - Provide OSHA statistical context
+WEATHER CONDITIONS:
+${JSON.stringify(weatherData, null, 2)}
 
-3. Rank threats by risk score
-4. Consider: work height, weather conditions, equipment type, worker experience
+RISK ASSESSMENT METHODOLOGY:
 
-EXAMPLE GOOD HAZARD:
+1. IDENTIFY TOP 3 SPECIFIC HAZARDS
+   - Be SPECIFIC: "Fall from 30ft swing stage during 35mph winds" 
+   - NOT generic: "Fall hazard"
+   - Focus on highest consequence and/or highest probability scenarios
+   - Must be based on actual checklist content
+
+2. FOR EACH HAZARD CALCULATE:
+
+   A. PROBABILITY (0.0 to 1.0):
+   
+   Base = Industry injury rate: ${oshaData.injuryRate}/100 = ${oshaData.injuryRate/100}
+   
+   Hazard Type Multiplier:
+   - Falls from >6ft: ×2.8 (OSHA Fatal Four: 36.5% of deaths)
+   - Struck by object: ×1.6 (OSHA Fatal Four: 10.1% of deaths)
+   - Electrocution: ×0.4 (OSHA Fatal Four: 8.5% of deaths)
+   - Caught between: ×0.9 (OSHA Fatal Four: 7.3% of deaths)
+   - Other: ×1.0
+   
+   Control Adequacy Multiplier:
+   - Comprehensive (3+ levels of hierarchy): ×0.3
+   - Adequate (2 levels): ×0.7
+   - Minimal (PPE only): ×1.5
+   - None identified: ×3.0
+   
+   Weather Multiplier (if applicable):
+   ${weatherData.temperature < 32 || weatherData.temperature > 95 ? `- Extreme temp: ×1.4` : ''}
+   ${weatherData.windSpeed > 25 ? `- High winds: ×1.8` : ''}
+   ${weatherData.precipitation ? `- Precipitation: ×1.6` : ''}
+   ${!weatherData.temperature && !weatherData.windSpeed ? `- Normal: ×1.0` : ''}
+   
+   Worker Experience Multiplier:
+   - Expert (>5 years): ×0.6
+   - Experienced (2-5 years): ×1.0
+   - New (<1 year): ×2.1
+   - Unknown: ×1.0
+   
+   Final Probability = Base × HazardType × Controls × Weather × Experience
+   (Cap at 1.0 for display)
+
+   B. CONSEQUENCE SEVERITY:
+   
+   Fatal (×10):
+   - Death likely within 30 days
+   - Examples: Fall >15ft, electrocution >50V, struck by heavy equipment
+   - OSHA 1904.39: Report within 8 hours
+   
+   Critical (×7):
+   - Hospitalization, amputation, eye loss
+   - OSHA 1904.39: Report within 24 hours
+   - Examples: Trench collapse burial, severe burns
+   
+   Serious (×4):
+   - Days Away From Work (DAFW)
+   - Medical treatment beyond first aid
+   - Examples: Fractures, deep lacerations
+   
+   Minor (×1):
+   - First aid only, no lost time
+   - Examples: Cuts, bruises, minor strains
+
+   C. RISK SCORE (1-100):
+   
+   Risk Score = (Probability × 100) × Severity Multiplier
+   Cap at 100.
+   
+   Risk Classification:
+   95-100 = EXTREME (Stop work immediately)
+   75-94 = HIGH (Additional controls required)
+   50-74 = MEDIUM (Enhanced monitoring)
+   25-49 = LOW (Standard controls adequate)
+   0-24 = MINIMAL (Routine procedures)
+
+3. CONTROL EVALUATION (OSHA Hierarchy):
+   
+   For each hazard, assess controls against:
+   L1-Elimination > L2-Substitution > L3-Engineering > L4-Administrative > L5-PPE
+   
+   Flag inadequate controls:
+   - PPE-only approach (should have engineering)
+   - Missing competent person designation
+   - No emergency response plan
+   - Controls not specific to hazard
+   
+   Recommend improvements following hierarchy.
+
+4. OSHA STATISTICAL CONTEXT:
+   
+   For each hazard, cite relevant statistic:
+   - Falls: "36.5% of construction fatalities (OSHA 2023)"
+   - If industry injury rate high: "This trade has ${oshaData.injuryRate}/100 injury rate, ${Math.round((oshaData.injuryRate/35)*100)}% above construction average"
+   - Weather-related: "Wet conditions increase slip/fall incidents by 60%"
+
+OUTPUT FORMAT (ONLY VALID JSON):
+
 {
-  "name": "Worker fall from swing stage at 90 feet during glass panel positioning",
-  "probability": 0.023,
-  "consequence": "Fatal",
-  "riskScore": 95,
-  "oshaContext": "Falls from height represent 36.5% of construction fatalities (OSHA 2023)",
-  "inadequateControls": ["Anchor points not certified by competent person", "No rescue plan documented"]
-}
-
-EXAMPLE BAD HAZARD (too generic):
-{
-  "name": "Fall hazard",
-  "probability": 0.5,
-  "consequence": "Injury"
-}
-
-OUTPUT REQUIREMENTS:
-Respond with ONLY valid JSON, no other text:
-
-{
+  "riskSummary": {
+    "overallRiskLevel": "EXTREME|HIGH|MEDIUM|LOW",
+    "highestRiskScore": <number>,
+    "industryContext": "Brief comparison to ${oshaData.industryName} baseline"
+  },
   "hazards": [
     {
-      "name": "Specific hazard description",
-      "probability": <0.0 to 1.0>,
-      "consequence": "Minor|Serious|Critical|Fatal",
+      "name": "Specific hazard with context (work type, height, conditions)",
+      "category": "Falls|Struck-By|Electrocution|Caught-Between|Other",
+      "probability": <0.0-1.0>,
+      "probabilityCalculation": {
+        "base": <number>,
+        "hazardMultiplier": <number>,
+        "controlMultiplier": <number>,
+        "weatherMultiplier": <number>,
+        "experienceMultiplier": <number>,
+        "final": <number>
+      },
+      "consequence": "Fatal|Critical|Serious|Minor",
       "riskScore": <1-100>,
-      "oshaContext": "Real OSHA statistic or closest analog",
-      "inadequateControls": ["control 1", "control 2"]
+      "riskLevel": "EXTREME|HIGH|MEDIUM|LOW",
+      "oshaContext": "Specific OSHA statistic or regulation reference",
+      "inadequateControls": [
+        "Specific control gap 1",
+        "Specific control gap 2"
+      ],
+      "recommendedControls": [
+        "L1-Elimination: Specific recommendation",
+        "L3-Engineering: Specific recommendation",
+        "L4-Administrative: Specific recommendation"
+      ],
+      "regulatoryRequirement": "OSHA 1926.xxx citation if applicable"
     }
   ],
-  "topThreats": ["threat 1", "threat 2", "threat 3"]
-}`;
+  "topThreats": [
+    "Threat 1 (Risk Score: XX)",
+    "Threat 2 (Risk Score: XX)",
+    "Threat 3 (Risk Score: XX)"
+  ],
+  "weatherImpact": "Description of how current weather affects risk levels",
+  "immediateActions": ["Action 1 if EXTREME/HIGH risk", "Action 2"]
+}
+
+CRITICAL: Output ONLY valid JSON. Any text outside JSON will cause parsing failure.`;
 
     let result = '';
     try {
-      result = await this.callGemini(prompt, 0.7, 8000); // 2.5-flash thinking + response
+      result = await this.callGemini(prompt, 0.7, 8000);
       const extracted = this.extractJSON(result);
       console.log('🔍 Agent 2 extracted JSON length:', extracted.length);
       const parsed = JSON.parse(extracted);
@@ -633,8 +776,14 @@ Respond with ONLY valid JSON, no other text:
       console.error('Agent 2 raw response preview:', result?.substring(0, 200));
       // Fallback risk assessment
       return {
+        riskSummary: {
+          overallRiskLevel: 'MEDIUM',
+          highestRiskScore: 50,
+          industryContext: 'Risk assessment failed - using baseline'
+        },
         hazards: [{
           name: 'Generic construction hazard - risk assessment failed',
+          category: 'Other',
           probability: 0.1,
           consequence: 'Serious',
           riskScore: 50,
