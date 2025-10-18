@@ -64,10 +64,14 @@ router.post('/checklist-analysis', async (req, res) => {
 
     console.log(`✅ Predictive incident forecast completed with agent tracking`);
 
-    // Return JSON with analysisId for agent output viewing
+    // Return JSON with structured agent outputs for SafetyAnalysisReport
     res.json({
       success: true,
       analysis: result.report,
+      agent1: result.agent1,
+      agent2: result.agent2,
+      agent3: result.agent3,
+      agent4: result.agent4,
       analysisId: analysisRecord.id,
       metadata: result.metadata,
       weather_integrated: true,

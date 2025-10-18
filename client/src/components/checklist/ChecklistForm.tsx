@@ -12,6 +12,7 @@ import { safetyCompanionAPI, type RiskProfile, type SafetyAnalysis } from '../..
 import { blueprintStorage, type BlueprintUpload } from '../../services/blueprintStorage';
 import { multiModalAnalysis } from '../../services/multiModalAnalysis';
 import { ReportFormatter } from '../../services/reportFormatter';
+import { SafetyAnalysisReport } from '../SafetyAnalysis/SafetyAnalysisReport';
 
 interface ChecklistItem {
   id: string;
@@ -59,6 +60,7 @@ const ChecklistForm = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingStatus, setProcessingStatus] = useState<string>('');
   const [aiResponse, setAiResponse] = useState<string | null>(null);
+  const [agentData, setAgentData] = useState<any | null>(null); // Structured agent outputs
   const [riskProfile, setRiskProfile] = useState<RiskProfile | null>(null);
   const [safetyAnalysis, setSafetyAnalysis] = useState<SafetyAnalysis | null>(null);
   const [currentAnalysisId, setCurrentAnalysisId] = useState<string | null>(null);
@@ -415,12 +417,33 @@ const ChecklistForm = () => {
             // Use requestAnimationFrame for smooth state update
             requestAnimationFrame(() => {
               if (currentRunId === runIdRef.current) {
-                // Check if we received the new structured FinalJHAReport format
-                const formattedResult = (analysisResult && typeof analysisResult === 'object' && analysisResult.metadata)
-                  ? ReportFormatter.formatStructuredJHAReport(analysisResult)
-                  : analysisResult;
+                // Check if we received structured agent outputs
+                if (result.agent1 && result.agent2 && result.agent3 && result.agent4 && result.metadata) {
+                  // Store structured agent data for SafetyAnalysisReport
+                  setAgentData({
+                    agent1: result.agent1,
+                    agent2: result.agent2,
+                    agent3: result.agent3,
+                    agent4: result.agent4,
+                    metadata: {
+                      reportId: result.metadata.reportId || result.analysisId || `JHA-${Date.now()}`,
+                      generatedAt: new Date(),
+                      projectName: result.agent4.metadata?.projectName || 'Safety Analysis',
+                      location: result.site_location || result.agent4.metadata?.location || 'Unknown',
+                      workType: result.agent4.metadata?.workType || 'Construction',
+                      supervisor: result.agent4.metadata?.supervisor || 'Unknown'
+                    }
+                  });
+                  setAiResponse(null); // Clear markdown view when showing structured data
+                } else {
+                  // Fallback to markdown format for legacy or error responses
+                  const formattedResult = (analysisResult && typeof analysisResult === 'object' && analysisResult.metadata)
+                    ? ReportFormatter.formatStructuredJHAReport(analysisResult)
+                    : analysisResult;
+                  setAiResponse(formattedResult);
+                  setAgentData(null);
+                }
                 
-                setAiResponse(formattedResult);
                 setCurrentAnalysisId(result.analysisId || null); // Store analysisId for agent output viewing
                 setProcessingStatus('Analysis complete!');
                 showToast('Predictive JHA analysis with agent pipeline completed!', 'success');
@@ -1094,8 +1117,19 @@ Progress: ${Math.round(calculateProgress())}% complete
           </motion.div>
         )}
 
-        {/* AI Analysis Results */}
-        {aiResponse && (
+        {/* AI Analysis Results - Structured Agent View */}
+        {agentData && (
+          <SafetyAnalysisReport
+            agent1={agentData.agent1}
+            agent2={agentData.agent2}
+            agent3={agentData.agent3}
+            agent4={agentData.agent4}
+            metadata={agentData.metadata}
+          />
+        )}
+
+        {/* AI Analysis Results - Legacy Markdown View */}
+        {!agentData && aiResponse && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}

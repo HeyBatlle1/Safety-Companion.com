@@ -1,0 +1,128 @@
+// components/SafetyAnalysis/SafetyAnalysisReport.tsx
+
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ExecutiveSummary } from './ExecutiveSummary';
+import { Agent1Card } from './Agent1Card';
+import { Agent2Card } from './Agent2Card';
+import { Agent3Card } from './Agent3Card';
+import { ActionBar } from './ActionBar';
+import type {
+  Agent1Output,
+  Agent2Output,
+  Agent3Output,
+  Agent4Output,
+  ReportMetadata
+} from '@/types/safety-analysis';
+
+interface SafetyAnalysisReportProps {
+  agent1: Agent1Output;
+  agent2: Agent2Output;
+  agent3: Agent3Output;
+  agent4: Agent4Output;
+  metadata: ReportMetadata;
+}
+
+export const SafetyAnalysisReport: React.FC<SafetyAnalysisReportProps> = ({
+  agent1,
+  agent2,
+  agent3,
+  agent4,
+  metadata
+}) => {
+  const [expandedAgent, setExpandedAgent] = useState<string | null>(null);
+
+  const toggleAgent = (agentId: string) => {
+    setExpandedAgent(expandedAgent === agentId ? null : agentId);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 md:p-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="max-w-6xl mx-auto space-y-6"
+      >
+        {/* Executive Summary - Always Visible */}
+        <ExecutiveSummary 
+          decision={agent4.executiveSummary.decision}
+          riskLevel={agent4.executiveSummary.overallRiskLevel}
+          riskScore={agent2.hazards[0]?.riskScore || 0}
+          probability={agent4.executiveSummary.incidentProbability}
+          dataQuality={agent1.qualityScore}
+          topThreats={agent4.executiveSummary.topThreats}
+          criticalActions={agent4.executiveSummary.criticalActions}
+          metadata={metadata}
+        />
+
+        {/* Agent Details Section */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+              <span className="text-cyan-400">✨</span>
+              AI Agent Analysis
+            </h2>
+            <span className="text-sm text-slate-400">
+              Tap any card to view detailed analysis
+            </span>
+          </div>
+
+          {/* Agent Cards */}
+          <Agent1Card
+            data={agent1}
+            isExpanded={expandedAgent === 'agent1'}
+            onToggle={() => toggleAgent('agent1')}
+          />
+
+          <Agent2Card
+            data={agent2}
+            isExpanded={expandedAgent === 'agent2'}
+            onToggle={() => toggleAgent('agent2')}
+          />
+
+          <Agent3Card
+            data={agent3}
+            isExpanded={expandedAgent === 'agent3'}
+            onToggle={() => toggleAgent('agent3')}
+          />
+        </div>
+
+        {/* Action Bar */}
+        <ActionBar
+          reportId={metadata.reportId}
+          agentData={{ agent1, agent2, agent3, agent4 }}
+        />
+      </motion.div>
+    </div>
+  );
+};
+```
+
+---
+
+## **Tell Opus:**
+```
+Here's the SafetyAnalysisReport container - the final piece!
+
+Create: components/SafetyAnalysis/SafetyAnalysisReport.tsx
+
+This component:
+- Orchestrates all 4 agent cards
+- Manages expanded state (only one card open at a time)
+- Passes correct data to each component
+- Includes the ActionBar at bottom
+
+After implementing BOTH ActionBar + SafetyAnalysisReport:
+
+1. Update components/SafetyAnalysis/index.ts to export SafetyAnalysisReport
+2. Wire this to your existing analysis endpoint
+3. Test with real data from a submitted checklist
+4. Verify:
+   - Executive Summary displays
+   - All 4 agent cards appear
+   - Expand/collapse works (one at a time)
+   - Action buttons work
+   - Mobile responsive
+
+Then show me screenshots of the complete interface!

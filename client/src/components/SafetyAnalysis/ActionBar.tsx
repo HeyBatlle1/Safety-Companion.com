@@ -1,0 +1,274 @@
+// components/SafetyAnalysis/ActionBar.tsx
+
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { 
+  Share2, 
+  Mail, 
+  Save, 
+  Download, 
+  Code, 
+  Printer,
+  Copy,
+  Check
+} from 'lucide-react';
+import type { Agent1Output, Agent2Output, Agent3Output, Agent4Output } from '@/types/safety-analysis';
+
+interface ActionBarProps {
+  reportId: string;
+  agentData: {
+    agent1: Agent1Output;
+    agent2: Agent2Output;
+    agent3: Agent3Output;
+    agent4: Agent4Output;
+  };
+}
+
+export const ActionBar: React.FC<ActionBarProps> = ({ reportId, agentData }) => {
+  const [copied, setCopied] = useState(false);
+  const [showJsonModal, setShowJsonModal] = useState(false);
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Safety Analysis Report',
+          text: 'View this safety analysis report',
+          url: window.location.href
+        });
+      } catch (err) {
+        console.error('Share failed:', err);
+      }
+    } else {
+      // Fallback: Copy link
+      navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleEmail = () => {
+    const subject = encodeURIComponent(`Safety Analysis Report - ${reportId}`);
+    const body = encodeURIComponent(
+      `View the full safety analysis report here: ${window.location.href}`
+    );
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  };
+
+  const handleSave = async () => {
+    // Save to database via API
+    try {
+      const response = await fetch('/api/reports/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(agentData)
+      });
+      
+      if (response.ok) {
+        alert('Report saved successfully!');
+      }
+    } catch (error) {
+      console.error('Save failed:', error);
+    }
+  };
+
+  const handleDownloadPDF = () => {
+    window.print(); // This will use the print-optimized CSS
+  };
+
+  const handleViewJSON = () => {
+    setShowJsonModal(true);
+  };
+
+  return (
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="sticky bottom-4 bg-slate-800/90 backdrop-blur-xl border border-slate-700/50 rounded-xl shadow-2xl p-4"
+      >
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <ActionButton
+            icon={<Share2 className="w-4 h-4" />}
+            label="Share"
+            onClick={handleShare}
+            color="cyan"
+          />
+
+          <ActionButton
+            icon={<Mail className="w-4 h-4" />}
+            label="Email"
+            onClick={handleEmail}
+            color="green"
+          />
+
+          <ActionButton
+            icon={<Save className="w-4 h-4" />}
+            label="Save"
+            onClick={handleSave}
+            color="blue"
+          />
+
+          <ActionButton
+            icon={<Printer className="w-4 h-4" />}
+            label="Print"
+            onClick={handleDownloadPDF}
+            color="purple"
+          />
+
+          <ActionButton
+            icon={<Code className="w-4 h-4" />}
+            label="View JSON"
+            onClick={handleViewJSON}
+            color="orange"
+          />
+
+          <ActionButton
+            icon={copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+            label={copied ? "Copied!" : "Copy Link"}
+            onClick={handleShare}
+            color="yellow"
+          />
+        </div>
+      </motion.div>
+
+      {/* JSON Modal */}
+      {showJsonModal && (
+        <JsonModal
+          data={agentData}
+          onClose={() => setShowJsonModal(false)}
+        />
+      )}
+    </>
+  );
+};
+
+// Action Button Component
+const ActionButton: React.FC<{
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  color: string;
+}> = ({ icon, label, onClick, color }) => {
+  const colorMap: Record<string, string> = {
+    cyan: 'hover:bg-cyan-500/10 hover:border-cyan-500/30 hover:text-cyan-400',
+    green: 'hover:bg-green-500/10 hover:border-green-500/30 hover:text-green-400',
+    blue: 'hover:bg-blue-500/10 hover:border-blue-500/30 hover:text-blue-400',
+    purple: 'hover:bg-purple-500/10 hover:border-purple-500/30 hover:text-purple-400',
+    orange: 'hover:bg-orange-500/10 hover:border-orange-500/30 hover:text-orange-400',
+    yellow: 'hover:bg-yellow-500/10 hover:border-yellow-500/30 hover:text-yellow-400'
+  };
+
+  return (
+    <motion.button
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      onClick={onClick}
+      className={`flex items-center gap-2 px-4 py-2 bg-slate-700/50 border border-slate-600/30 rounded-lg text-slate-300 text-sm font-medium transition-all ${colorMap[color]}`}
+    >
+      {icon}
+      <span className="hidden sm:inline">{label}</span>
+    </motion.button>
+  );
+};
+
+// JSON Modal Component
+const JsonModal: React.FC<{
+  data: any;
+  onClose: () => void;
+}> = ({ data, onClose }) => {
+  const [activeAgent, setActiveAgent] = useState<'agent1' | 'agent2' | 'agent3' | 'agent4'>('agent1');
+  const [copied, setCopied] = useState(false);
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(JSON.stringify(data[activeAgent], null, 2));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const downloadJSON = () => {
+    const blob = new Blob([JSON.stringify(data[activeAgent], null, 2)], {
+      type: 'application/json'
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${activeAgent}-output.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        onClick={(e) => e.stopPropagation()}
+        className="bg-slate-800 border border-slate-700 rounded-xl max-w-4xl w-full max-h-[80vh] flex flex-col overflow-hidden shadow-2xl"
+      >
+        {/* Header */}
+        <div className="p-6 border-b border-slate-700">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-bold text-white">Raw Agent Data</h3>
+            <button
+              onClick={onClose}
+              className="text-slate-400 hover:text-white transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Agent Selector */}
+          <div className="flex gap-2">
+            {(['agent1', 'agent2', 'agent3', 'agent4'] as const).map((agent) => (
+              <button
+                key={agent}
+                onClick={() => setActiveAgent(agent)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  activeAgent === agent
+                    ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                    : 'bg-slate-700/30 text-slate-400 hover:text-white'
+                }`}
+              >
+                {agent.replace('agent', 'Agent ')}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* JSON Content */}
+        <div className="flex-1 overflow-auto p-6 font-mono text-sm">
+          <pre className="text-slate-300">
+            {JSON.stringify(data[activeAgent], null, 2)}
+          </pre>
+        </div>
+
+        {/* Actions */}
+        <div className="p-4 border-t border-slate-700 flex gap-3">
+          <button
+            onClick={copyToClipboard}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded-lg hover:bg-cyan-500/20 transition-colors"
+          >
+            {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+            {copied ? 'Copied!' : 'Copy JSON'}
+          </button>
+          <button
+            onClick={downloadJSON}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/30 text-green-400 rounded-lg hover:bg-green-500/20 transition-colors"
+          >
+            <Download className="w-4 h-4" />
+            Download JSON
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};

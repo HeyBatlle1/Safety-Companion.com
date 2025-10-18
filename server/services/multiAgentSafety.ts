@@ -264,7 +264,11 @@ interface PipelineMetadata {
 }
 
 interface AnalysisResult {
-  report: string;
+  report: FinalJHAReport;
+  agent1: ValidationResult;
+  agent2: RiskAssessment;
+  agent3: IncidentPrediction;
+  agent4: FinalJHAReport;
   metadata: PipelineMetadata;
 }
 
@@ -507,6 +511,10 @@ export class MultiAgentSafetyAnalysis {
 
       return {
         report,
+        agent1: validation,
+        agent2: risk,
+        agent3: prediction,
+        agent4: report,
         metadata
       };
 
