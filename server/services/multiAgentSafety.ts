@@ -70,16 +70,61 @@ interface CausalStage {
   evidence?: string;
   whyItFails?: string;
   why?: string;
+  errorType?: string;
+  fatiqueLevel?: string;
+  timeToRecognize?: string;
   timeToIntervene?: string;
+  physicalMechanism?: string;
+  expectedBarrier?: string;
+  failureMode?: string;
+  energyType?: string;
+  energyMagnitude?: string;
+  bodyPart?: string;
   severity?: string;
+}
+
+interface LeadingIndicator {
+  type: string;
+  indicator: string;
+  whereToLook: string;
+  whatToSee: string;
+  threshold: string;
+  actionRequired: string;
+}
+
+interface Intervention {
+  tier?: string;
+  action: string;
+  breaksChainAt?: string;
+  feasibility?: string;
+  timeToImplement?: string;
+  cost?: string;
+  effectivenessReduction?: string;
+  reducesHarm?: string;
+}
+
+interface InterventionsSet {
+  preventive: Intervention[];
+  mitigative: Intervention[];
+  recommended: string;
+}
+
+interface OshaPatternMatch {
+  similarIncidents: number;
+  matchConfidence: string;
+  citationsExpected: string[];
 }
 
 interface IncidentPrediction {
   incidentName: string;
+  timeframe?: string;
+  probability?: number;
   confidence: 'HIGH' | 'MEDIUM' | 'LOW';
   causalChain: CausalStage[];
-  singleBestIntervention: string;
-  leadingIndicators: string[];
+  singleBestIntervention?: string; // Backward compatibility
+  leadingIndicators: LeadingIndicator[] | string[]; // Support both formats
+  interventions?: InterventionsSet;
+  oshaPatternMatch?: OshaPatternMatch;
 }
 
 interface PipelineMetadata {
@@ -299,7 +344,7 @@ export class MultiAgentSafetyAnalysis {
       // AGENT 3: Incident Prediction (Temperature 1.0 - creative reasoning)
       console.log('🔮 Agent 3: Predicting incident scenarios...');
       const agent3Start = Date.now();
-      const prediction = await this.predictIncident(risk, checklistData);
+      const prediction = await this.predictIncident(risk, checklistData, validation);
       agentTimings.agent3_incident_predictor = {
         model: 'gemini-2.5-flash',
         temperature: 1.0,
@@ -797,85 +842,338 @@ CRITICAL: Output ONLY valid JSON. Any text outside JSON will cause parsing failu
   }
 
   /**
+   * Helper: Calculate fatigue risk level
+   */
+  private calculateFatigue(hoursWorked: any, consecutiveDays: any): string {
+    const hours = parseFloat(hoursWorked) || 0;
+    const days = parseFloat(consecutiveDays) || 0;
+    
+    if (hours > 12 || days > 14) return 'CRITICAL';
+    if (hours > 10 || days > 10) return 'HIGH';
+    if (hours > 8 || days > 5) return 'MODERATE';
+    return 'NORMAL';
+  }
+
+  /**
+   * Helper: Determine if current time is high-risk period
+   */
+  private isHighRiskTime(): boolean {
+    const now = new Date();
+    const hour = now.getHours();
+    const minute = now.getMinutes();
+    const dayOfWeek = now.getDay();
+    
+    // High-risk periods: 10:00-11:30 AM, 2:00-3:30 PM, last hour of shift, Friday afternoons
+    if ((hour === 10 && minute >= 0) || (hour === 11 && minute <= 30)) return true;
+    if ((hour === 14 && minute >= 0) || (hour === 15 && minute <= 30)) return true;
+    if (dayOfWeek === 5 && hour >= 14) return true; // Friday afternoon
+    if (hour >= 16 && hour <= 17) return true; // Last hour of typical shift
+    
+    return false;
+  }
+
+  /**
    * AGENT 3: Incident Predictor
    * Temperature: 1.0 (maximum creative reasoning)
-   * Task: Build causal chain for most likely incident
+   * Task: Build causal chain using Swiss Cheese Model
    */
-  private async predictIncident(risk: RiskAssessment, checklistData: any): Promise<IncidentPrediction> {
-    const topHazard = risk.hazards[0]; // Highest risk score
+  private async predictIncident(risk: RiskAssessment, checklistData: any, validation?: ValidationResult): Promise<IncidentPrediction> {
+    const topHazard = risk.hazards[0];
+    const oshaData = risk.oshaData || {};
+    const weatherData = validation?.weatherData || {};
 
-    const prompt = `You are an incident prediction specialist using the Swiss Cheese Model of accident causation. Your job is to predict EXACTLY how the top-risk incident will unfold if nothing changes.
+    // Extract checklist fields
+    const getChecklistField = (field: string) => {
+      return checklistData[field] || checklistData.sections?.find((s: any) => 
+        s.responses?.some((r: any) => r.question?.toLowerCase().includes(field.toLowerCase()))
+      )?.responses?.find((r: any) => r.question?.toLowerCase().includes(field.toLowerCase()))?.response || 'Not specified';
+    };
 
-TOP RISK HAZARD:
+    const prompt = `You are an incident prediction specialist using the Swiss Cheese Model and Bow-Tie Analysis. Your expertise is in identifying latent organizational failures that combine with active errors to create incidents.
+
+CONTEXT - TOP IDENTIFIED RISK:
 ${JSON.stringify(topHazard, null, 2)}
 
-CHECKLIST EVIDENCE:
+FULL CHECKLIST DATA:
 ${JSON.stringify(checklistData, null, 2)}
 
+TEMPORAL CONTEXT:
+Current Time: ${new Date().toLocaleString()}
+High-Risk Periods: 10:00-11:30 AM, 2:00-3:30 PM, last hour of shift, Friday afternoons
+Weather Forecast (next 4 hours): ${weatherData.forecast || 'Not available'}
+
+INDUSTRY INCIDENT HISTORY (OSHA):
+${oshaData.industryName || 'Construction'} (NAICS ${oshaData.naicsCode || '23'})
+Common Incident Types: Falls (36.5%), Struck-By (10.1%), Electrocution (8.5%), Caught-Between (7.3%)
+
 YOUR TASK:
-Build a detailed causal chain showing the SPECIFIC sequence of events that leads to this incident TODAY.
+Predict the SPECIFIC causal chain that leads to this incident in the NEXT 4 HOURS if conditions don't change.
 
-SWISS CHEESE MODEL STAGES:
-1. **Initiating Event** - What specific trigger starts the sequence? (e.g., "Crane begins lift of 46-inch glass panel during wind gust cycle")
-2. **First Defense Failure** - Which control SHOULD stop this but doesn't work? WHY does it fail? (e.g., "Wind monitoring inadequate - no real-time anemometer")
-3. **Human Performance Factor** - What decision accelerates the failure? WHY will the worker make this choice? (e.g., "Foreman authorizes lift during borderline winds due to schedule pressure")
-4. **Point of No Return** - When does the incident become inevitable? How much time to intervene? (e.g., "Glass panel catches wind at 60 feet - load becomes uncontrollable - 15 seconds to impact")
-5. **Injury Mechanism** - EXACTLY how does injury occur? What severity? (e.g., "Glass panel strikes swing stage - worker falls 90 feet - Fatal")
+PREDICTION FRAMEWORK:
 
-REQUIREMENTS:
-- Use ACTUAL details from the checklist (specific equipment, heights, weather, procedures)
-- Quote specific checklist responses as evidence
-- Be SPECIFIC, not generic (not "worker falls" but "worker on swing stage at 6th floor struck by swinging glass panel")
-- Identify 3-5 observable leading indicators supervisors could see RIGHT NOW
-- Provide ONE specific intervention that breaks the chain at its weakest point
+1. ORGANIZATIONAL INFLUENCES (Latent Conditions):
+   - Schedule Pressure Analysis:
+     ${getChecklistField('deadline')}
+     ${getChecklistField('scheduleStatus')}
+     Pressure Level: ${getChecklistField('overtime') !== 'Not specified' ? 'HIGH (overtime)' : 'NORMAL'}
+     
+   - Resource Constraints:
+     Equipment adequate?: ${getChecklistField('equipmentAdequacy')}
+     Staffing adequate?: ${getChecklistField('staffingLevel')}
+     
+   - Safety Culture Indicators:
+     Training current?: ${getChecklistField('trainingCurrent')}
+     Safety meetings held?: ${getChecklistField('safetyMeetings')}
+     Past violations?: ${getChecklistField('pastViolations')}
 
-OUTPUT REQUIREMENTS:
-Respond with ONLY valid JSON, no other text:
+2. UNSAFE SUPERVISION (Active Failures):
+   - Competent person designated?: ${getChecklistField('competentPerson')}
+   - Adequate oversight?: ${getChecklistField('supervisionLevel')}
+   - Hazard recognition training?: ${getChecklistField('hazardRecognition')}
+
+3. PRECONDITIONS FOR UNSAFE ACTS:
+   
+   A. Worker State:
+   - Fatigue Risk: ${this.calculateFatigue(getChecklistField('hoursWorked'), getChecklistField('consecutiveDays'))}
+   - Experience level: ${getChecklistField('workerExperience')}
+   - Training adequacy: ${getChecklistField('taskSpecificTraining')}
+   
+   B. Equipment State:
+   - Condition: ${getChecklistField('equipmentCondition')}
+   - Last inspection: ${getChecklistField('lastInspection')}
+   - Adequacy for task: ${getChecklistField('equipmentMatch')}
+   
+   C. Environmental State:
+   - Weather: ${JSON.stringify(weatherData)}
+   - Visibility: ${weatherData.visibility || 'Unknown'}
+   - Temperature effects: ${weatherData.temperature < 32 || weatherData.temperature > 95 ? 'EXTREME' : 'NORMAL'}
+
+4. UNSAFE ACT (Trigger Event):
+   
+   Classify error type:
+   - Skill-based (slip/lapse): Attention failure during routine task
+   - Rule-based (mistake): Wrong procedure applied
+   - Knowledge-based (mistake): Novel problem, improvised solution
+   - Violation (routine): Normalized deviation from procedure
+   - Violation (situational): Pressured by schedule/cost
+   
+   Predict which error is most likely based on:
+   - Worker experience + task familiarity
+   - Production pressure level
+   - Past practice patterns from checklist
+
+5. LOSS OF CONTROL (Point of No Return):
+   
+   - Trigger event: Specific action that starts cascade
+   - Time to recognize problem: X seconds
+   - Time to intervene: X seconds
+   - Physical mechanism: How does control loss occur?
+   - Critical decision point: Last chance to abort
+
+6. DEFENSE FAILURES (Why Barriers Don't Work):
+   
+   For each barrier that SHOULD prevent this:
+   - What is the barrier? (Engineering, Administrative, PPE)
+   - Why doesn't it work? (Absent, Inadequate, Bypassed, Failed)
+   - Evidence from checklist: Quote specific response showing gap
+   
+   Example: 
+   Barrier: "Fall arrest system"
+   Failure Mode: "Inadequate - anchor point not certified by competent person"
+   Evidence: Checklist Q47: "No response" for anchor point inspection
+
+7. INJURY MECHANISM (Energy Transfer):
+   
+   - Energy type: Kinetic (fall), Electrical, Thermal, Chemical, etc.
+   - Energy magnitude: Fall distance, voltage, temperature, etc.
+   - Body part affected: Head, torso, extremities
+   - Injury severity: Based on energy and body part
+     Fatal: >15ft fall to head, >50V electrocution
+     Critical: 10-15ft fall, crush injury, severe burns
+     Serious: 6-10ft fall, fractures, lacerations
+     Minor: <6ft fall, bruises, sprains
+
+PATTERN MATCHING:
+Search mental database of similar OSHA incidents:
+- Match on: Industry, hazard type, equipment, weather
+- Reference actual incident reports if strong match (>70% similarity)
+- Use to validate predicted chain and increase confidence
+
+LEADING INDICATORS (Observable Now):
+Identify 3-5 conditions supervisor could see RIGHT NOW:
+
+Behavioral:
+- "2 of 4 workers not clipping into fall arrest when accessing edge"
+- "Foreman verbally pushing crew to 'hurry up and finish'"
+
+Environmental:
+- "Wind speed 28mph (approaching 30mph work limit)"
+- "Damaged sling tags missing, still in use"
+
+Organizational:
+- "No competent person on-site for last 2 hours"
+- "Rescue plan not posted at work location"
+
+Near-Miss:
+- "Load swung within 3 feet of worker yesterday in similar conditions"
+
+For each indicator, specify:
+- Where to look
+- What constitutes the indicator
+- Threshold for action
+
+CONFIDENCE SCORING:
+
+Calculate probability of incident in next 4 hours:
+
+Base Probability: ${(topHazard.probability || 0.1) * 100}%
+
+Adjustments:
++ Temporal risk: ${this.isHighRiskTime() ? '+15%' : '0%'}
++ Production pressure: ${getChecklistField('overtime') !== 'Not specified' ? '+20%' : '0%'}
++ Fatigue: ${this.calculateFatigue(getChecklistField('hoursWorked'), getChecklistField('consecutiveDays')) === 'CRITICAL' ? '+15%' : '0%'}
++ Defense gaps: ${(validation?.missingCritical?.length || 0) * 5}%
++ Weather deteriorating: ${weatherData.windSpeed > 25 ? '+10%' : '0%'}
+
+Final Probability: Calculate based on above
+
+Confidence Rating:
+80-100%: HIGH (Incident likely in next 4 hours)
+40-79%: MEDIUM (Incident possible in next 1-2 days)
+0-39%: LOW (Incident unlikely without major change)
+
+INTERVENTION HIERARCHY:
+
+PREVENTIVE (Stop it from happening):
+Tier 1 - Elimination: Identify elimination option if feasible
+Tier 2 - Engineering: Identify engineering control option
+Tier 3 - Administrative: Identify administrative control option
+Tier 4 - PPE: Identify PPE option
+
+MITIGATIVE (Reduce harm if it happens):
+- Emergency response: Identify emergency response capability
+- Medical readiness: Identify medical preparedness
+
+Select top 3 interventions across all tiers.
+
+OUTPUT (VALID JSON ONLY):
 
 {
-  "incidentName": "Specific incident with mechanism (e.g., 'Struck-by: Glass panel loss of control during crane lift')",
+  "incidentName": "Specific incident with mechanism and location",
+  "timeframe": "Next 4 hours",
+  "probability": <0-100>,
   "confidence": "HIGH|MEDIUM|LOW",
   "causalChain": [
     {
-      "stage": "Initiating Event",
-      "description": "Specific trigger with details",
-      "evidence": "Quote from checklist showing this condition exists"
+      "stage": "Organizational Influences",
+      "description": "Specific latent condition (schedule pressure, resource constraint, etc.)",
+      "evidence": "Quote from checklist showing this exists"
     },
     {
-      "stage": "First Defense Failure",
-      "description": "Specific control that fails",
-      "whyItFails": "Root cause (procedure unclear, equipment unavailable, etc.)"
+      "stage": "Unsafe Supervision",
+      "description": "Specific supervision gap",
+      "evidence": "Quote from checklist"
     },
     {
-      "stage": "Human Performance Factor",
-      "description": "Specific worker decision",
-      "why": "Why they make this choice (fatigue, pressure, normalized deviation)"
+      "stage": "Preconditions - Worker State",
+      "description": "Fatigue/experience/training issue",
+      "fatiqueLevel": "CRITICAL|HIGH|MODERATE|NORMAL",
+      "evidence": "Quote from checklist"
     },
     {
-      "stage": "Point of No Return",
-      "description": "When incident becomes inevitable",
-      "timeToIntervene": "X seconds/minutes"
+      "stage": "Preconditions - Equipment State",
+      "description": "Equipment condition/adequacy issue",
+      "evidence": "Quote from checklist"
+    },
+    {
+      "stage": "Preconditions - Environment",
+      "description": "Weather/visibility/temperature issue",
+      "evidence": "Current conditions: ${JSON.stringify(weatherData)}"
+    },
+    {
+      "stage": "Unsafe Act (Trigger)",
+      "errorType": "Skill-Based Slip|Rule-Based Mistake|Knowledge-Based Mistake|Routine Violation|Situational Violation",
+      "description": "Specific action worker takes",
+      "why": "Why worker makes this choice (fatigue, pressure, normalized practice, etc.)"
+    },
+    {
+      "stage": "Loss of Control",
+      "description": "When situation becomes unrecoverable",
+      "timeToRecognize": "X seconds",
+      "timeToIntervene": "X seconds",
+      "physicalMechanism": "How control is lost (wind gust, equipment failure, etc.)"
+    },
+    {
+      "stage": "Defense Failure 1",
+      "expectedBarrier": "What should prevent this (engineering/admin/PPE)",
+      "failureMode": "Why it doesn't work (absent/inadequate/bypassed)",
+      "evidence": "Quote from checklist showing gap"
+    },
+    {
+      "stage": "Defense Failure 2",
+      "expectedBarrier": "Second line of defense",
+      "failureMode": "Why it fails",
+      "evidence": "Quote from checklist"
     },
     {
       "stage": "Injury Mechanism",
-      "description": "Exactly how injury occurs",
-      "severity": "Minor|Serious|Critical|Fatal"
+      "energyType": "Kinetic|Electrical|Thermal|Chemical|Other",
+      "energyMagnitude": "Specific value (fall distance, voltage, etc.)",
+      "bodyPart": "Specific body part affected",
+      "severity": "Fatal|Critical|Serious|Minor",
+      "description": "Exact injury pathway"
     }
   ],
   "leadingIndicators": [
-    "Observable indicator 1 supervisors would see now",
-    "Observable indicator 2",
-    "Observable indicator 3"
+    {
+      "type": "Behavioral|Environmental|Organizational|Near-Miss",
+      "indicator": "Specific observable condition",
+      "whereToLook": "Exact location to observe",
+      "whatToSee": "Specific condition/behavior",
+      "threshold": "What level triggers action",
+      "actionRequired": "What supervisor should do if observed"
+    }
   ],
-  "singleBestIntervention": "ONE specific action that breaks the chain (not 'provide training' but 'Install real-time anemometer with 20mph alarm before authorizing any lifts')"
-}`;
+  "interventions": {
+    "preventive": [
+      {
+        "tier": "Elimination|Engineering|Administrative|PPE",
+        "action": "Specific intervention",
+        "breaksChainAt": "Which stage this intervention prevents",
+        "feasibility": "HIGH|MEDIUM|LOW",
+        "timeToImplement": "Immediate|Hours|Days",
+        "cost": "LOW|MEDIUM|HIGH",
+        "effectivenessReduction": "X% risk reduction"
+      }
+    ],
+    "mitigative": [
+      {
+        "action": "Specific mitigation if incident occurs",
+        "reducesHarm": "How it reduces severity"
+      }
+    ],
+    "recommended": "Primary + Backup + Immediate intervention summary"
+  },
+  "oshaPatternMatch": {
+    "similarIncidents": <number>,
+    "matchConfidence": "HIGH|MEDIUM|LOW",
+    "citationsExpected": ["1926.XXX", "1926.YYY"]
+  }
+}
+
+CRITICAL: Output ONLY valid JSON. Any non-JSON text will cause parsing failure.`;
 
     let result = '';
     try {
-      result = await this.callGemini(prompt, 1.0, 8000); // 2.5-flash thinking + response
+      result = await this.callGemini(prompt, 1.0, 10000); // Higher token limit for detailed output
       const extracted = this.extractJSON(result);
       console.log('🔍 Agent 3 extracted JSON length:', extracted.length);
       const parsed = JSON.parse(extracted);
+      
+      // Backward compatibility: extract singleBestIntervention if not present
+      if (!parsed.singleBestIntervention && parsed.interventions?.recommended) {
+        parsed.singleBestIntervention = parsed.interventions.recommended;
+      }
       
       return parsed;
     } catch (error) {
