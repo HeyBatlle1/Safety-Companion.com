@@ -13,6 +13,7 @@ import { GoNoGoDecision, ReportMetadata } from '../../types/safety-analysis';
 interface ExecutiveSummaryProps {
   decision: GoNoGoDecision;
   riskLevel: string;
+  riskScore: number;
   probability: number;
   dataQuality: number;
   topThreats: string[];
@@ -23,6 +24,7 @@ interface ExecutiveSummaryProps {
 export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
   decision,
   riskLevel,
+  riskScore,
   probability,
   dataQuality,
   topThreats,
@@ -110,7 +112,7 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
           {/* Risk Score */}
           <MetricCard
             label="Risk Score"
-            value={`${agent2?.hazards[0]?.riskScore || 0}/100`}
+            value={`${riskScore}/100`}
             level={riskLevel}
             color={getRiskColor(riskLevel)}
             delay={0.4}
