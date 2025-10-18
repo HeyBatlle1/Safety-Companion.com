@@ -41,67 +41,44 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
-    let isMounted = true;
+    let mounted = true;
 
     const initializeAuth = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const { data: { session } } = await supabase.auth.getSession();
         
-        if (error) {
-          console.error('Auth session error:', error);
-          if (isMounted) {
-            setUser(null);
-            setLoading(false);
-          }
+        if (!session) {
+          if (mounted) setLoading(false);
           return;
         }
 
-        if (isMounted) {
-          if (session?.user) {
-            try {
-              const { data: userData, error: dbError } = await supabase
-                .from('user_profiles')
-                .select('*')
-                .eq('id', session.user.id)
-                .single();
+        if (mounted) {
+          setUser({
+            id: session.user.id,
+            email: session.user.email || '',
+            role: 'field_worker'
+          });
+        }
 
-              if (dbError) {
-                console.error('User data fetch error:', dbError);
-              }
+        const { data: userData } = await supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
 
-              setUser({
-                id: session.user.id,
-                email: session.user.email || '',
-                role: userData?.role || 'field_worker'
-              });
-            } catch (err) {
-              console.error('Error fetching user data:', err);
-              setUser({
-                id: session.user.id,
-                email: session.user.email || '',
-                role: 'field_worker'
-              });
-            }
-          } else {
-            setUser(null);
-          }
+        if (mounted) {
+          setUser({
+            id: session.user.id,
+            email: session.user.email || '',
+            role: userData?.role || 'field_worker'
+          });
           setLoading(false);
         }
       } catch (error) {
-        console.error('Auth initialization error:', error);
-        if (isMounted) {
-          setUser(null);
-          setLoading(false);
-        }
+        console.error('Auth error:', error);
+        if (mounted) setLoading(false);
       }
     };
-
-    const fallbackTimeout = setTimeout(() => {
-      if (isMounted) {
-        console.warn('Auth initialization timeout - forcing load complete');
-        setLoading(false);
-      }
-    }, 3000);
 
     initializeAuth();
 
@@ -132,8 +109,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     });
 
     return () => {
-      isMounted = false;
-      clearTimeout(fallbackTimeout);
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);
