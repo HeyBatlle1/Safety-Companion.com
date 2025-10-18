@@ -436,7 +436,7 @@ const ChecklistForm = () => {
                   });
                   setAiResponse(null); // Clear markdown view when showing structured data
                 } else {
-                  // Fallback to markdown format for legacy or error responses
+                  // Error fallback: Display error messages when analysis fails
                   const formattedResult = (analysisResult && typeof analysisResult === 'object' && analysisResult.metadata)
                     ? ReportFormatter.formatStructuredJHAReport(analysisResult)
                     : analysisResult;
@@ -1128,7 +1128,7 @@ Progress: ${Math.round(calculateProgress())}% complete
           />
         )}
 
-        {/* AI Analysis Results - Legacy Markdown View */}
+        {/* AI Analysis Results - Error Fallback */}
         {!agentData && aiResponse && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}

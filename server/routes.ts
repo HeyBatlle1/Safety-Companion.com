@@ -126,31 +126,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==================== AUTHENTICATION ====================
-  // ⚠️ DISABLED - Supabase Auth handles all authentication client-side
+  // Supabase Auth handles all authentication client-side
   // Auth flow: Frontend → supabase.auth.signInWithOAuth({ provider: 'azure' }) → Microsoft SSO
-  // No backend auth endpoints needed
-  
-  /* DISABLED CUSTOM AUTH ENDPOINTS
-  app.post("/api/auth/signup", async (req: Request, res: Response) => {
-    // REMOVED - Use Supabase Auth instead
-    res.status(404).json({ error: 'Use Supabase Auth' });
-  });
-
-  app.post("/api/auth/signin", async (req: Request, res: Response) => {
-    // REMOVED - Use Supabase Auth instead
-    res.status(404).json({ error: 'Use Supabase Auth' });
-  });
-
-  app.post("/api/auth/signout", (req, res) => {
-    // REMOVED - Use Supabase Auth instead
-    res.status(404).json({ error: 'Use Supabase Auth' });
-  });
-
-  app.get("/api/auth/user", async (req, res) => {
-    // REMOVED - Use Supabase Auth instead
-    res.status(404).json({ error: 'Use Supabase Auth' });
-  });
-  */
 
   // Get team members (admin only)
   app.get("/api/team/members", requireAuth, async (req, res) => {

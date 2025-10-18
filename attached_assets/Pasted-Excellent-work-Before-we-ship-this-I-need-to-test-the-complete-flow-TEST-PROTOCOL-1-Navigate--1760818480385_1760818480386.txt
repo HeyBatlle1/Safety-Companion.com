@@ -1,0 +1,79 @@
+Excellent work! Before we ship this, I need to test the complete flow.
+
+TEST PROTOCOL:
+
+1. Navigate to a checklist form (e.g., confined-space or master-jha)
+
+2. Fill out with REALISTIC data:
+   - Project: "Downtown Office Construction"
+   - Location: "Indianapolis, IN"
+   - Work Type: "Glass Installation at Height"
+   - Equipment: "Tower crane, swing stage, suction cups"
+   - Height: "60 feet"
+   - Weather: Use real current weather
+   - PPE: "Hard hats, safety harnesses, gloves"
+   - Emergency Plan: "Assembly point at ground level"
+   - CRITICAL: Leave 2-3 fields with vague answers like "same" or "yes"
+
+3. Submit the analysis
+
+4. WATCH THE AGENT PIPELINE:
+   - Should see 4 separate agent calls
+   - Each returns structured JSON
+   - Final synthesis combines them
+
+5. VERIFY THE UI:
+   - Executive Summary appears with decision badge
+   - Risk score shows as X/100 with gauge
+   - All 4 agent cards appear collapsed
+   - "Tap any card to view" hint visible
+
+6. TEST INTERACTIONS:
+   - Click Agent 1 - should expand smoothly
+   - Click Agent 2 - Agent 1 should collapse, Agent 2 expands
+   - Click Agent 3 - Agent 2 collapses, Agent 3 expands
+   - Within Agent 3, test the 3 tabs (Causal Chain, Indicators, Interventions)
+
+7. TEST ACTION BAR:
+   - Click "View JSON" - modal should open with agent data
+   - Try downloading JSON
+   - Try copying to clipboard
+   - Test Share button (if on mobile)
+
+8. TEST MOBILE:
+   - Open on mobile device or resize browser to 375px
+   - Verify cards stack vertically
+   - Verify action bar is sticky at bottom
+   - Verify executive summary is readable
+
+Take screenshots at each major step and report back with:
+- Any errors in console
+- Any visual glitches
+- Any missing data
+- Performance (was it slow?)
+
+DO NOT skip this testing. This is production safety software.
+```
+
+---
+
+## **Expected Behavior:**
+
+### **If Everything Works:**
+```
+✅ Executive Summary: Shows CONDITIONAL_GO or NO_GO (unlikely to be GO on first test)
+✅ Agent 1: Shows quality score 6-8/10 (due to vague answers)
+✅ Agent 2: Shows risk score 40-90/100 depending on hazards
+✅ Agent 3: Shows incident prediction with 40-80% probability
+✅ All animations smooth (no jank)
+✅ Mobile layout works
+✅ Action buttons functional
+```
+
+### **If Something's Wrong:**
+```
+🚨 Console errors → Debug immediately
+🚨 Missing data → Check agent output structure
+🚨 No animations → Check Framer Motion setup
+🚨 Layout broken → Check Tailwind classes
+🚨 API timeout → Agents taking too long (reduce complexity)
