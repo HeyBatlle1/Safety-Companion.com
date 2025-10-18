@@ -20,7 +20,7 @@ export interface WeatherFunctionData {
 export async function getWeatherForSafetyAnalysis(location: string): Promise<WeatherFunctionData> {
   try {
     // First, geocode the location to get coordinates
-    const geocodeUrl = `https://api.open-meteo.com/v1/search?name=${encodeURIComponent(location)}&count=1&language=en&format=json`;
+    const geocodeUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(location)}&count=1&language=en&format=json`;
     const geocodeResponse = await axios.get(geocodeUrl);
     
     if (!geocodeResponse.data.results || geocodeResponse.data.results.length === 0) {
