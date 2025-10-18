@@ -127,6 +127,101 @@ interface IncidentPrediction {
   oshaPatternMatch?: OshaPatternMatch;
 }
 
+interface GoNoGoDecision {
+  decision: 'GO' | 'GO_WITH_CONDITIONS' | 'NO_GO' | 'STOP_WORK';
+  reasons: string[];
+  conditions?: string[];
+}
+
+interface ComplianceGap {
+  standard: string;
+  requirement: string;
+  gap: string;
+  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  evidence: string;
+}
+
+interface EmergencyReadiness {
+  rescueCapability: 'ADEQUATE' | 'INADEQUATE' | 'NOT_REQUIRED';
+  firstAid: boolean;
+  communication: boolean;
+  evacuationPlan: boolean;
+  gaps: string[];
+}
+
+interface WeatherImpact {
+  currentConditions: any;
+  riskLevel: 'GREEN' | 'YELLOW' | 'RED';
+  impacts: string[];
+  recommendations: string[];
+}
+
+interface ActionItem {
+  priority: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  action: string;
+  deadline: string;
+  responsibility: string;
+}
+
+interface FinalJHAReport {
+  metadata: {
+    reportId: string;
+    generatedAt: Date;
+    projectName: string;
+    location: string;
+    workType: string;
+    supervisor: string;
+  };
+  
+  executiveSummary: {
+    decision: GoNoGoDecision;
+    overallRiskLevel: string;
+    topThreats: string[];
+    criticalActions: string[];
+    incidentProbability: number;
+  };
+  
+  dataQuality: {
+    score: number;
+    rating: string;
+    missingCritical: string[];
+    concerns: ValidationResult['concerns'];
+  };
+  
+  riskAssessment: {
+    hazards: RiskHazard[];
+    industryContext: string;
+    oshaStatistics: any;
+  };
+  
+  incidentPrediction: {
+    scenario: string;
+    probability: number;
+    timeframe: string;
+    causalChain: CausalStage[];
+    leadingIndicators: LeadingIndicator[] | string[];
+  };
+  
+  weatherAnalysis: WeatherImpact;
+  complianceGaps: ComplianceGap[];
+  emergencyReadiness: EmergencyReadiness;
+  actionItems: ActionItem[];
+  
+  recommendedInterventions: {
+    preventive: Intervention[];
+    mitigative: Intervention[];
+  };
+  
+  approvals: {
+    requiredSignatures: string[];
+    competentPersonReview: boolean;
+    managementReview: boolean;
+  };
+  
+  // Legacy markdown format for backward compatibility
+  markdownReport?: string;
+}
+
 interface PipelineMetadata {
   pipelineVersion: string;
   executionTimeMs: number;
@@ -1251,9 +1346,296 @@ CRITICAL: Output ONLY valid JSON. Any non-JSON text will cause parsing failure.`
   }
 
   /**
+   * Helper: Determine GO/NO-GO decision based on all factors
+   */
+  private determineGoNoGo(
+    validation: ValidationResult,
+    risk: RiskAssessment,
+    prediction: IncidentPrediction,
+    weatherData: any
+  ): GoNoGoDecision {
+    const topHazard = risk.hazards[0] || { riskScore: 0 };
+    const stopWorkReasons: string[] = [];
+    const conditions: string[] = [];
+
+    // Data quality check
+    if (validation.dataQuality === 'LOW') {
+      stopWorkReasons.push('Insufficient data quality for safe operations');
+    }
+
+    // Weather check
+    if (weatherData?.windSpeed) {
+      const windLimit = 20;
+      if (weatherData.windSpeed > windLimit) {
+        stopWorkReasons.push(`Wind speed (${weatherData.windSpeed} mph) exceeds ${windLimit} mph safe crane operation limit`);
+      } else if (weatherData.windSpeed > windLimit * 0.8) {
+        conditions.push('Continuous wind speed monitoring with hard stop at 20 mph');
+      }
+    }
+
+    // Risk check
+    if (prediction.confidence === 'HIGH' && topHazard.riskScore > 85) {
+      stopWorkReasons.push('High-confidence prediction of critical incident with inadequate controls');
+    }
+
+    // Critical fields check
+    if (validation.missingCritical.some(field => 
+      field.toLowerCase().includes('emergency') || 
+      field.toLowerCase().includes('rescue'))) {
+      conditions.push('Competent person inspection of fall protection before work starts');
+    }
+
+    // Determine decision
+    let decision: 'GO' | 'GO_WITH_CONDITIONS' | 'NO_GO' | 'STOP_WORK';
+    if (stopWorkReasons.length > 0) {
+      decision = stopWorkReasons.some(r => r.includes('immediate')) ? 'STOP_WORK' : 'NO_GO';
+    } else if (conditions.length > 0) {
+      decision = 'GO_WITH_CONDITIONS';
+    } else {
+      decision = 'GO';
+    }
+
+    return { decision, reasons: stopWorkReasons, conditions };
+  }
+
+  /**
+   * Helper: Identify compliance gaps from validation and risk data
+   */
+  private identifyComplianceGaps(
+    validation: ValidationResult,
+    risk: RiskAssessment
+  ): ComplianceGap[] {
+    const gaps: ComplianceGap[] = [];
+    const topHazard = risk.hazards[0];
+
+    // Add gaps from missing critical fields
+    validation.missingCritical.forEach(field => {
+      gaps.push({
+        standard: 'OSHA 1926',
+        requirement: `Documentation of ${field}`,
+        gap: `Missing: ${field}`,
+        severity: 'HIGH',
+        evidence: `Validation found missing critical field: ${field}`
+      });
+    });
+
+    // Add gaps from inadequate controls
+    if (topHazard?.inadequateControls) {
+      topHazard.inadequateControls.forEach(control => {
+        gaps.push({
+          standard: topHazard.regulatoryRequirement || 'OSHA 1926',
+          requirement: 'Adequate hazard controls',
+          gap: control,
+          severity: topHazard.riskScore > 75 ? 'CRITICAL' : 'HIGH',
+          evidence: `Risk assessment identified: ${control}`
+        });
+      });
+    }
+
+    return gaps;
+  }
+
+  /**
+   * Helper: Assess emergency response readiness
+   */
+  private assessEmergencyResponse(
+    checklistData: any,
+    topHazard?: RiskHazard
+  ): EmergencyReadiness {
+    const gaps: string[] = [];
+
+    // Check for rescue capability
+    const hasRescuePlan = checklistData.sections?.some((s: any) => 
+      s.responses?.some((r: any) => 
+        r.response?.toLowerCase().includes('rescue')));
+
+    const rescueCapability: 'ADEQUATE' | 'INADEQUATE' | 'NOT_REQUIRED' = 
+      topHazard?.name?.toLowerCase().includes('fall') 
+        ? (hasRescuePlan ? 'ADEQUATE' : 'INADEQUATE')
+        : 'NOT_REQUIRED';
+
+    if (rescueCapability === 'INADEQUATE') {
+      gaps.push('No documented fall rescue plan');
+    }
+
+    // Check for first aid
+    const firstAid = checklistData.sections?.some((s: any) => 
+      s.responses?.some((r: any) => 
+        r.response?.toLowerCase().includes('first aid')));
+
+    if (!firstAid) gaps.push('First aid equipment not documented');
+
+    // Check for communication
+    const communication = checklistData.sections?.some((s: any) => 
+      s.responses?.some((r: any) => 
+        r.response?.toLowerCase().includes('radio') || 
+        r.response?.toLowerCase().includes('communication')));
+
+    if (!communication) gaps.push('Communication systems not documented');
+
+    // Check for evacuation plan
+    const evacuationPlan = checklistData.sections?.some((s: any) => 
+      s.responses?.some((r: any) => 
+        r.response?.toLowerCase().includes('evacuation') || 
+        r.response?.toLowerCase().includes('emergency exit')));
+
+    if (!evacuationPlan) gaps.push('Evacuation plan not documented');
+
+    return {
+      rescueCapability,
+      firstAid: firstAid || false,
+      communication: communication || false,
+      evacuationPlan: evacuationPlan || false,
+      gaps
+    };
+  }
+
+  /**
+   * Helper: Analyze weather impact
+   */
+  private analyzeWeatherImpact(
+    weatherData: any,
+    forecast: string | undefined,
+    hazards: RiskHazard[]
+  ): WeatherImpact {
+    const impacts: string[] = [];
+    const recommendations: string[] = [];
+    let riskLevel: 'GREEN' | 'YELLOW' | 'RED' = 'GREEN';
+
+    if (weatherData?.windSpeed) {
+      const safeLimit = 20;
+      const windMargin = ((safeLimit - weatherData.windSpeed) / safeLimit) * 100;
+
+      if (windMargin < 20) {
+        riskLevel = 'RED';
+        impacts.push(`Critical wind speed: ${weatherData.windSpeed} mph (approaching ${safeLimit} mph limit)`);
+        recommendations.push('Halt crane and swing stage operations immediately');
+      } else if (windMargin < 30) {
+        riskLevel = 'YELLOW';
+        impacts.push(`Elevated wind speed: ${weatherData.windSpeed} mph`);
+        recommendations.push('Implement continuous wind monitoring with hard stop at 20 mph');
+      }
+    }
+
+    if (weatherData?.temperature) {
+      if (weatherData.temperature < 32) {
+        impacts.push('Freezing temperatures increase slip/fall risk');
+        recommendations.push('Implement cold stress prevention and anti-slip measures');
+      } else if (weatherData.temperature > 95) {
+        impacts.push('Extreme heat increases fatigue and heat stress risk');
+        recommendations.push('Implement heat stress prevention with frequent breaks and hydration');
+      }
+    }
+
+    if (weatherData?.precipitation) {
+      impacts.push('Precipitation increases slip/fall incidents by 60%');
+      recommendations.push('Enhanced fall protection and slip-resistant surfaces required');
+    }
+
+    return {
+      currentConditions: weatherData,
+      riskLevel,
+      impacts,
+      recommendations
+    };
+  }
+
+  /**
+   * Helper: Generate prioritized action items
+   */
+  private generateActionItems(
+    goNoGo: GoNoGoDecision,
+    complianceGaps: ComplianceGap[],
+    emergencyReadiness: EmergencyReadiness,
+    interventions?: InterventionsSet
+  ): ActionItem[] {
+    const actions: ActionItem[] = [];
+
+    // Add immediate actions from decision
+    if (goNoGo.decision === 'STOP_WORK' || goNoGo.decision === 'NO_GO') {
+      goNoGo.reasons.forEach(reason => {
+        actions.push({
+          priority: 'CRITICAL',
+          action: `Address: ${reason}`,
+          deadline: 'Before work can proceed',
+          responsibility: 'Site Supervisor'
+        });
+      });
+    }
+
+    // Add condition-based actions
+    goNoGo.conditions?.forEach(condition => {
+      actions.push({
+        priority: 'HIGH',
+        action: condition,
+        deadline: 'Before work starts',
+        responsibility: 'Competent Person'
+      });
+    });
+
+    // Add compliance gap actions
+    complianceGaps.slice(0, 3).forEach(gap => {
+      actions.push({
+        priority: gap.severity as any,
+        action: `Resolve compliance gap: ${gap.gap}`,
+        deadline: gap.severity === 'CRITICAL' ? 'Immediate' : 'Within 24 hours',
+        responsibility: 'Safety Manager'
+      });
+    });
+
+    // Add emergency readiness actions
+    emergencyReadiness.gaps.forEach(gap => {
+      actions.push({
+        priority: 'HIGH',
+        action: `Address emergency readiness gap: ${gap}`,
+        deadline: 'Before work starts',
+        responsibility: 'Emergency Coordinator'
+      });
+    });
+
+    // Add preventive interventions
+    if (interventions?.preventive) {
+      interventions.preventive.slice(0, 3).forEach(intervention => {
+        actions.push({
+          priority: intervention.feasibility === 'HIGH' ? 'MEDIUM' : 'LOW',
+          action: intervention.action,
+          deadline: intervention.timeToImplement || 'As soon as feasible',
+          responsibility: 'Project Manager'
+        });
+      });
+    }
+
+    return actions;
+  }
+
+  /**
+   * Helper: Determine required approvals based on decision and risk
+   */
+  private determineRequiredApprovals(
+    goNoGo: GoNoGoDecision,
+    risk: RiskAssessment
+  ): string[] {
+    const approvals: string[] = ['Site Supervisor'];
+
+    if (goNoGo.decision === 'GO_WITH_CONDITIONS') {
+      approvals.push('Competent Person');
+    }
+
+    if (goNoGo.decision === 'NO_GO' || goNoGo.decision === 'STOP_WORK') {
+      approvals.push('Competent Person', 'Safety Manager', 'Project Manager');
+    }
+
+    if (risk.riskSummary?.overallRiskLevel === 'EXTREME' || risk.riskSummary?.overallRiskLevel === 'HIGH') {
+      approvals.push('Safety Manager');
+    }
+
+    return Array.from(new Set(approvals)); // Remove duplicates
+  }
+
+  /**
    * AGENT 4: Report Synthesizer
    * Temperature: 0.5 (structured formatting)
-   * Task: Generate hybrid report (Traditional JHA + Predictive Analysis)
+   * Task: Generate structured JHA report
    */
   private async synthesizeReport(
     validation: ValidationResult,
@@ -1261,15 +1643,89 @@ CRITICAL: Output ONLY valid JSON. Any non-JSON text will cause parsing failure.`
     prediction: IncidentPrediction,
     weatherData: any,
     checklistData: any
-  ): Promise<string> {
-    
+  ): Promise<FinalJHAReport> {
     const now = new Date();
-    const topHazard = risk.hazards[0] || {};
+    const topHazard = risk.hazards[0] || { riskScore: 0, inadequateControls: [] };
     
-    // Calculate GO/NO-GO decision logic
-    let decision = 'GO WITH CONDITIONS';
-    const stopWorkReasons: string[] = [];
-    const requiredConditions: string[] = [];
+    // Generate all components using helper functions
+    const goNoGo = this.determineGoNoGo(validation, risk, prediction, weatherData);
+    const complianceGaps = this.identifyComplianceGaps(validation, risk);
+    const emergencyReadiness = this.assessEmergencyResponse(checklistData, topHazard as RiskHazard);
+    const weatherImpact = this.analyzeWeatherImpact(weatherData, weatherData?.forecast, risk.hazards);
+    const actionItems = this.generateActionItems(goNoGo, complianceGaps, emergencyReadiness, prediction.interventions);
+    const requiredApprovals = this.determineRequiredApprovals(goNoGo, risk);
+    
+    // Extract metadata
+    const siteLocation = checklistData.sections?.[0]?.responses?.[0]?.response || checklistData.location || 'Location not specified';
+    const workType = checklistData.sections?.[0]?.responses?.[1]?.response || checklistData.workType || 'Work type not specified';
+    const supervisor = checklistData.supervisor || 'Not specified';
+    const projectName = checklistData.projectName || checklistData.template || 'Unnamed Project';
+    
+    // Build structured report
+    const report: FinalJHAReport = {
+      metadata: {
+        reportId: `JHA-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        generatedAt: now,
+        projectName,
+        location: siteLocation,
+        workType,
+        supervisor
+      },
+      
+      executiveSummary: {
+        decision: goNoGo,
+        overallRiskLevel: risk.riskSummary?.overallRiskLevel || 'MEDIUM',
+        topThreats: risk.topThreats || risk.hazards.slice(0, 3).map((h, i) => `${i+1}. ${h.name} (${h.riskScore}/100)`),
+        criticalActions: actionItems.filter(a => a.priority === 'CRITICAL').map(a => a.action),
+        incidentProbability: prediction.probability || (topHazard as any).probability * 100 || 0
+      },
+      
+      dataQuality: {
+        score: validation.qualityScore,
+        rating: validation.dataQuality,
+        missingCritical: validation.missingCritical,
+        concerns: validation.concerns
+      },
+      
+      riskAssessment: {
+        hazards: risk.hazards,
+        industryContext: risk.riskSummary?.industryContext || risk.oshaData?.industryName || 'Construction industry',
+        oshaStatistics: risk.oshaData
+      },
+      
+      incidentPrediction: {
+        scenario: prediction.incidentName,
+        probability: prediction.probability || 0,
+        timeframe: prediction.timeframe || 'Next 4 hours',
+        causalChain: prediction.causalChain,
+        leadingIndicators: prediction.leadingIndicators
+      },
+      
+      weatherAnalysis: weatherImpact,
+      complianceGaps,
+      emergencyReadiness,
+      actionItems,
+      
+      recommendedInterventions: {
+        preventive: prediction.interventions?.preventive || [],
+        mitigative: prediction.interventions?.mitigative || []
+      },
+      
+      approvals: {
+        requiredSignatures: requiredApprovals,
+        competentPersonReview: goNoGo.decision !== 'GO',
+        managementReview: goNoGo.decision === 'NO_GO' || goNoGo.decision === 'STOP_WORK'
+      }
+    };
+    
+    return report;
+  }
+
+  /**
+   * Helper: Generate overall assessment section (LEGACY - kept for backward compatibility)
+   */
+  private generateOverallAssessment(validation: ValidationResult, risk: RiskAssessment, weatherData: any): string {
+    const topRisk = risk.hazards[0];
     
     // Evaluate stop-work triggers
     if (validation.dataQuality === 'LOW') {
