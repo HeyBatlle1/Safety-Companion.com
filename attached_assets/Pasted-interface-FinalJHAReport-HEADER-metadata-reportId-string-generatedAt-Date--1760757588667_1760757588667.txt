@@ -1,0 +1,141 @@
+interface FinalJHAReport {
+  // HEADER
+  metadata: {
+    reportId: string;
+    generatedAt: Date;
+    projectName: string;
+    location: string;
+    workType: string;
+    supervisor: string;
+  };
+  
+  // EXECUTIVE SUMMARY
+  executiveSummary: {
+    decision: GoNoGoDecision;
+    overallRiskLevel: 'EXTREME' | 'HIGH' | 'MEDIUM' | 'LOW';
+    topThreats: string[];
+    criticalActions: string[];
+    incidentProbability: number;
+  };
+  
+  // DATA QUALITY
+  dataQuality: {
+    score: number;
+    rating: 'HIGH' | 'MEDIUM' | 'LOW';
+    missingCritical: string[];
+    concerns: Agent1Output['concerns'];
+  };
+  
+  // RISK ASSESSMENT
+  riskAssessment: {
+    hazards: Hazard[];
+    industryContext: string;
+    oshaStatistics: any;
+  };
+  
+  // INCIDENT PREDICTION
+  incidentPrediction: {
+    scenario: string;
+    probability: number;
+    timeframe: string;
+    causalChain: Agent3Output['causalChain'];
+    leadingIndicators: Agent3Output['leadingIndicators'];
+  };
+  
+  // WEATHER ANALYSIS
+  weatherAnalysis: WeatherImpact;
+  
+  // COMPLIANCE
+  complianceGaps: ComplianceGap[];
+  
+  // EMERGENCY RESPONSE
+  emergencyReadiness: EmergencyReadiness;
+  
+  // ACTION PLAN
+  actionItems: ActionItem[];
+  
+  // INTERVENTIONS
+  recommendedInterventions: {
+    preventive: Agent3Output['interventions']['preventive'];
+    mitigative: Agent3Output['interventions']['mitigative'];
+  };
+  
+  // APPROVALS
+  approvals: {
+    requiredSignatures: string[];
+    competentPersonReview: boolean;
+    managementReview: boolean;
+  };
+}
+
+export function synthesizeReport(
+  validation: Agent1Output,
+  risks: Agent2Output,
+  prediction: Agent3Output,
+  checklistData: ChecklistData,
+  weatherData: WeatherData
+): FinalJHAReport {
+  
+  // Calculate all components
+  const goNoGo = determineGoNoGo(validation, risks, prediction, weatherData);
+  const complianceGaps = identifyComplianceGaps(validation, risks);
+  const emergencyReadiness = assessEmergencyResponse(checklistData, risks.hazards[0]);
+  const weatherImpact = analyzeWeatherImpact(weatherData, weatherData.forecast, risks.hazards);
+  const actionItems = generateActionItems(goNoGo, complianceGaps, emergencyReadiness, prediction.interventions);
+  
+  return {
+    metadata: {
+      reportId: generateReportId(),
+      generatedAt: new Date(),
+      projectName: checklistData.projectName,
+      location: checklistData.location,
+      workType: checklistData.workType,
+      supervisor: checklistData.supervisor
+    },
+    
+    executiveSummary: {
+      decision: goNoGo,
+      overallRiskLevel: risks.riskSummary.overallRiskLevel,
+      topThreats: risks.topThreats,
+      criticalActions: actionItems.filter(a => a.priority === 'CRITICAL').map(a => a.action),
+      incidentProbability: prediction.probability
+    },
+    
+    dataQuality: {
+      score: validation.qualityScore,
+      rating: validation.dataQuality,
+      missingCritical: validation.missingCritical,
+      concerns: validation.concerns
+    },
+    
+    riskAssessment: {
+      hazards: risks.hazards,
+      industryContext: risks.riskSummary.industryContext,
+      oshaStatistics: risks.hazards[0].oshaContext
+    },
+    
+    incidentPrediction: {
+      scenario: prediction.incidentName,
+      probability: prediction.probability,
+      timeframe: prediction.timeframe,
+      causalChain: prediction.causalChain,
+      leadingIndicators: prediction.leadingIndicators
+    },
+    
+    weatherAnalysis: weatherImpact,
+    complianceGaps,
+    emergencyReadiness,
+    actionItems,
+    
+    recommendedInterventions: {
+      preventive: prediction.interventions.preventive,
+      mitigative: prediction.interventions.mitigative
+    },
+    
+    approvals: {
+      requiredSignatures: determineRequiredApprovals(goNoGo, risks),
+      competentPersonReview: goNoGo.decision !== 'GO',
+      managementReview: goNoGo.decision === 'NO_GO' || goNoGo.decision === 'STOP_WORK'
+    }
+  };
+}
