@@ -383,6 +383,39 @@ export const insertSafetyIntelligenceSchema = createInsertSchema(safetyIntellige
   createdAt: true,
 });
 
+// JHA Daily Updates - Track changes to baseline JHAs
+export const jhaUpdates = pgTable("jha_updates", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  baselineAnalysisId: uuid("baseline_analysis_id").references(() => analysisHistory.id, { onDelete: "cascade" }).notNull(),
+  updateAnalysisId: uuid("update_analysis_id").references(() => analysisHistory.id, { onDelete: "cascade" }),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  updateNumber: integer("update_number").notNull(), // 1, 2, 3, etc. for this baseline
+  
+  // Update delta data
+  changedCategories: jsonb("changed_categories").notNull(), // ['weather', 'personnel', 'hazards']
+  newWindSpeed: text("new_wind_speed"), // If weather changed
+  newCrewMembers: jsonb("new_crew_members"), // If personnel changed
+  newHazards: jsonb("new_hazards"), // If new hazards discovered
+  riskAssessment: text("risk_assessment").notNull(), // 'safer', 'same', 'riskier'
+  
+  // Comparison analysis
+  comparisonResult: jsonb("comparison_result"), // Agent pipeline output comparing baseline vs current
+  goNoGoDecision: text("go_no_go_decision"), // 'go', 'no_go', 'conditional'
+  decisionReason: text("decision_reason"), // Why the decision was made
+  changeHighlights: jsonb("change_highlights"), // Red/green highlighted changes
+  
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  baselineAnalysisIdIdx: index("jha_updates_baseline_analysis_id_idx").on(table.baselineAnalysisId),
+  userIdIdx: index("jha_updates_user_id_idx").on(table.userId),
+  createdAtIdx: index("jha_updates_created_at_idx").on(table.createdAt),
+}));
+
+export const insertJhaUpdatesSchema = createInsertSchema(jhaUpdates).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Export types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -423,3 +456,6 @@ export type IndustryBenchmarks = typeof industryBenchmarks.$inferSelect;
 
 export type InsertSafetyIntelligence = z.infer<typeof insertSafetyIntelligenceSchema>;
 export type SafetyIntelligence = typeof safetyIntelligence.$inferSelect;
+
+export type InsertJhaUpdate = z.infer<typeof insertJhaUpdatesSchema>;
+export type JhaUpdate = typeof jhaUpdates.$inferSelect;
