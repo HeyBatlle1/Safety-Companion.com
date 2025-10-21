@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { showToast } from '@/components/common/ToastContainer';
+import supabase from '@/services/supabase';
 
 interface JHAUpdateFormProps {
   baselineAnalysisId: string;
@@ -47,13 +48,19 @@ export function JHAUpdateForm({ baselineAnalysisId, onUpdateComplete, onCancel }
 
     try {
       // Get Supabase token
-      const token = sessionStorage.getItem('supabase_token');
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        showToast('Authentication required. Please sign in again.', 'error');
+        setIsSubmitting(false);
+        return;
+      }
       
       const response = await fetch('/api/jha-update', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
           baselineAnalysisId,
