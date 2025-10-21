@@ -13,6 +13,8 @@ import { blueprintStorage, type BlueprintUpload } from '../../services/blueprint
 import { multiModalAnalysis } from '../../services/multiModalAnalysis';
 import { ReportFormatter } from '../../services/reportFormatter';
 import { SafetyAnalysisReport } from '../SafetyAnalysis/SafetyAnalysisReport';
+import { JHAUpdateForm } from '../JHA/JHAUpdateForm';
+import { JHAComparisonView } from '../JHA/JHAComparisonView';
 
 interface ChecklistItem {
   id: string;
@@ -64,6 +66,10 @@ const ChecklistForm = () => {
   const [riskProfile, setRiskProfile] = useState<RiskProfile | null>(null);
   const [safetyAnalysis, setSafetyAnalysis] = useState<SafetyAnalysis | null>(null);
   const [currentAnalysisId, setCurrentAnalysisId] = useState<string | null>(null);
+  
+  // JHA Update state
+  const [showUpdateForm, setShowUpdateForm] = useState(false);
+  const [updateComparison, setUpdateComparison] = useState<any | null>(null);
   const [analysisMode] = useState<'standard'>('standard');
   const [uploadingBlueprints, setUploadingBlueprints] = useState<Record<string, boolean>>({});
   const formRef = useRef<HTMLFormElement>(null);
@@ -1118,13 +1124,57 @@ Progress: ${Math.round(calculateProgress())}% complete
         )}
 
         {/* AI Analysis Results - Structured Agent View */}
-        {agentData && (
-          <SafetyAnalysisReport
-            agent1={agentData.agent1}
-            agent2={agentData.agent2}
-            agent3={agentData.agent3}
-            agent4={agentData.agent4}
-            metadata={agentData.metadata}
+        {agentData && !updateComparison && (
+          <>
+            <SafetyAnalysisReport
+              agent1={agentData.agent1}
+              agent2={agentData.agent2}
+              agent3={agentData.agent3}
+              agent4={agentData.agent4}
+              metadata={agentData.metadata}
+            />
+            
+            {/* Create Daily Update Button */}
+            {currentAnalysisId && !showUpdateForm && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex justify-center mt-6"
+              >
+                <button
+                  onClick={() => setShowUpdateForm(true)}
+                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all flex items-center space-x-2"
+                  data-testid="button-create-daily-update"
+                >
+                  <RefreshCcw className="w-5 h-5" />
+                  <span>Create Daily Update</span>
+                </button>
+              </motion.div>
+            )}
+          </>
+        )}
+        
+        {/* JHA Update Form */}
+        {showUpdateForm && currentAnalysisId && !updateComparison && (
+          <JHAUpdateForm
+            baselineAnalysisId={currentAnalysisId}
+            onUpdateComplete={(result) => {
+              setUpdateComparison(result);
+              setShowUpdateForm(false);
+            }}
+            onCancel={() => setShowUpdateForm(false)}
+          />
+        )}
+        
+        {/* JHA Comparison View */}
+        {updateComparison && currentAnalysisId && agentData && (
+          <JHAComparisonView
+            baseline={{
+              id: currentAnalysisId,
+              riskScore: agentData.agent2?.overallRiskScore || 60,
+              query: template.title || 'JHA Analysis',
+            }}
+            comparison={updateComparison}
           />
         )}
 

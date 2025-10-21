@@ -21,6 +21,7 @@ import monitoringRoutes from './routes/monitoring';
 import multiAgentTestRoutes from './routes/multiAgentTest';
 import eapRoutes from './routes/eap.routes.js';
 import agentOutputsRoutes from './routes/agentOutputs.js';
+import jhaUpdateRoutes from './routes/jhaUpdate.routes';
 import { logError } from "./utils/logger";
 import './types/session';
 import { geminiAnalytics } from "./services/geminiAnalytics";
@@ -1218,6 +1219,9 @@ Please provide a comprehensive, grounded response that helps ensure workplace sa
   
   // Add agent outputs routes for retrieving agent metadata
   app.use('/api/agent-outputs', agentOutputsRoutes);
+
+  // JHA Update routes
+  app.use('/api', jhaUpdateRoutes);
 
   return httpServer;
 }
