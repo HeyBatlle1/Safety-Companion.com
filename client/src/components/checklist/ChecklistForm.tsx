@@ -1146,7 +1146,7 @@ Progress: ${Math.round(calculateProgress())}% complete
                   className="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all flex items-center space-x-2"
                   data-testid="button-create-daily-update"
                 >
-                  <RefreshCcw className="w-5 h-5" />
+                  <RotateCcw className="w-5 h-5" />
                   <span>Create Daily Update</span>
                 </button>
               </motion.div>
