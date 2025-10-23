@@ -15,6 +15,8 @@ import { ReportFormatter } from '../../services/reportFormatter';
 import { SafetyAnalysisReport } from '../SafetyAnalysis/SafetyAnalysisReport';
 import { JHAUpdateForm } from '../JHA/JHAUpdateForm';
 import { JHAComparisonView } from '../JHA/JHAComparisonView';
+import { WindConditionsQuestion, type WindConditionsData } from '../JHA/WindConditionsQuestion';
+import { TemperatureQuestion, type TemperatureData } from '../JHA/TemperatureQuestion';
 
 interface ChecklistItem {
   id: string;
@@ -72,6 +74,29 @@ const ChecklistForm = () => {
   const [updateComparison, setUpdateComparison] = useState<any | null>(null);
   const [analysisMode] = useState<'standard'>('standard');
   const [uploadingBlueprints, setUploadingBlueprints] = useState<Record<string, boolean>>({});
+  
+  // Structured question data
+  const [windData, setWindData] = useState<WindConditionsData>({
+    currentSpeed: '',
+    forecastedGusts: '',
+    source: '',
+    stoppageThreshold: '20',
+    monitoringPlan: []
+  });
+  const [tempData, setTempData] = useState<TemperatureData>({
+    currentTemp: '',
+    humidity: '',
+    heatIndex: '',
+    windChill: '',
+    thermalRisk: 'none',
+    precautions: [],
+    fatigueIndicators: {
+      waterBreakFrequency: '',
+      restAreaTemp: '',
+      workerFatigueLevel: ''
+    }
+  });
+  
   const formRef = useRef<HTMLFormElement>(null);
   const analysisAbortController = useRef<AbortController | null>(null);
   const statusCleanupTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -88,6 +113,19 @@ const ChecklistForm = () => {
     };
     setResponses(updatedResponses);
     localStorage.setItem(`checklist-${templateId}-responses`, JSON.stringify(updatedResponses));
+  };
+  
+  // Handle structured question data
+  const handleWindDataChange = (data: WindConditionsData) => {
+    setWindData(data);
+    // Store as JSON string in responses for backend processing
+    handleResponse('sa-5', JSON.stringify(data));
+  };
+  
+  const handleTempDataChange = (data: TemperatureData) => {
+    setTempData(data);
+    // Store as JSON string in responses for backend processing
+    handleResponse('sa-6', JSON.stringify(data));
   };
 
   const toggleFlag = (itemId: string) => {
@@ -1264,7 +1302,18 @@ Progress: ${Math.round(calculateProgress())}% complete
 
                           {/* Enhanced Input System */}
                           <div className="mb-4">
-                            {item.inputType === 'select' && item.options.length > 0 ? (
+                            {/* Structured Questions for Wind (sa-5) and Temperature (sa-6) */}
+                            {item.id === 'sa-5' ? (
+                              <WindConditionsQuestion 
+                                data={windData} 
+                                onChange={handleWindDataChange}
+                              />
+                            ) : item.id === 'sa-6' ? (
+                              <TemperatureQuestion 
+                                data={tempData} 
+                                onChange={handleTempDataChange}
+                              />
+                            ) : item.inputType === 'select' && item.options.length > 0 ? (
                               // Dropdown select for multiple choice questions
                               <select
                                 value={responses[item.id]?.value || ''}
