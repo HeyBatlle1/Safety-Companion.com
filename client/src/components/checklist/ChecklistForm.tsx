@@ -239,7 +239,35 @@ const ChecklistForm = () => {
     // Load previous responses from localStorage
     const savedResponses = localStorage.getItem(`checklist-${templateId}-responses`);
     if (savedResponses) {
-      setResponses(JSON.parse(savedResponses));
+      const parsedResponses = JSON.parse(savedResponses);
+      setResponses(parsedResponses);
+      
+      // Hydrate structured question data from saved responses
+      if (parsedResponses['sa-5']?.value) {
+        try {
+          // Only parse if value looks like JSON
+          const windValue = parsedResponses['sa-5'].value;
+          if (typeof windValue === 'string' && windValue.startsWith('{')) {
+            const parsedWindData = JSON.parse(windValue);
+            setWindData(parsedWindData);
+          }
+        } catch (e) {
+          // Silently handle parse errors - data might be from old format
+        }
+      }
+      
+      if (parsedResponses['sa-6']?.value) {
+        try {
+          // Only parse if value looks like JSON
+          const tempValue = parsedResponses['sa-6'].value;
+          if (typeof tempValue === 'string' && tempValue.startsWith('{')) {
+            const parsedTempData = JSON.parse(tempValue);
+            setTempData(parsedTempData);
+          }
+        } catch (e) {
+          // Silently handle parse errors - data might be from old format
+        }
+      }
     }
 
     // Load response history
