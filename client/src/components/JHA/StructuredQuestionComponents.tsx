@@ -213,3 +213,93 @@ export function StructuredCheckboxGroup({
     </div>
   );
 }
+
+interface StructuredTextFieldProps {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  hint?: string;
+  icon?: React.ReactNode;
+  required?: boolean;
+  testId?: string;
+}
+
+export function StructuredTextField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  hint,
+  icon,
+  required,
+  testId
+}: StructuredTextFieldProps) {
+  return (
+    <div className="space-y-2">
+      <Label className="text-white text-sm font-medium">
+        {label} {required && <span className="text-red-400">*</span>}
+      </Label>
+      <div className="flex items-center space-x-2">
+        {icon && <div className="text-gray-400">{icon}</div>}
+        <Input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="bg-slate-700/50 border-blue-500/30 text-white flex-1"
+          data-testid={testId}
+        />
+      </div>
+      {hint && <p className="text-xs text-gray-400">{hint}</p>}
+    </div>
+  );
+}
+
+interface StructuredRadioGroupProps {
+  label: string;
+  options: { value: string; label: string }[];
+  value: string;
+  onChange: (value: string) => void;
+  hint?: string;
+  required?: boolean;
+}
+
+export function StructuredRadioGroup({
+  label,
+  options,
+  value,
+  onChange,
+  hint,
+  required
+}: StructuredRadioGroupProps) {
+  return (
+    <div className="space-y-2">
+      <Label className="text-white text-sm font-medium">
+        {label} {required && <span className="text-red-400">*</span>}
+      </Label>
+      <div className="space-y-2 pl-1">
+        {options.map((option) => (
+          <div key={option.value} className="flex items-center space-x-2 min-h-[44px]">
+            <input
+              type="radio"
+              id={option.value}
+              name={label}
+              checked={value === option.value}
+              onChange={() => onChange(option.value)}
+              className="w-5 h-5 border-gray-600 bg-slate-700 text-blue-600 focus:ring-2 focus:ring-blue-500"
+              data-testid={`radio-${option.value}`}
+            />
+            <label 
+              htmlFor={option.value}
+              className="text-sm text-gray-300 cursor-pointer py-2"
+            >
+              {option.label}
+            </label>
+          </div>
+        ))}
+      </div>
+      {hint && <p className="text-xs text-gray-400 mt-1">{hint}</p>}
+    </div>
+  );
+}

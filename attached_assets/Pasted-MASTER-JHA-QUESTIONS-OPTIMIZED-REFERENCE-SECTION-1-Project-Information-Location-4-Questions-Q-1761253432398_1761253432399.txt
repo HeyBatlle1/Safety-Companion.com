@@ -1,0 +1,154 @@
+MASTER JHA QUESTIONS - OPTIMIZED REFERENCE
+SECTION 1: Project Information & Location (4 Questions)
+Q1: Project Location & Building Details
+Current: "Project Location and Building Height"
+Optimized:
+📍 PROJECT LOCATION & BUILDING DETAILS
+
+Location (City, State): ___________________
+Example: "Indianapolis, IN"
+
+Building Height: _____ feet (total height)
+
+Work Height Today: _____ feet (height where work will be performed)
+
+Fall Distance: _____ feet (straight drop to ground level)
+
+Nearest Hospital: ___________________
+Name + distance (e.g., "IU Health Methodist - 2.3 miles")
+
+💡 Agent Note: Specific measurements are critical for risk calculations
+
+📷 Helpful Photos:
+✓ Building exterior showing full height
+✓ Work area from ground level (shows scale)
+✓ Site plan or blueprint
+✓ Street view showing access routes
+
+Q2: Glass Installation Type & Specifications
+Current: "Glass Installation Type"
+Optimized:
+🪟 GLASS INSTALLATION TYPE & SPECIFICATIONS
+
+Installation Method:
+☐ Curtain Wall (exterior, multi-story)
+☐ Storefront (ground level, framed)
+☐ Window Replacement (in-place)
+☐ Skylight/Roof Glass
+☐ Other: _____________
+
+Panel Size:
+Width: _____ inches
+Height: _____ inches
+Thickness: _____ inches
+
+Panel Weight: _____ lbs (per panel)
+
+Glass Type:
+☐ Insulated Glass Unit (IGU)
+☐ Laminated Safety Glass
+☐ Tempered Glass
+☐ Annealed (standard)
+☐ Spandrel (opaque)
+
+Special Features:
+☐ Argon-filled
+☐ Low-E coating
+☐ Tinted/reflective
+☐ None
+
+💡 Agent Note: Weight + size determine rigging requirements and struck-by risk
+
+📷 Helpful Photos:
+✓ Glass panel close-up showing thickness
+✓ Shop drawing or spec sheet
+✓ Packaging label (shows weight/specs)
+✓ Rigging setup for these panels
+
+Q3: Building Access & Lifting Equipment
+Current: "Building Access and Crane Requirements"
+Optimized:
+🏗️ BUILDING ACCESS & LIFTING EQUIPMENT
+
+Building Access Method:
+☐ Tower Crane (external)
+☐ Mobile Crane (ground-based)
+☐ Boom Lift / Aerial Lift
+☐ Swing Stage / Suspended Platform
+☐ Scaffolding + Manual Handling
+☐ Interior Access (no external equipment)
+
+Crane/Equipment Details (if applicable):
+Type/Model: _____________
+Load Capacity: _____ lbs (rated capacity)
+Actual Load: _____ lbs (glass + rigging)
+Safety Factor: _____ (capacity ÷ load, should be ≥4:1)
+
+Operator Certification:
+☐ NCCCO Certified (attach cert photo)
+☐ Manufacturer Trained
+☐ Not Certified (STOP - do not proceed)
+
+Ground Conditions:
+☐ Concrete (stable)
+☐ Asphalt (stable)
+☐ Gravel/Compacted Soil (verify stability)
+☐ Soft Ground (requires mats/stabilization)
+
+Overhead Clearances:
+Power Lines within 50 feet? ☐ Yes ☐ No
+If yes, distance: _____ feet (min 10 ft required)
+
+💡 Agent Note: Overloaded crane or untrained operator = AUTOMATIC NO-GO
+
+📷 Required Photos:
+✓ Crane setup (full view)
+✓ Operator certification card
+✓ Ground conditions under crane
+✓ Overhead clearance (power lines if present)
+✓ Load chart on crane
+
+Q4: Public Exposure & Ground-Level Protection
+Current: "Public Exposure Level"
+Optimized:
+🚶 PUBLIC EXPOSURE & GROUND-LEVEL PROTECTION
+
+Public Traffic Below Work Area:
+☐ High (sidewalk, main entrance, parking)
+☐ Medium (occasional pedestrian traffic)
+☐ Low (restricted area, limited access)
+☐ None (isolated site, no public access)
+
+Exclusion Zone:
+Barricade Distance: _____ feet from building
+(Minimum: 1 foot per 10 feet of height, e.g., 60 ft high = 60 ft exclusion)
+
+Ground-Level Protection Systems:
+☐ Hard Barricades (fencing/concrete barriers)
+☐ Caution Tape / Soft Barricades
+☐ Safety Netting (overhead protection)
+☐ Dedicated Spotter (person monitoring area)
+☐ None (CRITICAL VIOLATION - see note below)
+
+Barricade Status:
+☐ Installed and secure
+☐ Needs installation (BEFORE work starts)
+☐ Not planned (STOP - do not proceed)
+
+Adjacent Activity:
+☐ Active construction nearby
+☐ Operating businesses
+☐ Residential area
+☐ Empty/unoccupied
+
+🚨 CRITICAL: No ground-level protection = AUTOMATIC NO-GO
+Per OSHA 1926.760, falling object protection is REQUIRED when public exposure exists.
+
+💡 Agent Note: This is the #1 gap from most JHAs. Agent 3 predicts struck-by incidents when this is inadequate.
+
+📷 Required Photos:
+✓ Ground-level view showing public traffic
+✓ Barricade setup (if installed)
+✓ Fall zone perimeter
+✓ Adjacent properties/activities
+✓ Signage (warning signs, caution tape)
