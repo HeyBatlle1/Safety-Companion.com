@@ -22,6 +22,7 @@ import multiAgentTestRoutes from './routes/multiAgentTest';
 import eapRoutes from './routes/eap.routes.js';
 import agentOutputsRoutes from './routes/agentOutputs.js';
 import jhaUpdateRoutes from './routes/jhaUpdate.routes';
+import supabaseTestRoutes from './routes/supabaseTest';
 import { logError } from "./utils/logger";
 import './types/session';
 import { geminiAnalytics } from "./services/geminiAnalytics";
@@ -1222,6 +1223,9 @@ Please provide a comprehensive, grounded response that helps ensure workplace sa
 
   // JHA Update routes
   app.use('/api', jhaUpdateRoutes);
+
+  // Supabase connection test routes
+  app.use(supabaseTestRoutes);
 
   return httpServer;
 }
