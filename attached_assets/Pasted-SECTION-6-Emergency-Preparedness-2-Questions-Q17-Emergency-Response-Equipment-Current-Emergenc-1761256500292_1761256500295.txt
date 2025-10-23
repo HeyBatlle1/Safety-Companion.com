@@ -1,0 +1,251 @@
+SECTION 6: Emergency Preparedness (2 Questions)
+Q17: Emergency Response Equipment
+Current: "Emergency Response Equipment"
+Optimized:
+🚑 EMERGENCY RESPONSE EQUIPMENT & READINESS
+
+First Aid/Medical Equipment:
+☐ First Aid Kit (OSHA 1910.151 compliant)
+☐ AED (Automated External Defibrillator)
+☐ Trauma Kit (for serious injuries)
+☐ Oxygen (if available)
+☐ Eye Wash Station (for chemical exposure)
+
+Equipment Location:
+First Aid: ______________ (specific location, e.g., "ground level, blue box")
+AED: ______________ (within 3-minute travel time required)
+Rescue Equipment: ______________
+
+Equipment Inspection:
+☐ All equipment inspected before shift
+☐ First aid kit fully stocked
+☐ AED pads not expired (check date: _____ / _____ / _____)
+☐ Not inspected (⚠️ READINESS CONCERN)
+
+Fall Rescue Equipment (if working >6 ft):
+☐ Descent Device (for lowering fallen worker)
+☐ Retrieval System (mechanical advantage)
+☐ Trauma Straps (suspension relief)
+☐ None (⚠️ OSHA VIOLATION - rescue within 6 min required)
+
+Crew Training on Equipment:
+☐ All crew First Aid/CPR certified
+☐ Designated person trained on AED
+☐ Rescue team trained on descent device
+☐ No training (⚠️ EQUIPMENT WON'T BE USED EFFECTIVELY)
+
+Emergency Response Time Estimates:
+Fall rescue (on-site team): _____ minutes (max 6 min allowed)
+EMS arrival: _____ minutes
+Helicopter medevac: ☐ Available ☐ Not available
+Nearest Trauma Center: ______________ (_____ minutes away)
+
+🚨 CRITICAL: Fall arrest without rescue = suspension trauma → death in 30 minutes.
+OSHA requires rescue within 6 minutes.
+
+💡 Agent Note: "No AED" + "electrical work nearby" = Agent 4 flags emergency readiness as FAILED → NO-GO decision.
+
+📷 Required Photos:
+✓ First aid kit (open, showing contents)
+✓ AED (with expiration date visible on pads)
+✓ Rescue equipment staged nearby
+✓ Equipment location signage
+
+Q18: Emergency Response Plan Status
+Current: "Emergency Response Plan Status"
+Optimized:
+📋 EMERGENCY ACTION PLAN (EAP)
+
+EAP Status:
+☐ Written EAP available on-site (attach photo/PDF)
+☐ Generic company EAP (not site-specific)
+☐ Verbal plan only (⚠️ NOT COMPLIANT - OSHA requires written)
+☐ No EAP (⚠️ AUTOMATIC NO-GO)
+
+EAP Components:
+☐ Evacuation routes marked
+☐ Assembly point designated: ______________ (location)
+☐ Emergency contact numbers posted
+☐ Hospital route map available
+☐ Weather evacuation plan (high winds, lightning)
+☐ Rescue procedures documented
+
+Assembly Point:
+Location: ______________
+Distance from building: _____ feet
+Safe from falling objects? ☐ Yes ☐ No
+Can all crew reach it in <2 minutes? ☐ Yes ☐ No
+
+Emergency Communication Tree:
+Who calls 911: ______________ (name, role)
+Who notifies site supervisor: ______________
+Who notifies safety manager: ______________
+
+Crew Awareness:
+☐ All crew briefed on EAP today
+☐ Briefed this week
+☐ Briefed >1 week ago
+☐ Not briefed (⚠️ CREW DOESN'T KNOW PLAN)
+
+EAP Drills:
+Last EAP drill conducted: _____ / _____ / _____
+☐ <30 days ago (excellent)
+☐ 30-90 days ago (acceptable)
+☐ >90 days ago (⚠️ STALE)
+☐ Never conducted (⚠️ UNTESTED PLAN)
+
+Nearest Hospital Details:
+Name: ______________
+Address: ______________
+Drive time: _____ minutes
+Trauma center? ☐ Yes ☐ No
+
+🚨 CRITICAL: OSHA 1926.35 requires written EAP for sites with >10 employees.
+No written plan = compliance violation.
+
+💡 Agent Note: "No EAP" + "High-risk work" = Agent 4 automatic NO-GO decision.
+
+📷 Required Photos:
+✓ Written EAP document (first page)
+✓ Assembly point location
+✓ Evacuation route signage
+✓ Emergency contact numbers posted
+✓ Hospital route map
+
+SECTION 7: Public Safety and Site Security (2 Questions)
+Q19: Ground Level Protection Systems (MOST CRITICAL)
+Current: "Ground Level Protection Systems"
+⚠️ THIS IS THE CRITICAL GAP FROM EXAMPLE ANALYSIS (sa-19)
+Optimized:
+🚧 GROUND-LEVEL PROTECTION SYSTEMS (CRITICAL!)
+
+Public Fall Zone Assessment:
+Building/work height: _____ feet
+Required exclusion zone: _____ feet (1 ft per 10 ft height minimum)
+Actual exclusion zone: _____ feet
+Is exclusion adequate? ☐ Yes ☐ No (⚠️ PUBLIC EXPOSURE RISK)
+
+Barricade System:
+☐ Hard Barricades (concrete barriers, fencing)
+☐ Caution Tape (3-strand minimum)
+☐ Traffic Cones with chains
+☐ Safety Netting (overhead protection)
+☐ None (🚨 AUTOMATIC NO-GO - CRITICAL VIOLATION)
+
+Barricade Status:
+☐ Installed and secure (before work starts)
+☐ Needs installation (work cannot start)
+☐ Not planned (🚨 STOP - this is required by OSHA 1926.760)
+
+Overhead Protection:
+☐ Safety Netting installed
+☐ Catch Platform
+☐ Canopy/Awning
+☐ None (barricades must be larger if no overhead protection)
+
+Ground-Level Monitoring:
+☐ Dedicated Spotter (person monitoring fall zone)
+    - Name: ______________
+    - Position: ______________
+    - Equipped with: ☐ Air horn ☐ Two-way radio ☐ High-vis vest
+☐ No spotter (⚠️ NO ACTIVE DEFENSE)
+
+Public Traffic Volume:
+☐ High (sidewalk, main entrance, parking lot)
+☐ Medium (occasional pedestrian traffic)
+☐ Low (restricted area, limited access)
+☐ None (isolated site, no public nearby)
+
+Signage:
+☐ "DANGER - OVERHEAD WORK" signs posted
+☐ "HARD HAT AREA" signs
+☐ "AUTHORIZED PERSONNEL ONLY"
+☐ No signage (⚠️ PUBLIC UNAWARE OF HAZARD)
+
+Enforcement:
+☐ Security guard on-site
+☐ Supervisor actively monitoring
+☐ No enforcement (⚠️ BARRICADE BREACH RISK)
+
+Breach Response Plan:
+If someone enters fall zone:
+☐ Spotter sounds alarm (air horn)
+☐ All overhead work STOPS immediately
+☐ Person is escorted out
+☐ No plan (⚠️ STRUCK-BY INCIDENT LIKELY)
+
+🚨 THIS IS THE #1 MISSING CONTROL FROM JHAS!
+
+OSHA 1926.760(a): "The employer shall erect or have erected on the site, as necessary, a barrier, railing or any other effective means to prevent entrance to the fall zone."
+
+Per example analysis: "Missing ground-level protection = most pressing concern, constitutes severe OSHA violation."
+
+Agent 3 predicts: "Glass panel strikes ground-level worker" when this section is inadequate.
+
+💡 Agent Note: If this field says "Same" or "TBD" or "None", Agent 4 issues AUTOMATIC NO-GO decision.
+
+📷 REQUIRED PHOTOS (Not Optional!):
+✓ Full perimeter barricade (aerial/ground view)
+✓ Barricade at each side of building
+✓ Fall zone marked on ground
+✓ Signage at entry points
+✓ Spotter position (where they stand)
+✓ Overhead netting (if installed)
+
+Q20: Adjacent Property Protection
+Current: "Adjacent Property Protection"
+Optimized:
+🏘️ ADJACENT PROPERTY PROTECTION & NOTIFICATION
+
+Adjacent Properties (Within 100 Feet):
+☐ Residential (occupied homes)
+☐ Commercial (operating businesses)
+☐ Parking areas (vehicles present)
+☐ Public Right-of-Way (sidewalks, streets)
+☐ Vacant/Unoccupied
+☐ None (isolated site)
+
+Closest Property Distance: _____ feet from work area
+
+Property Owner Notification:
+☐ All adjacent owners notified in writing (attach proof)
+☐ Verbal notification only
+☐ No notification (⚠️ COMMUNITY RELATIONS RISK)
+
+Notification included:
+☐ Work schedule (dates/times)
+☐ Noise/disruption warning
+☐ Safety measures in place
+☐ Emergency contact info
+
+Protection Measures for Adjacent Property:
+☐ Extended barricades onto adjacent property (with permission)
+☐ Safety netting over adjacent property
+☐ Plywood/tarps protecting vehicles/structures
+☐ Designated parking restricted during glass work
+☐ None (⚠️ PROPERTY DAMAGE RISK)
+
+Vehicle Protection:
+☐ No parking allowed in fall zone during work
+☐ Vehicles moved to safe area
+☐ Covered parking structures protected
+☐ None (⚠️ VEHICLE DAMAGE RISK)
+
+Adjacent Property Hazards TO Workers:
+☐ Power lines from adjacent building
+☐ Overhanging trees/structures
+☐ HVAC exhaust/vents
+☐ None identified
+
+Coordination with Adjacent Activity:
+☐ No other work happening nearby
+☐ Coordinated with other contractors
+☐ Uncoordinated (⚠️ CONFLICT RISK)
+
+💡 Agent Note: Residential property + inadequate notification = community complaints = work stoppage.
+
+📷 Helpful Photos:
+✓ Adjacent properties (showing distance)
+✓ Protection measures installed
+✓ Notification letters (if available)
+✓ Vehicle parking areas

@@ -31,6 +31,10 @@ import { GlassPanelRiskQuestion, type GlassPanelRiskData } from '../JHA/GlassPan
 import { CrewQualificationsQuestion, type CrewQualificationsData } from '../JHA/CrewQualificationsQuestion';
 import { PPEInspectionQuestion, type PPEInspectionData } from '../JHA/PPEInspectionQuestion';
 import { CommunicationSystemsQuestion, type CommunicationSystemsData } from '../JHA/CommunicationSystemsQuestion';
+import { EmergencyEquipmentQuestion, type EmergencyEquipmentData } from '../JHA/EmergencyEquipmentQuestion';
+import { EmergencyPlanQuestion, type EmergencyPlanData } from '../JHA/EmergencyPlanQuestion';
+import { GroundProtectionQuestion, type GroundProtectionData } from '../JHA/GroundProtectionQuestion';
+import { AdjacentPropertyQuestion, type AdjacentPropertyData } from '../JHA/AdjacentPropertyQuestion';
 
 interface ChecklistItem {
   id: string;
@@ -301,6 +305,66 @@ const ChecklistForm = () => {
     hospitalPhone: '',
     backupMethod: ''
   });
+  const [emergencyEquipmentData, setEmergencyEquipmentData] = useState<EmergencyEquipmentData>({
+    medicalEquipment: [],
+    firstAidLocation: '',
+    aedLocation: '',
+    rescueEquipmentLocation: '',
+    equipmentInspection: [],
+    aedPadExpiration: '',
+    fallRescueEquipment: [],
+    crewTraining: [],
+    fallRescueTime: '',
+    emsArrival: '',
+    helicopterAvailable: '',
+    traumaCenter: '',
+    traumaCenterTime: ''
+  });
+  const [emergencyPlanData, setEmergencyPlanData] = useState<EmergencyPlanData>({
+    eapStatus: '',
+    eapComponents: [],
+    assemblyLocation: '',
+    assemblyDistance: '',
+    assemblySafeFromFalling: '',
+    assemblyReachable: '',
+    whoCalls911: '',
+    whoNotifiesSupervisor: '',
+    whoNotifiesSafety: '',
+    crewAwareness: '',
+    lastDrillDate: '',
+    drillFrequency: '',
+    hospitalName: '',
+    hospitalAddress: '',
+    hospitalDriveTime: '',
+    hospitalTraumaCenter: ''
+  });
+  const [groundProtectionData, setGroundProtectionData] = useState<GroundProtectionData>({
+    workHeight: '',
+    requiredExclusionZone: '',
+    actualExclusionZone: '',
+    exclusionAdequate: '',
+    barricadeSystem: [],
+    barricadeStatus: '',
+    overheadProtection: [],
+    spotterAssigned: '',
+    spotterName: '',
+    spotterPosition: '',
+    spotterEquipment: [],
+    publicTrafficVolume: '',
+    signage: [],
+    enforcement: [],
+    breachResponse: []
+  });
+  const [adjacentPropertyData, setAdjacentPropertyData] = useState<AdjacentPropertyData>({
+    adjacentProperties: [],
+    closestDistance: '',
+    ownerNotification: '',
+    notificationIncluded: [],
+    protectionMeasures: [],
+    vehicleProtection: [],
+    adjacentHazards: [],
+    coordination: ''
+  });
   
   const formRef = useRef<HTMLFormElement>(null);
   const analysisAbortController = useRef<AbortController | null>(null);
@@ -399,6 +463,26 @@ const ChecklistForm = () => {
   const handleCommunicationSystemsDataChange = (data: CommunicationSystemsData) => {
     setCommunicationSystemsData(data);
     handleResponse('sa-16', JSON.stringify(data));
+  };
+  
+  const handleEmergencyEquipmentDataChange = (data: EmergencyEquipmentData) => {
+    setEmergencyEquipmentData(data);
+    handleResponse('sa-17', JSON.stringify(data));
+  };
+  
+  const handleEmergencyPlanDataChange = (data: EmergencyPlanData) => {
+    setEmergencyPlanData(data);
+    handleResponse('sa-18', JSON.stringify(data));
+  };
+  
+  const handleGroundProtectionDataChange = (data: GroundProtectionData) => {
+    setGroundProtectionData(data);
+    handleResponse('sa-19', JSON.stringify(data));
+  };
+  
+  const handleAdjacentPropertyDataChange = (data: AdjacentPropertyData) => {
+    setAdjacentPropertyData(data);
+    handleResponse('sa-20', JSON.stringify(data));
   };
 
   const toggleFlag = (itemId: string) => {
@@ -545,6 +629,10 @@ const ChecklistForm = () => {
       hydrateStructuredData('sa-14', setCrewQualificationsData);
       hydrateStructuredData('sa-15', setPPEInspectionData);
       hydrateStructuredData('sa-16', setCommunicationSystemsData);
+      hydrateStructuredData('sa-17', setEmergencyEquipmentData);
+      hydrateStructuredData('sa-18', setEmergencyPlanData);
+      hydrateStructuredData('sa-19', setGroundProtectionData);
+      hydrateStructuredData('sa-20', setAdjacentPropertyData);
     }
 
     // Load response history
@@ -1687,6 +1775,26 @@ Progress: ${Math.round(calculateProgress())}% complete
                               <CommunicationSystemsQuestion 
                                 data={communicationSystemsData} 
                                 onChange={handleCommunicationSystemsDataChange}
+                              />
+                            ) : item.id === 'sa-17' ? (
+                              <EmergencyEquipmentQuestion 
+                                data={emergencyEquipmentData} 
+                                onChange={handleEmergencyEquipmentDataChange}
+                              />
+                            ) : item.id === 'sa-18' ? (
+                              <EmergencyPlanQuestion 
+                                data={emergencyPlanData} 
+                                onChange={handleEmergencyPlanDataChange}
+                              />
+                            ) : item.id === 'sa-19' ? (
+                              <GroundProtectionQuestion 
+                                data={groundProtectionData} 
+                                onChange={handleGroundProtectionDataChange}
+                              />
+                            ) : item.id === 'sa-20' ? (
+                              <AdjacentPropertyQuestion 
+                                data={adjacentPropertyData} 
+                                onChange={handleAdjacentPropertyDataChange}
                               />
                             ) : item.inputType === 'select' && item.options.length > 0 ? (
                               // Dropdown select for multiple choice questions
