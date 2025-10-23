@@ -21,6 +21,9 @@ import { BuildingAccessQuestion, type BuildingAccessData } from '../JHA/Building
 import { PublicExposureQuestion, type PublicExposureData } from '../JHA/PublicExposureQuestion';
 import { WindConditionsQuestion, type WindConditionsData } from '../JHA/WindConditionsQuestion';
 import { TemperatureQuestion, type TemperatureData } from '../JHA/TemperatureQuestion';
+import { PrecipitationQuestion, type PrecipitationData } from '../JHA/PrecipitationQuestion';
+import { GlassHandlingQuestion, type GlassHandlingData } from '../JHA/GlassHandlingQuestion';
+import { FallProtectionQuestion, type FallProtectionData } from '../JHA/FallProtectionQuestion';
 
 interface ChecklistItem {
   id: string;
@@ -134,6 +137,53 @@ const ChecklistForm = () => {
       workerFatigueLevel: ''
     }
   });
+  const [precipitationData, setPrecipitationData] = useState<PrecipitationData>({
+    currentPrecipitation: [],
+    forecastHour1: '',
+    forecastHour2: '',
+    forecastHour3: '',
+    forecastHour4: '',
+    currentVisibility: '',
+    groundVisibility: '',
+    surfaceConditions: [],
+    slipFallPrecautions: [],
+    workInRainPolicy: ''
+  });
+  const [glassHandlingData, setGlassHandlingData] = useState<GlassHandlingData>({
+    liftingMethod: [],
+    numberOfCups: '',
+    capacityPerCup: '',
+    totalCapacity: '',
+    actualLoad: '',
+    safetyFactor: '',
+    backupSystems: [],
+    cupsInspected: '',
+    riggingInspected: '',
+    vacuumPumpTested: '',
+    inspectionFindings: [],
+    damageDescription: '',
+    loadDistribution: ''
+  });
+  const [fallProtectionData, setFallProtectionData] = useState<FallProtectionData>({
+    primaryProtection: [],
+    harnessType: '',
+    dRingLocation: '',
+    lanyardType: [],
+    anchorageCapacity: '',
+    harnessInspected: '',
+    inspectionFindings: '',
+    damageDescription: '',
+    inspectorName: '',
+    freeFallDistance: '',
+    lanyardDeceleration: '',
+    safetyMargin: '',
+    totalClearance: '',
+    availableClearance: '',
+    clearanceAdequate: '',
+    rescuePlan: [],
+    rescueETA: '',
+    rescueEquipment: []
+  });
   
   const formRef = useRef<HTMLFormElement>(null);
   const analysisAbortController = useRef<AbortController | null>(null);
@@ -182,6 +232,21 @@ const ChecklistForm = () => {
   const handleTempDataChange = (data: TemperatureData) => {
     setTempData(data);
     handleResponse('sa-6', JSON.stringify(data));
+  };
+  
+  const handlePrecipitationDataChange = (data: PrecipitationData) => {
+    setPrecipitationData(data);
+    handleResponse('sa-7', JSON.stringify(data));
+  };
+  
+  const handleGlassHandlingDataChange = (data: GlassHandlingData) => {
+    setGlassHandlingData(data);
+    handleResponse('sa-8', JSON.stringify(data));
+  };
+  
+  const handleFallProtectionDataChange = (data: FallProtectionData) => {
+    setFallProtectionData(data);
+    handleResponse('sa-9', JSON.stringify(data));
   };
 
   const toggleFlag = (itemId: string) => {
@@ -318,6 +383,9 @@ const ChecklistForm = () => {
       hydrateStructuredData('sa-4', setPublicExposureData);
       hydrateStructuredData('sa-5', setWindData);
       hydrateStructuredData('sa-6', setTempData);
+      hydrateStructuredData('sa-7', setPrecipitationData);
+      hydrateStructuredData('sa-8', setGlassHandlingData);
+      hydrateStructuredData('sa-9', setFallProtectionData);
     }
 
     // Load response history
@@ -1410,6 +1478,21 @@ Progress: ${Math.round(calculateProgress())}% complete
                               <TemperatureQuestion 
                                 data={tempData} 
                                 onChange={handleTempDataChange}
+                              />
+                            ) : item.id === 'sa-7' ? (
+                              <PrecipitationQuestion 
+                                data={precipitationData} 
+                                onChange={handlePrecipitationDataChange}
+                              />
+                            ) : item.id === 'sa-8' ? (
+                              <GlassHandlingQuestion 
+                                data={glassHandlingData} 
+                                onChange={handleGlassHandlingDataChange}
+                              />
+                            ) : item.id === 'sa-9' ? (
+                              <FallProtectionQuestion 
+                                data={fallProtectionData} 
+                                onChange={handleFallProtectionDataChange}
                               />
                             ) : item.inputType === 'select' && item.options.length > 0 ? (
                               // Dropdown select for multiple choice questions
