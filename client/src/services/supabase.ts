@@ -1,22 +1,63 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-// Get environment variables from .env file
+// Get environment variables
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
-// Create a single Supabase client for interacting with your database
-const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true
-  },
-  global: {
-    headers: {
-      'Content-Type': 'application/json'
-    }
+// Validate configuration
+if (!supabaseUrl) {
+  console.error('❌ CRITICAL: VITE_SUPABASE_URL is not configured!');
+  console.error('Please add VITE_SUPABASE_URL to your Replit Secrets');
+}
+if (!supabaseAnonKey) {
+  console.error('❌ CRITICAL: VITE_SUPABASE_ANON_KEY is not configured!');
+  console.error('Please add VITE_SUPABASE_ANON_KEY to your Replit Secrets');
+}
+
+// Singleton pattern: Store client in window to survive HMR
+declare global {
+  interface Window {
+    __supabaseClient?: SupabaseClient;
   }
-});
+}
+
+let supabase: SupabaseClient;
+
+if (typeof window !== 'undefined' && window.__supabaseClient) {
+  // Reuse existing client during HMR
+  supabase = window.__supabaseClient;
+  console.log('🔐 Reusing existing Supabase client (HMR)');
+} else {
+  console.log('🔐 Supabase Configuration:');
+  console.log('  URL configured:', !!supabaseUrl, supabaseUrl ? `(${supabaseUrl.substring(0, 30)}...)` : '');
+  console.log('  Anon Key configured:', !!supabaseAnonKey, supabaseAnonKey ? `(${supabaseAnonKey.substring(0, 20)}...)` : '');
+  
+  // Create a single Supabase client for interacting with your database
+  supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+      storageKey: 'safety-companion-auth',
+      flowType: 'pkce'
+    },
+    global: {
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Client-Info': 'safety-companion-web'
+      }
+    },
+    db: {
+      schema: 'public'
+    }
+  });
+  
+  // Store in window for HMR
+  if (typeof window !== 'undefined') {
+    window.__supabaseClient = supabase;
+  }
+}
 
 // Supabase status checker
 export const getSupabaseStatus = async () => {
