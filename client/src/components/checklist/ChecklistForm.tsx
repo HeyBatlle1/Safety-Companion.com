@@ -15,6 +15,10 @@ import { ReportFormatter } from '../../services/reportFormatter';
 import { SafetyAnalysisReport } from '../SafetyAnalysis/SafetyAnalysisReport';
 import { JHAUpdateForm } from '../JHA/JHAUpdateForm';
 import { JHAComparisonView } from '../JHA/JHAComparisonView';
+import { ProjectLocationQuestion, type ProjectLocationData } from '../JHA/ProjectLocationQuestion';
+import { GlassInstallationQuestion, type GlassInstallationData } from '../JHA/GlassInstallationQuestion';
+import { BuildingAccessQuestion, type BuildingAccessData } from '../JHA/BuildingAccessQuestion';
+import { PublicExposureQuestion, type PublicExposureData } from '../JHA/PublicExposureQuestion';
 import { WindConditionsQuestion, type WindConditionsData } from '../JHA/WindConditionsQuestion';
 import { TemperatureQuestion, type TemperatureData } from '../JHA/TemperatureQuestion';
 
@@ -76,6 +80,40 @@ const ChecklistForm = () => {
   const [uploadingBlueprints, setUploadingBlueprints] = useState<Record<string, boolean>>({});
   
   // Structured question data
+  const [projectLocationData, setProjectLocationData] = useState<ProjectLocationData>({
+    location: '',
+    buildingHeight: '',
+    workHeight: '',
+    fallDistance: '',
+    nearestHospital: ''
+  });
+  const [glassInstallationData, setGlassInstallationData] = useState<GlassInstallationData>({
+    installationMethod: [],
+    panelWidth: '',
+    panelHeight: '',
+    panelThickness: '',
+    panelWeight: '',
+    glassType: [],
+    specialFeatures: []
+  });
+  const [buildingAccessData, setBuildingAccessData] = useState<BuildingAccessData>({
+    accessMethod: [],
+    equipmentType: '',
+    loadCapacity: '',
+    actualLoad: '',
+    safetyFactor: '',
+    operatorCertification: [],
+    groundConditions: [],
+    powerLinesNearby: '',
+    powerLineDistance: ''
+  });
+  const [publicExposureData, setPublicExposureData] = useState<PublicExposureData>({
+    publicTraffic: '',
+    barricadeDistance: '',
+    protectionSystems: [],
+    barricadeStatus: [],
+    adjacentActivity: []
+  });
   const [windData, setWindData] = useState<WindConditionsData>({
     currentSpeed: '',
     forecastedGusts: '',
@@ -116,15 +154,33 @@ const ChecklistForm = () => {
   };
   
   // Handle structured question data
+  const handleProjectLocationDataChange = (data: ProjectLocationData) => {
+    setProjectLocationData(data);
+    handleResponse('sa-1', JSON.stringify(data));
+  };
+  
+  const handleGlassInstallationDataChange = (data: GlassInstallationData) => {
+    setGlassInstallationData(data);
+    handleResponse('sa-2', JSON.stringify(data));
+  };
+  
+  const handleBuildingAccessDataChange = (data: BuildingAccessData) => {
+    setBuildingAccessData(data);
+    handleResponse('sa-3', JSON.stringify(data));
+  };
+  
+  const handlePublicExposureDataChange = (data: PublicExposureData) => {
+    setPublicExposureData(data);
+    handleResponse('sa-4', JSON.stringify(data));
+  };
+  
   const handleWindDataChange = (data: WindConditionsData) => {
     setWindData(data);
-    // Store as JSON string in responses for backend processing
     handleResponse('sa-5', JSON.stringify(data));
   };
   
   const handleTempDataChange = (data: TemperatureData) => {
     setTempData(data);
-    // Store as JSON string in responses for backend processing
     handleResponse('sa-6', JSON.stringify(data));
   };
 
@@ -243,31 +299,25 @@ const ChecklistForm = () => {
       setResponses(parsedResponses);
       
       // Hydrate structured question data from saved responses
-      if (parsedResponses['sa-5']?.value) {
-        try {
-          // Only parse if value looks like JSON
-          const windValue = parsedResponses['sa-5'].value;
-          if (typeof windValue === 'string' && windValue.startsWith('{')) {
-            const parsedWindData = JSON.parse(windValue);
-            setWindData(parsedWindData);
+      const hydrateStructuredData = (questionId: string, setter: (data: any) => void) => {
+        if (parsedResponses[questionId]?.value) {
+          try {
+            const value = parsedResponses[questionId].value;
+            if (typeof value === 'string' && value.startsWith('{')) {
+              setter(JSON.parse(value));
+            }
+          } catch (e) {
+            // Silently handle parse errors - data might be from old format
           }
-        } catch (e) {
-          // Silently handle parse errors - data might be from old format
         }
-      }
+      };
       
-      if (parsedResponses['sa-6']?.value) {
-        try {
-          // Only parse if value looks like JSON
-          const tempValue = parsedResponses['sa-6'].value;
-          if (typeof tempValue === 'string' && tempValue.startsWith('{')) {
-            const parsedTempData = JSON.parse(tempValue);
-            setTempData(parsedTempData);
-          }
-        } catch (e) {
-          // Silently handle parse errors - data might be from old format
-        }
-      }
+      hydrateStructuredData('sa-1', setProjectLocationData);
+      hydrateStructuredData('sa-2', setGlassInstallationData);
+      hydrateStructuredData('sa-3', setBuildingAccessData);
+      hydrateStructuredData('sa-4', setPublicExposureData);
+      hydrateStructuredData('sa-5', setWindData);
+      hydrateStructuredData('sa-6', setTempData);
     }
 
     // Load response history
@@ -1330,8 +1380,28 @@ Progress: ${Math.round(calculateProgress())}% complete
 
                           {/* Enhanced Input System */}
                           <div className="mb-4">
-                            {/* Structured Questions for Wind (sa-5) and Temperature (sa-6) */}
-                            {item.id === 'sa-5' ? (
+                            {/* Structured Questions for sa-1 through sa-6 */}
+                            {item.id === 'sa-1' ? (
+                              <ProjectLocationQuestion 
+                                data={projectLocationData} 
+                                onChange={handleProjectLocationDataChange}
+                              />
+                            ) : item.id === 'sa-2' ? (
+                              <GlassInstallationQuestion 
+                                data={glassInstallationData} 
+                                onChange={handleGlassInstallationDataChange}
+                              />
+                            ) : item.id === 'sa-3' ? (
+                              <BuildingAccessQuestion 
+                                data={buildingAccessData} 
+                                onChange={handleBuildingAccessDataChange}
+                              />
+                            ) : item.id === 'sa-4' ? (
+                              <PublicExposureQuestion 
+                                data={publicExposureData} 
+                                onChange={handlePublicExposureDataChange}
+                              />
+                            ) : item.id === 'sa-5' ? (
                               <WindConditionsQuestion 
                                 data={windData} 
                                 onChange={handleWindDataChange}
