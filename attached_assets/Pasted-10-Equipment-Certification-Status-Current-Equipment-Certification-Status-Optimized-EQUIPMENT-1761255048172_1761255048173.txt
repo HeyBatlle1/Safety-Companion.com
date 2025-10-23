@@ -1,0 +1,161 @@
+10: Equipment Certification Status
+Current: "Equipment Certification Status"
+Optimized:
+📋 EQUIPMENT CERTIFICATION & INSPECTION RECORDS
+
+Crane/Lift Equipment Certification:
+Last inspection date: _____ / _____ / _____
+Inspection type: ☐ Annual ☐ Quarterly ☐ Pre-use
+Inspector name: ________________
+Inspector credentials: ☐ NCCCO ☐ Manufacturer ☐ Competent Person (company)
+Next inspection due: _____ / _____ / _____
+
+Equipment Serial/ID Numbers:
+Crane: _______________
+Boom/Lift: _______________
+Rigging: _______________
+
+Rigging Inspection:
+☐ Inspected before each use (OSHA required)
+☐ Inspected weekly
+☐ Inspected monthly
+☐ No regular inspection (⚠️ COMPLIANCE VIOLATION)
+
+Inspector for rigging: ________________ (Competent Person?)
+
+Inspection Findings (Any defects?):
+☐ All equipment passed inspection
+☐ Minor issues (corrected before use)
+☐ Major issues found: ________________
+☐ Not documented (⚠️ CONCERN)
+
+Load Testing (if applicable):
+Last load test: _____ / _____ / _____
+Test capacity: _____ lbs
+Test result: ☐ Passed ☐ Failed ☐ Not tested
+
+Fall Protection Equipment Certs:
+Harnesses certified: ☐ Yes (attach cert photo) ☐ No
+Lanyards certified: ☐ Yes (attach cert photo) ☐ No
+Anchorage certified: ☐ Yes (by engineer) ☐ No
+
+🚨 CRITICAL: OSHA 1926.1412 requires annual crane inspection by qualified person.
+Expired certs = AUTOMATIC NO-GO decision.
+
+💡 Agent Note: "Up to date" without dates = Agent 1 flags as insufficient response.
+
+📷 Required Photos:
+✓ Inspection tags on equipment (dates visible)
+✓ Certification documents
+✓ Crane nameplate (serial number)
+✓ Load chart placard
+✓ Inspector's credentials (if available)
+
+SECTION 4: Glass Storage and Material Handling (3 Questions)
+Q11: Glass Storage Area Conditions
+Current: "Glass Storage Area Conditions"
+Optimized:
+📦 GLASS STORAGE LOCATION & PROTECTION
+
+Storage Area Location:
+Distance from building: _____ feet
+Distance from edge/excavation: _____ feet (minimum 6 ft required)
+Ground conditions: ☐ Level/stable ☐ Sloped ☐ Soft/unstable
+
+Fall Protection Around Storage:
+☐ Guardrails (if near edge >6 ft)
+☐ Barricades/caution tape
+☐ No edge nearby (storage in safe area)
+☐ None (⚠️ RISK if near edge)
+
+Glass Rack/Support System:
+☐ A-frame racks (angled, stable)
+☐ Vertical racks (secure)
+☐ Laid flat (on padding)
+☐ Leaning against structure (⚠️ TIPPING RISK)
+
+Rack capacity: _____ lbs
+Current load: _____ lbs
+
+Environmental Protection:
+☐ Covered/tarped (protects from rain)
+☐ Shaded (prevents thermal stress)
+☐ Secured against wind
+☐ None (⚠️ DAMAGE RISK)
+
+Security/Access Control:
+☐ Fenced/restricted area
+☐ Signage ("Authorized Personnel Only")
+☐ Open area (⚠️ PUBLIC ACCESS RISK)
+
+Wind Protection:
+Is storage area protected from wind? ☐ Yes ☐ No
+If no, maximum wind before moving glass indoors: _____ mph
+
+💡 Agent Note: Glass tipping from rack = struck-by incident. Agent 3 looks for "leaning" + "no securing" combination.
+
+📷 Required Photos:
+✓ Storage area overview (full setup)
+✓ Glass racks (A-frame or vertical)
+✓ Distance from edge (if applicable)
+✓ Environmental protection (tarps, covers)
+✓ Security measures (fencing, signage)
+
+Q12: Glass Transport Path Safety
+Current: "Glass Transport Path Safety"
+Optimized:
+🚶‍♂️ GLASS TRANSPORT ROUTE & HAZARDS
+
+Transport Method:
+☐ Crane lift (glass never manually carried)
+☐ Manual carry by crew (how many people: _____)
+☐ Cart/dolly
+☐ Combination (describe): ______________
+
+Transport Distance:
+Horizontal: _____ feet
+Vertical: _____ feet (stairs, ramps, lifts)
+Total time per trip: _____ minutes
+
+Transport Path Hazards:
+☐ Level, clear path
+☐ Stairs/steps (number: _____)
+☐ Ramps (slope: _____ degrees)
+☐ Doorways/narrow passages (width: _____ inches)
+☐ Overhead obstacles (clearance: _____ feet)
+☐ Uneven surface (describe): ______________
+
+Trip/Slip Hazards on Path:
+☐ None identified
+☐ Cables/hoses crossing path
+☐ Debris/materials on ground
+☐ Wet/slippery areas
+☐ Poor lighting
+☐ Other: ______________
+
+Hazard Mitigation:
+☐ Path cleared before each transport
+☐ Cables secured/marked
+☐ Lighting added
+☐ Non-slip mats placed
+☐ None (⚠️ TRIP RISK)
+
+Traffic Conflicts:
+☐ Dedicated path (no other activity)
+☐ Shared with other trades
+☐ Active vehicle traffic nearby
+☐ Public pedestrian traffic
+
+Traffic Control:
+☐ Spotter/escort with crew
+☐ Barriers/cones marking path
+☐ Radio communication with other trades
+☐ None (⚠️ COLLISION RISK)
+
+💡 Agent Note: Manual carry = high fatigue + trip risk. Agent 3 predicts "dropped glass" incidents when transport distance >50 ft with no rest points.
+
+📷 Required Photos:
+✓ Transport path (full route)
+✓ Any obstacles (stairs, doors, tight spots)
+✓ Trip hazards identified
+✓ Traffic areas (where other activity occurs)

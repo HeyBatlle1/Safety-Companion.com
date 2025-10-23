@@ -24,6 +24,9 @@ import { TemperatureQuestion, type TemperatureData } from '../JHA/TemperatureQue
 import { PrecipitationQuestion, type PrecipitationData } from '../JHA/PrecipitationQuestion';
 import { GlassHandlingQuestion, type GlassHandlingData } from '../JHA/GlassHandlingQuestion';
 import { FallProtectionQuestion, type FallProtectionData } from '../JHA/FallProtectionQuestion';
+import { EquipmentCertificationQuestion, type EquipmentCertificationData } from '../JHA/EquipmentCertificationQuestion';
+import { GlassStorageQuestion, type GlassStorageData } from '../JHA/GlassStorageQuestion';
+import { TransportPathQuestion, type TransportPathData } from '../JHA/TransportPathQuestion';
 
 interface ChecklistItem {
   id: string;
@@ -184,6 +187,56 @@ const ChecklistForm = () => {
     rescueETA: '',
     rescueEquipment: []
   });
+  const [equipmentCertificationData, setEquipmentCertificationData] = useState<EquipmentCertificationData>({
+    lastInspectionDate: '',
+    inspectionType: [],
+    inspectorName: '',
+    inspectorCredentials: [],
+    nextInspectionDue: '',
+    craneSerial: '',
+    boomSerial: '',
+    riggingSerial: '',
+    riggingInspectionFrequency: [],
+    riggingInspector: '',
+    inspectionFindings: [],
+    defectDescription: '',
+    lastLoadTestDate: '',
+    testCapacity: '',
+    testResult: '',
+    harnessesCertified: '',
+    lanyardsCertified: '',
+    anchorageCertified: ''
+  });
+  const [glassStorageData, setGlassStorageData] = useState<GlassStorageData>({
+    distanceFromBuilding: '',
+    distanceFromEdge: '',
+    groundConditions: [],
+    fallProtection: [],
+    rackSystem: [],
+    rackCapacity: '',
+    currentLoad: '',
+    environmentalProtection: [],
+    securityAccess: [],
+    windProtected: '',
+    maxWindBeforeMoving: ''
+  });
+  const [transportPathData, setTransportPathData] = useState<TransportPathData>({
+    transportMethod: [],
+    manualCarryCrewSize: '',
+    horizontalDistance: '',
+    verticalDistance: '',
+    tripTime: '',
+    pathHazards: [],
+    stairsCount: '',
+    rampSlope: '',
+    doorwayWidth: '',
+    overheadClearance: '',
+    unevenDescription: '',
+    tripHazards: [],
+    hazardMitigation: [],
+    trafficConflicts: [],
+    trafficControl: []
+  });
   
   const formRef = useRef<HTMLFormElement>(null);
   const analysisAbortController = useRef<AbortController | null>(null);
@@ -247,6 +300,21 @@ const ChecklistForm = () => {
   const handleFallProtectionDataChange = (data: FallProtectionData) => {
     setFallProtectionData(data);
     handleResponse('sa-9', JSON.stringify(data));
+  };
+  
+  const handleEquipmentCertificationDataChange = (data: EquipmentCertificationData) => {
+    setEquipmentCertificationData(data);
+    handleResponse('sa-10', JSON.stringify(data));
+  };
+  
+  const handleGlassStorageDataChange = (data: GlassStorageData) => {
+    setGlassStorageData(data);
+    handleResponse('sa-11', JSON.stringify(data));
+  };
+  
+  const handleTransportPathDataChange = (data: TransportPathData) => {
+    setTransportPathData(data);
+    handleResponse('sa-12', JSON.stringify(data));
   };
 
   const toggleFlag = (itemId: string) => {
@@ -386,6 +454,9 @@ const ChecklistForm = () => {
       hydrateStructuredData('sa-7', setPrecipitationData);
       hydrateStructuredData('sa-8', setGlassHandlingData);
       hydrateStructuredData('sa-9', setFallProtectionData);
+      hydrateStructuredData('sa-10', setEquipmentCertificationData);
+      hydrateStructuredData('sa-11', setGlassStorageData);
+      hydrateStructuredData('sa-12', setTransportPathData);
     }
 
     // Load response history
@@ -1493,6 +1564,21 @@ Progress: ${Math.round(calculateProgress())}% complete
                               <FallProtectionQuestion 
                                 data={fallProtectionData} 
                                 onChange={handleFallProtectionDataChange}
+                              />
+                            ) : item.id === 'sa-10' ? (
+                              <EquipmentCertificationQuestion 
+                                data={equipmentCertificationData} 
+                                onChange={handleEquipmentCertificationDataChange}
+                              />
+                            ) : item.id === 'sa-11' ? (
+                              <GlassStorageQuestion 
+                                data={glassStorageData} 
+                                onChange={handleGlassStorageDataChange}
+                              />
+                            ) : item.id === 'sa-12' ? (
+                              <TransportPathQuestion 
+                                data={transportPathData} 
+                                onChange={handleTransportPathDataChange}
                               />
                             ) : item.inputType === 'select' && item.options.length > 0 ? (
                               // Dropdown select for multiple choice questions
