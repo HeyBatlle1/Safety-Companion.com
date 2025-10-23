@@ -1,0 +1,163 @@
+Q7: Precipitation and Visibility
+Current: "Precipitation and Visibility"
+Optimized:
+🌧️ PRECIPITATION, VISIBILITY & SURFACE CONDITIONS
+
+Current Precipitation:
+☐ None / Dry
+☐ Light Rain / Drizzle
+☐ Heavy Rain
+☐ Snow / Ice
+☐ Recent Rain (surfaces still wet)
+
+Precipitation Forecast (Next 4 Hours):
+Hour 1: ☐ Dry ☐ Rain ☐ Snow
+Hour 2: ☐ Dry ☐ Rain ☐ Snow
+Hour 3: ☐ Dry ☐ Rain ☐ Snow
+Hour 4: ☐ Dry ☐ Rain ☐ Snow
+
+Visibility:
+Current visibility: ☐ Clear (>1 mile) ☐ Reduced (fog/rain) ☐ Poor (<100 ft)
+Can workers see ground level clearly? ☐ Yes ☐ No
+
+Walking Surface Conditions:
+☐ Dry and clear
+☐ Wet but non-slip surface
+☐ Wet and slippery
+☐ Ice / frozen
+☐ Debris on walking paths
+
+Slip/Fall Precautions:
+☐ Non-slip tape on platforms
+☐ Squeegee/broom for water removal
+☐ Sand/salt for ice
+☐ Designated walking paths marked
+☐ None (⚠️ CONCERN if wet)
+
+Work in Rain Policy:
+Our policy: ☐ Stop work in any rain ☐ Continue unless heavy ☐ No specific policy
+ANSI recommends: NO elevated work during precipitation
+
+🚨 CRITICAL: Rain + elevated glass work = high slip risk + reduced grip
+Agent 3 predicts fall incidents when rain forecast ignored.
+
+💡 Agent Note: Visibility affects crane operator's ability to see signals and obstacles.
+
+📷 Required Photos:
+✓ Sky conditions (clouds, visibility)
+✓ Ground surface conditions (wet/dry/ice)
+✓ Walking surfaces on swing stage/platform
+✓ Visibility from work height (can you see ground?)
+
+SECTION 3: Glass Handling Equipment & Systems (3 Questions)
+Q8: Glass Lifting and Positioning Equipment
+Current: "Glass Lifting and Positioning Equipment"
+Optimized:
+🔧 GLASS HANDLING TOOLS & RIGGING
+
+Primary Lifting Method:
+☐ Suction Cups / Vacuum Lifters
+☐ Clamps / Mechanical Grips
+☐ Slings / Soft Rigging
+☐ Custom Spreader Bar / Frame
+
+Suction Cup Details (if applicable):
+Number of cups: _____
+Rated capacity per cup: _____ lbs
+Total capacity: _____ lbs
+Actual load: _____ lbs
+Safety factor: _____ (should be ≥4:1)
+
+Backup Systems:
+☐ Redundant suction cups (if one fails, others hold)
+☐ Secondary restraint line
+☐ Safety netting below load
+☐ No backup system (⚠️ SINGLE POINT FAILURE RISK)
+
+Equipment Inspection Status:
+Suction cups inspected: ☐ Today ☐ This week ☐ >1 week ago ☐ Unknown
+Rigging inspected: ☐ Today ☐ This week ☐ >1 week ago ☐ Unknown
+Vacuum pump tested: ☐ Today ☐ This week ☐ >1 week ago ☐ Unknown
+
+Inspection Findings:
+☐ All equipment in good condition
+☐ Minor wear (still safe)
+☐ Damage found (describe): ______________
+☐ Not inspected (⚠️ COMPLIANCE VIOLATION)
+
+Load Distribution:
+☐ Evenly distributed across rigging points
+☐ Slightly off-center but within limits
+☐ Poor distribution (⚠️ LOAD SHIFT RISK)
+
+🚨 CRITICAL: Equipment failure is the #2 cause of glass drop incidents
+Agent 3 specifically looks for "no backup system" + "poor inspection" combination
+
+💡 Agent Note: "Unknown" inspection status = Agent 1 data quality drops to 3/10
+
+📷 Required Photos:
+✓ Suction cups attached to glass (close-up)
+✓ Rigging configuration (full setup)
+✓ Inspection tag on equipment (date visible)
+✓ Vacuum gauge reading
+✓ Load distribution (even vs uneven)
+
+Q9: Fall Protection Systems for Glass Work
+Current: "Fall Protection Systems for Glass Work"
+Optimized:
+🪂 FALL PROTECTION SYSTEMS & RESCUE PLAN
+
+Primary Fall Protection:
+☐ Personal Fall Arrest System (PFAS) - harness + lanyard + anchor
+☐ Guardrails (3-rail system, 42" high)
+☐ Safety Net (below work area)
+☐ Travel Restraint (prevents reaching edge)
+☐ None (⚠️ AUTOMATIC NO-GO if >6 ft height)
+
+PFAS Details (if applicable):
+Harness type: ☐ Full body ☐ Other (⚠️ only full body allowed)
+D-ring location: ☐ Back (correct) ☐ Chest (incorrect for fall arrest)
+Lanyard type: ☐ Shock-absorbing ☐ Self-retracting ☐ Standard
+Anchorage point capacity: _____ lbs (min 5,000 lbs per person required)
+
+Inspection Status:
+Harnesses inspected: ☐ Before each use (correct) ☐ Weekly ☐ Monthly ☐ Unknown
+Findings: ☐ No defects ☐ Minor wear ☐ Damage (describe): _______
+Who inspected: ________________ (Name + Competent Person cert?)
+
+Fall Clearance Calculation:
+Free fall distance: _____ feet
+Lanyard deceleration: _____ feet
+Safety margin: _____ feet (minimum 3 ft)
+Total clearance needed: _____ feet
+Available clearance: _____ feet
+Is clearance adequate? ☐ Yes ☐ No (⚠️ COLLISION RISK)
+
+Rescue Plan (OSHA requires rescue within 6 minutes):
+☐ Rescue team on-site with descent equipment
+☐ Fire department notified (ETA: _____ minutes)
+☐ Self-rescue equipment available
+☐ No rescue plan (⚠️ SUSPENSION TRAUMA RISK - FATAL)
+
+Rescue Equipment On-Site:
+☐ Descent/retrieval device
+☐ Trauma straps (for suspension relief)
+☐ AED (for cardiac arrest post-fall)
+☐ First aid kit
+☐ None (⚠️ EMERGENCY READINESS = FAILED)
+
+🚨 CRITICAL: Fall from 60 ft = likely fatal. Fall protection prevents this.
+But improper harness use = fall protection FAILS when needed.
+
+OSHA 1926.502(d): Fall protection required for work >6 ft.
+OSHA 1926.502(d)(15): Competent person must inspect equipment before each use.
+OSHA 1926.502(d)(20): Rescue plan required within 6 minutes.
+
+💡 Agent Note: "No rescue plan" was the emergency readiness gap in example analysis. This is a GO/NO-GO factor for Agent 4.
+
+📷 Required Photos:
+✓ Worker wearing harness (D-ring visible on back)
+✓ Anchorage point (structural connection)
+✓ Lanyard attached correctly
+✓ Rescue equipment staged nearby
+✓ Inspection tag on harness (date visible)
