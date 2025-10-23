@@ -27,6 +27,10 @@ import { FallProtectionQuestion, type FallProtectionData } from '../JHA/FallProt
 import { EquipmentCertificationQuestion, type EquipmentCertificationData } from '../JHA/EquipmentCertificationQuestion';
 import { GlassStorageQuestion, type GlassStorageData } from '../JHA/GlassStorageQuestion';
 import { TransportPathQuestion, type TransportPathData } from '../JHA/TransportPathQuestion';
+import { GlassPanelRiskQuestion, type GlassPanelRiskData } from '../JHA/GlassPanelRiskQuestion';
+import { CrewQualificationsQuestion, type CrewQualificationsData } from '../JHA/CrewQualificationsQuestion';
+import { PPEInspectionQuestion, type PPEInspectionData } from '../JHA/PPEInspectionQuestion';
+import { CommunicationSystemsQuestion, type CommunicationSystemsData } from '../JHA/CommunicationSystemsQuestion';
 
 interface ChecklistItem {
   id: string;
@@ -237,6 +241,66 @@ const ChecklistForm = () => {
     trafficConflicts: [],
     trafficControl: []
   });
+  const [glassPanelRiskData, setGlassPanelRiskData] = useState<GlassPanelRiskData>({
+    weightCategory: '',
+    actualWeight: '',
+    crewSize: '',
+    weightPerPerson: '',
+    sizeShape: '',
+    panelSurfaceArea: '',
+    windForce: '',
+    canResistWind: '',
+    panelsToday: '',
+    timePerPanel: '',
+    totalHandlingTime: '',
+    restBreakFrequency: ''
+  });
+  const [crewQualificationsData, setCrewQualificationsData] = useState<CrewQualificationsData>({
+    totalWorkers: '',
+    installers: '',
+    craneOperator: '',
+    groundSupport: '',
+    supervisor: '',
+    competentPersonName: '',
+    competentPersonRole: [],
+    competentPersonQualifications: [],
+    foremanYears: '',
+    crewExperience: '',
+    trainingRecords: [],
+    glassTraining: [],
+    previousExperience: [],
+    nearMissCount: '',
+    correctiveActions: '',
+    correctiveActionsTaken: ''
+  });
+  const [ppeInspectionData, setPPEInspectionData] = useState<PPEInspectionData>({
+    requiredPPE: [],
+    fallProtectionPPE: [],
+    inspectionStatus: [],
+    dRingCorrect: '',
+    hardHatCorrect: '',
+    glovesAppropriate: '',
+    glassesWorn: '',
+    spareAvailable: ''
+  });
+  const [communicationSystemsData, setCommunicationSystemsData] = useState<CommunicationSystemsData>({
+    primaryMethod: [],
+    radioChannel: '',
+    communicationChecks: [],
+    groundToHeightClear: '',
+    craneSignalsVisible: '',
+    backgroundNoise: '',
+    noiseDescription: '',
+    emergencyStopSignal: '',
+    manDownSignal: '',
+    evacuateSignal: '',
+    crewBriefed: '',
+    emergencyNumbers: [],
+    supervisorPhone: '',
+    safetyManagerPhone: '',
+    hospitalPhone: '',
+    backupMethod: ''
+  });
   
   const formRef = useRef<HTMLFormElement>(null);
   const analysisAbortController = useRef<AbortController | null>(null);
@@ -315,6 +379,26 @@ const ChecklistForm = () => {
   const handleTransportPathDataChange = (data: TransportPathData) => {
     setTransportPathData(data);
     handleResponse('sa-12', JSON.stringify(data));
+  };
+  
+  const handleGlassPanelRiskDataChange = (data: GlassPanelRiskData) => {
+    setGlassPanelRiskData(data);
+    handleResponse('sa-13', JSON.stringify(data));
+  };
+  
+  const handleCrewQualificationsDataChange = (data: CrewQualificationsData) => {
+    setCrewQualificationsData(data);
+    handleResponse('sa-14', JSON.stringify(data));
+  };
+  
+  const handlePPEInspectionDataChange = (data: PPEInspectionData) => {
+    setPPEInspectionData(data);
+    handleResponse('sa-15', JSON.stringify(data));
+  };
+  
+  const handleCommunicationSystemsDataChange = (data: CommunicationSystemsData) => {
+    setCommunicationSystemsData(data);
+    handleResponse('sa-16', JSON.stringify(data));
   };
 
   const toggleFlag = (itemId: string) => {
@@ -457,6 +541,10 @@ const ChecklistForm = () => {
       hydrateStructuredData('sa-10', setEquipmentCertificationData);
       hydrateStructuredData('sa-11', setGlassStorageData);
       hydrateStructuredData('sa-12', setTransportPathData);
+      hydrateStructuredData('sa-13', setGlassPanelRiskData);
+      hydrateStructuredData('sa-14', setCrewQualificationsData);
+      hydrateStructuredData('sa-15', setPPEInspectionData);
+      hydrateStructuredData('sa-16', setCommunicationSystemsData);
     }
 
     // Load response history
@@ -1579,6 +1667,26 @@ Progress: ${Math.round(calculateProgress())}% complete
                               <TransportPathQuestion 
                                 data={transportPathData} 
                                 onChange={handleTransportPathDataChange}
+                              />
+                            ) : item.id === 'sa-13' ? (
+                              <GlassPanelRiskQuestion 
+                                data={glassPanelRiskData} 
+                                onChange={handleGlassPanelRiskDataChange}
+                              />
+                            ) : item.id === 'sa-14' ? (
+                              <CrewQualificationsQuestion 
+                                data={crewQualificationsData} 
+                                onChange={handleCrewQualificationsDataChange}
+                              />
+                            ) : item.id === 'sa-15' ? (
+                              <PPEInspectionQuestion 
+                                data={ppeInspectionData} 
+                                onChange={handlePPEInspectionDataChange}
+                              />
+                            ) : item.id === 'sa-16' ? (
+                              <CommunicationSystemsQuestion 
+                                data={communicationSystemsData} 
+                                onChange={handleCommunicationSystemsDataChange}
                               />
                             ) : item.inputType === 'select' && item.options.length > 0 ? (
                               // Dropdown select for multiple choice questions
