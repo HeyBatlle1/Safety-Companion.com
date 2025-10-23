@@ -1,0 +1,654 @@
+# QUESTION OPTIMIZATION GUIDE
+
+## Purpose
+Transform vague JHA questions into structured, agent-friendly inputs that generate better safety analysis.
+
+**Goal:** Workers know exactly what to enter, agents get clean structured data.
+
+---
+
+## The Problem We're Solving
+
+### Current State (Bad)
+```
+Question: "Current Wind Conditions"
+Worker types: "windy"
+Agent 1: "Insufficient data - quality score 2/10"
+Agent 2: "Cannot calculate risk without numbers"
+Agent 3: "Cannot predict incident without specifics"
+Result: Garbage in → Garbage out
+```
+
+### Target State (Good)
+```
+Question: "Wind Conditions & Monitoring"
+Worker enters:
+- Current: 18 mph
+- Forecast: 25 mph by 2pm
+- Monitoring: Every 15 min with anemometer
+
+Agent 1: "Complete data - quality score 9/10"
+Agent 2: "Risk score 68/100 now, 92/100 at 2pm"
+Agent 3: "78% probability of load swing at 2pm"
+Result: Specific, actionable analysis
+```
+
+---
+
+## The Framework: 5 Components
+
+Every optimized question needs these 5 elements:
+
+### 1. STRUCTURED SUB-FIELDS
+Break the question into specific data points.
+
+**Bad:**
+```jsx
+<textarea placeholder="Enter wind conditions..." />
+```
+
+**Good:**
+```jsx
+<div className="space-y-4">
+  <div>
+    <label>Current Wind Speed</label>
+    <input type="number" placeholder="e.g., 18" /> mph
+  </div>
+  
+  <div>
+    <label>Forecasted Gusts (next 4 hours)</label>
+    <input type="number" placeholder="e.g., 25" /> mph
+  </div>
+  
+  <div>
+    <label>Source</label>
+    <select>
+      <option>On-site anemometer</option>
+      <option>Weather app</option>
+      <option>Visual estimate</option>
+    </select>
+  </div>
+</div>
+```
+
+**Why:** Forces specific inputs, prevents vague answers.
+
+---
+
+### 2. PLACEHOLDER EXAMPLES
+Show the exact format you want.
+
+**Bad:**
+```jsx
+<input placeholder="Enter response..." />
+```
+
+**Good:**
+```jsx
+<input placeholder="e.g., Current: 15 mph, Forecast: 22 mph, Stop at: 20 mph" />
+```
+
+**Why:** Workers know what format you expect.
+
+---
+
+### 3. PHOTO SUGGESTIONS
+Tell workers which photos would help.
+
+**Template:**
+```jsx
+<div className="photo-hints">
+  <p className="text-sm text-gray-400">📷 Helpful photos:</p>
+  <ul className="text-xs text-gray-500 space-y-1">
+    <li>✓ Specific hint 1</li>
+    <li>✓ Specific hint 2</li>
+    <li>✓ Specific hint 3</li>
+  </ul>
+</div>
+```
+
+**Example:**
+```jsx
+<div className="photo-hints">
+  <p>📷 Helpful photos:</p>
+  <ul>
+    <li>✓ Anemometer display (if using)</li>
+    <li>✓ Weather app screenshot with forecast</li>
+    <li>✓ Wind indicators on site (flags, trees moving)</li>
+    <li>✓ Sky conditions</li>
+  </ul>
+</div>
+```
+
+**Why:** Guides workers to capture useful visual evidence.
+
+---
+
+### 4. AGENT CONTEXT NOTE
+Explain WHY this data matters to the AI.
+
+**Template:**
+```jsx
+<div className="agent-note">
+  <p className="text-sm text-blue-400">
+    💡 Agent Note: [Why this data is critical for analysis]
+  </p>
+</div>
+```
+
+**Example:**
+```jsx
+<div className="agent-note">
+  <p className="text-sm text-blue-400">
+    💡 Agent Note: Wind >20 mph is the #1 environmental factor in 
+    Agent 3's load swing predictions. Forecast data enables timeline analysis.
+  </p>
+</div>
+```
+
+**Why:** Helps workers understand importance of detail.
+
+---
+
+### 5. CRITICAL WARNINGS (if applicable)
+Flag automatic NO-GO conditions.
+
+**Template:**
+```jsx
+<div className="critical-warning">
+  <p className="text-sm text-red-400">
+    🚨 CRITICAL: [Condition that triggers NO-GO]
+  </p>
+</div>
+```
+
+**Example:**
+```jsx
+<div className="critical-warning">
+  <p className="text-sm text-red-400">
+    🚨 CRITICAL: Wind >20 mph = STOP glass installation at height.
+    This is an ANSI/IWCA I-14.1 requirement.
+  </p>
+</div>
+```
+
+**Why:** Makes safety limits explicit and enforceable.
+
+---
+
+## Step-by-Step Process
+
+### STEP 1: Analyze Current Question
+```
+Look at: "Current Wind Conditions"
+
+Ask yourself:
+- What specific data do agents need? (speed, forecast, monitoring)
+- What do workers currently type? (probably "windy" or "15mph")
+- What's missing? (forecast, source, monitoring plan)
+- What format works best? (number inputs + dropdowns)
+```
+
+---
+
+### STEP 2: Break Into Sub-Fields
+```
+Identify discrete data points:
+1. Current wind speed (number)
+2. Forecasted gusts (number)
+3. Source of data (dropdown)
+4. Work stoppage threshold (number)
+5. Monitoring plan (checkboxes)
+6. Hourly forecast (4 number inputs)
+```
+
+---
+
+### STEP 3: Choose Input Types
+
+**Number inputs:** For measurements (mph, feet, lbs, degrees)
+```jsx
+<input type="number" min="0" max="100" />
+```
+
+**Dropdowns:** For limited choices (equipment types, yes/no)
+```jsx
+<select>
+  <option>Option 1</option>
+  <option>Option 2</option>
+</select>
+```
+
+**Checkboxes:** For multiple selections (PPE types, precautions)
+```jsx
+<input type="checkbox" /> Option 1
+<input type="checkbox" /> Option 2
+```
+
+**Radio buttons:** For single choice (risk level, decision)
+```jsx
+<input type="radio" name="group" /> Option A
+<input type="radio" name="group" /> Option B
+```
+
+**Text areas:** Only when freeform text actually needed (hazard descriptions)
+```jsx
+<textarea rows="4" placeholder="Describe each hazard on a new line" />
+```
+
+---
+
+### STEP 4: Add Examples & Hints
+
+For every text/number input, add a placeholder showing format:
+```jsx
+// Bad
+<input placeholder="Enter temperature" />
+
+// Good
+<input placeholder="e.g., 85" /> °F
+```
+
+---
+
+### STEP 5: Add Photo Suggestions
+
+Think: "What photo would help me verify this answer?"
+
+**For wind:** Anemometer, weather app, visual indicators
+**For crew:** Team photo, cert cards
+**For equipment:** Setup, inspection tags, serial numbers
+**For barricades:** Perimeter view, signage, fall zone
+
+Be specific, not generic:
+- ❌ "Take photos of the site"
+- ✅ "Barricade at each side of building"
+
+---
+
+### STEP 6: Write Agent Context Note
+
+Answer: "Why does this specific data help the AI make better predictions?"
+
+**Formula:**
+```
+💡 Agent Note: [Data point] enables [Agent X] to [specific capability].
+```
+
+**Examples:**
+- "Wind forecast enables Agent 3 to predict timeline of unsafe conditions"
+- "Inspection dates enable Agent 1 to validate compliance"
+- "Crew experience level affects Agent 2's error probability calculation"
+
+---
+
+### STEP 7: Add Critical Warnings
+
+If there's a hard safety limit or automatic NO-GO condition:
+```jsx
+🚨 CRITICAL: [Specific condition] = [Consequence]
+[OSHA/ANSI citation if applicable]
+```
+
+Only add if truly critical. Don't overuse.
+
+---
+
+## Technical Implementation
+
+### Component Structure
+```jsx
+// QuestionCard.tsx
+export function QuestionCard({
+  title,
+  fields,
+  photoHints,
+  agentNote,
+  criticalWarning
+}) {
+  return (
+    <div className="question-card">
+      {/* Header */}
+      <h3>{title}</h3>
+      
+      {/* Sub-fields */}
+      <div className="fields">
+        {fields.map(field => (
+          <Field key={field.id} {...field} />
+        ))}
+      </div>
+      
+      {/* Photo hints */}
+      {photoHints && (
+        <PhotoHints hints={photoHints} />
+      )}
+      
+      {/* Agent note */}
+      {agentNote && (
+        <AgentNote text={agentNote} />
+      )}
+      
+      {/* Critical warning */}
+      {criticalWarning && (
+        <CriticalWarning text={criticalWarning} />
+      )}
+      
+      {/* Existing image upload component */}
+      <ImageUploader />
+    </div>
+  );
+}
+```
+
+---
+
+### Data Structure
+```typescript
+interface QuestionField {
+  id: string;
+  label: string;
+  type: 'text' | 'number' | 'select' | 'checkbox' | 'radio' | 'textarea';
+  placeholder?: string;
+  options?: string[]; // for select/radio
+  unit?: string; // e.g., "mph", "feet", "lbs"
+  min?: number;
+  max?: number;
+  required?: boolean;
+}
+
+interface QuestionConfig {
+  id: string;
+  title: string;
+  fields: QuestionField[];
+  photoHints?: string[];
+  agentNote?: string;
+  criticalWarning?: string;
+}
+```
+
+---
+
+## Quality Checklist
+
+Before submitting a question, verify:
+
+### ✅ Structure
+- [ ] Question broken into specific sub-fields
+- [ ] No vague open-ended text boxes
+- [ ] Input types match data type (number for measurements)
+- [ ] Required fields marked clearly
+
+### ✅ Clarity
+- [ ] Every input has placeholder example
+- [ ] Labels are specific ("Current wind speed" not "Wind")
+- [ ] Units shown explicitly (mph, feet, lbs)
+- [ ] Dropdown options are clear and complete
+
+### ✅ Guidance
+- [ ] 3-4 specific photo hints (not generic "take photos")
+- [ ] Agent context note explains WHY data matters
+- [ ] Critical warnings added if applicable
+
+### ✅ Technical
+- [ ] Form still submits correctly
+- [ ] Data structure matches backend expectations
+- [ ] Validation works (required fields, number ranges)
+- [ ] Mobile-friendly layout
+
+---
+
+## Common Mistakes to Avoid
+
+### ❌ Mistake #1: Still Too Vague
+```jsx
+// Bad - still vague
+<input placeholder="Enter wind information" />
+
+// Good - specific
+<input type="number" placeholder="18" /> mph (current)
+<input type="number" placeholder="25" /> mph (forecast)
+```
+
+---
+
+### ❌ Mistake #2: Over-Complicating
+```jsx
+// Bad - 15 sub-fields for one question
+<input name="wind_current" />
+<input name="wind_forecast_1hr" />
+<input name="wind_forecast_2hr" />
+<input name="wind_forecast_3hr" />
+<input name="wind_forecast_4hr" />
+<input name="wind_source" />
+<input name="wind_monitoring_person" />
+<input name="wind_monitoring_device" />
+// ... 7 more fields
+
+// Good - essential fields only
+<input name="wind_current" />
+<input name="wind_forecast_peak" />
+<select name="wind_source" />
+<select name="wind_monitoring" />
+```
+
+**Rule:** 3-6 sub-fields per question max.
+
+---
+
+### ❌ Mistake #3: Generic Photo Hints
+```jsx
+// Bad
+📷 Helpful photos:
+✓ Site conditions
+✓ Equipment
+✓ Weather
+
+// Good
+📷 Helpful photos:
+✓ Anemometer display showing current reading
+✓ Weather app screenshot with 4-hour forecast
+✓ Wind indicators on site (flags at full extension, tree movement)
+✓ Sky conditions (cloud coverage, approaching storms)
+```
+
+**Rule:** Be so specific that worker knows exact photo to take.
+
+---
+
+### ❌ Mistake #4: Missing Agent Context
+```jsx
+// Bad - no context
+<input type="number" placeholder="18" /> mph
+
+// Good - context provided
+<input type="number" placeholder="18" /> mph
+
+💡 Agent Note: Wind speed feeds directly into Agent 2's risk 
+calculation and Agent 3's load swing prediction. Numbers are 
+required - words like "windy" don't work.
+```
+
+**Rule:** Always explain the "why" behind the data request.
+
+---
+
+## Example: Before & After
+
+### BEFORE (Current)
+```jsx
+<QuestionCard>
+  <h3>Current Wind Conditions</h3>
+  <textarea placeholder="Enter response..." />
+  <ImageUploader />
+</QuestionCard>
+```
+
+**Worker types:** "windy but ok"
+**Agent result:** Insufficient data, cannot analyze
+
+---
+
+### AFTER (Optimized)
+```jsx
+<QuestionCard>
+  <h3>💨 Wind Conditions & Monitoring</h3>
+  
+  <div className="fields">
+    <div>
+      <label>Current Wind Speed</label>
+      <input type="number" placeholder="e.g., 18" min="0" max="100" /> mph
+    </div>
+    
+    <div>
+      <label>Forecasted Gusts (next 4 hours)</label>
+      <input type="number" placeholder="e.g., 25" /> mph
+    </div>
+    
+    <div>
+      <label>Source</label>
+      <select>
+        <option>On-site anemometer</option>
+        <option>Weather app</option>
+        <option>Visual estimate</option>
+      </select>
+    </div>
+    
+    <div>
+      <label>Work Stoppage Threshold</label>
+      <p className="text-sm text-gray-400">
+        ANSI/IWCA I-14.1 recommends: 20 mph for glass at height
+      </p>
+      <input type="number" placeholder="20" /> mph
+    </div>
+    
+    <div>
+      <label>Wind Monitoring Plan</label>
+      <div className="checkboxes">
+        <input type="checkbox" /> Dedicated person checking every 15 minutes
+        <input type="checkbox" /> Real-time anemometer with alarm
+        <input type="checkbox" /> Periodic checks
+      </div>
+    </div>
+  </div>
+  
+  <PhotoHints hints={[
+    "Anemometer display (if using)",
+    "Weather app screenshot with forecast",
+    "Wind indicators on site (flags, trees moving)",
+    "Sky conditions"
+  ]} />
+  
+  <AgentNote>
+    Wind >20 mph is the #1 environmental factor in Agent 3's load swing 
+    predictions. Forecast data enables timeline analysis.
+  </AgentNote>
+  
+  <CriticalWarning>
+    Wind >20 mph = STOP glass installation at height per ANSI/IWCA I-14.1
+  </CriticalWarning>
+  
+  <ImageUploader />
+</QuestionCard>
+```
+
+**Worker enters:** Specific numbers, sources, monitoring plan
+**Agent result:** High quality data, accurate risk analysis
+
+---
+
+## Your First 2 Questions
+
+You're starting with **Q5: Wind Conditions** and **Q6: Temperature**
+
+### Q5: Wind Conditions
+**Reference:** See optimized version in artifact "Master JHA Questions"
+
+**Key sub-fields needed:**
+1. Current wind speed (number, mph)
+2. Forecasted gusts (number, mph)
+3. Source (dropdown: anemometer, app, visual)
+4. Work stoppage threshold (number, mph)
+5. Monitoring plan (checkboxes)
+6. 4-hour forecast (optional: 4 number inputs)
+
+**Photo hints:** Anemometer, weather app, wind indicators, sky
+
+**Agent note:** Explain how wind affects Agent 3 predictions
+
+**Critical warning:** 20 mph = stop work (ANSI citation)
+
+---
+
+### Q6: Temperature
+**Reference:** See optimized version in artifact
+
+**Key sub-fields needed:**
+1. Current temperature (number, °F)
+2. Humidity (number, %)
+3. Heat index / wind chill (calculated or entered)
+4. Thermal stress risk (radio buttons)
+5. Precautions (checkboxes for heat OR cold)
+6. Worker fatigue indicators (numbers)
+
+**Photo hints:** Thermometer, rest area, water station, worker clothing
+
+**Agent note:** Explain how fatigue feeds Agent 3's causal chain
+
+**Critical warning:** Heat index >103°F or wind chill <32°F
+
+---
+
+## Review Process
+
+### After You Complete Q5-Q6:
+
+**You'll provide:**
+1. ✅ Screenshot of updated questions in UI
+2. ✅ Confirmation that form still submits correctly
+3. ✅ List of any technical challenges encountered
+
+**We'll review:**
+1. Does structure match reference quality?
+2. Are placeholders specific enough?
+3. Are photo hints useful?
+4. Does agent note explain the "why"?
+
+**Then:** Approve → Move to next 2 questions
+
+---
+
+## Final Notes
+
+### This is Production Code
+- No shortcuts
+- No "good enough for now"
+- Workers' lives depend on this data quality
+
+### You Have Autonomy
+- Improve on the reference if you see a better way
+- Add validation rules if needed
+- Suggest UI improvements
+
+### But Stay Consistent
+- Match the quality bar from reference
+- Use same component patterns
+- Keep mobile-friendly
+
+### Ask if Stuck
+- Unclear on input type? Ask.
+- Not sure about photo hints? Ask.
+- Technical blocker? Stop and ask.
+
+---
+
+## Success Looks Like
+
+**After Q5-Q6 optimization:**
+- ✅ Workers know exactly what to enter
+- ✅ Agents get clean, structured data
+- ✅ Analysis quality improves measurably
+- ✅ Pattern established for remaining questions
+
+**Let's make these questions bulletproof.**
+
+**Start with Q5 and Q6. Show me what you build. Let's go.** 🎯
