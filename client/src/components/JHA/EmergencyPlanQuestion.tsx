@@ -60,7 +60,7 @@ export function EmergencyPlanQuestion({ data, onChange }: EmergencyPlanQuestionP
           { value: 'verbal-only', label: 'Verbal plan only' },
           { value: 'no-eap', label: 'No EAP' }
         ]}
-        selectedValue={data.eapStatus}
+        value={data.eapStatus}
         onChange={(value) => updateField('eapStatus', value)}
         required
       />
@@ -120,7 +120,7 @@ export function EmergencyPlanQuestion({ data, onChange }: EmergencyPlanQuestionP
             { value: 'yes', label: 'Yes' },
             { value: 'no', label: 'No' }
           ]}
-          selectedValue={data.assemblySafeFromFalling}
+          value={data.assemblySafeFromFalling}
           onChange={(value) => updateField('assemblySafeFromFalling', value)}
           required
         />
@@ -137,7 +137,7 @@ export function EmergencyPlanQuestion({ data, onChange }: EmergencyPlanQuestionP
             { value: 'yes', label: 'Yes' },
             { value: 'no', label: 'No' }
           ]}
-          selectedValue={data.assemblyReachable}
+          value={data.assemblyReachable}
           onChange={(value) => updateField('assemblyReachable', value)}
           required
         />
@@ -187,7 +187,7 @@ export function EmergencyPlanQuestion({ data, onChange }: EmergencyPlanQuestionP
           { value: 'over-week', label: 'Briefed >1 week ago' },
           { value: 'not-briefed', label: 'Not briefed' }
         ]}
-        selectedValue={data.crewAwareness}
+        value={data.crewAwareness}
         onChange={(value) => updateField('crewAwareness', value)}
         required
       />
@@ -216,7 +216,7 @@ export function EmergencyPlanQuestion({ data, onChange }: EmergencyPlanQuestionP
             { value: 'over-90-days', label: '>90 days ago' },
             { value: 'never', label: 'Never conducted' }
           ]}
-          selectedValue={data.drillFrequency}
+          value={data.drillFrequency}
           onChange={(value) => updateField('drillFrequency', value)}
           required
         />
@@ -269,7 +269,7 @@ export function EmergencyPlanQuestion({ data, onChange }: EmergencyPlanQuestionP
             { value: 'yes', label: 'Yes' },
             { value: 'no', label: 'No' }
           ]}
-          selectedValue={data.hospitalTraumaCenter}
+          value={data.hospitalTraumaCenter}
           onChange={(value) => updateField('hospitalTraumaCenter', value)}
         />
       </div>

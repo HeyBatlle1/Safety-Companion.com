@@ -198,7 +198,7 @@ export function EmergencyEquipmentQuestion({ data, onChange }: EmergencyEquipmen
             { value: 'yes', label: 'Available' },
             { value: 'no', label: 'Not available' }
           ]}
-          selectedValue={data.helicopterAvailable}
+          value={data.helicopterAvailable}
           onChange={(value) => updateField('helicopterAvailable', value)}
         />
 

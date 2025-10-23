@@ -163,7 +163,7 @@ export function CrewQualificationsQuestion({ data, onChange }: CrewQualification
             { value: '3-5', label: '3-5 years' },
             { value: 'more-5', label: '>5 years' }
           ]}
-          selectedValue={data.crewExperience}
+          value={data.crewExperience}
           onChange={(value) => updateField('crewExperience', value)}
           required
         />
@@ -243,7 +243,7 @@ export function CrewQualificationsQuestion({ data, onChange }: CrewQualification
             { value: '3-plus', label: '3+ near-misses' },
             { value: 'unknown', label: 'Unknown/not tracked' }
           ]}
-          selectedValue={data.nearMissCount}
+          value={data.nearMissCount}
           onChange={(value) => updateField('nearMissCount', value)}
           required
         />
@@ -274,7 +274,7 @@ export function CrewQualificationsQuestion({ data, onChange }: CrewQualification
                 { value: 'yes', label: 'Yes' },
                 { value: 'no', label: 'No' }
               ]}
-              selectedValue={data.correctiveActions}
+              value={data.correctiveActions}
               onChange={(value) => updateField('correctiveActions', value)}
               required
             />

@@ -104,7 +104,7 @@ export function GlassPanelRiskQuestion({ data, onChange }: GlassPanelRiskQuestio
             { value: 'heavy', label: 'Heavy (150-300 lbs, 3-4 person + equipment)' },
             { value: 'extra-heavy', label: 'Extra Heavy (>300 lbs, mechanical lift REQUIRED)' }
           ]}
-          selectedValue={data.weightCategory}
+          value={data.weightCategory}
           onChange={(value) => updateField('weightCategory', value)}
           required
         />
@@ -168,7 +168,7 @@ export function GlassPanelRiskQuestion({ data, onChange }: GlassPanelRiskQuestio
           { value: 'oversized', label: 'Oversized (>6 ft in any dimension)' },
           { value: 'irregular', label: 'Irregular shape' }
         ]}
-        selectedValue={data.sizeShape}
+        value={data.sizeShape}
         onChange={(value) => updateField('sizeShape', value)}
         required
       />
@@ -223,7 +223,7 @@ export function GlassPanelRiskQuestion({ data, onChange }: GlassPanelRiskQuestio
             { value: 'yes', label: 'Yes' },
             { value: 'no', label: 'No' }
           ]}
-          selectedValue={data.canResistWind}
+          value={data.canResistWind}
           onChange={(value) => updateField('canResistWind', value)}
           required
         />

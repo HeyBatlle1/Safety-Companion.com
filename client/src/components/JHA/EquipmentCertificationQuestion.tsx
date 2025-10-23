@@ -234,7 +234,7 @@ export function EquipmentCertificationQuestion({ data, onChange }: EquipmentCert
             { value: 'failed', label: 'Failed' },
             { value: 'not-tested', label: 'Not tested' }
           ]}
-          selectedValue={data.testResult}
+          value={data.testResult}
           onChange={(value) => updateField('testResult', value)}
         />
 
@@ -254,7 +254,7 @@ export function EquipmentCertificationQuestion({ data, onChange }: EquipmentCert
             { value: 'yes', label: 'Yes (attach cert photo)' },
             { value: 'no', label: 'No' }
           ]}
-          selectedValue={data.harnessesCertified}
+          value={data.harnessesCertified}
           onChange={(value) => updateField('harnessesCertified', value)}
           required
         />
@@ -265,7 +265,7 @@ export function EquipmentCertificationQuestion({ data, onChange }: EquipmentCert
             { value: 'yes', label: 'Yes (attach cert photo)' },
             { value: 'no', label: 'No' }
           ]}
-          selectedValue={data.lanyardsCertified}
+          value={data.lanyardsCertified}
           onChange={(value) => updateField('lanyardsCertified', value)}
           required
         />
@@ -276,7 +276,7 @@ export function EquipmentCertificationQuestion({ data, onChange }: EquipmentCert
             { value: 'yes', label: 'Yes' },
             { value: 'no', label: 'No' }
           ]}
-          selectedValue={data.anchorageCertified}
+          value={data.anchorageCertified}
           onChange={(value) => updateField('anchorageCertified', value)}
           required
         />

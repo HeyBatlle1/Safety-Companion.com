@@ -86,7 +86,7 @@ export function AdjacentPropertyQuestion({ data, onChange }: AdjacentPropertyQue
           { value: 'verbal', label: 'Verbal notification only' },
           { value: 'no-notification', label: 'No notification' }
         ]}
-        selectedValue={data.ownerNotification}
+        value={data.ownerNotification}
         onChange={(value) => updateField('ownerNotification', value)}
         required
       />
@@ -175,7 +175,7 @@ export function AdjacentPropertyQuestion({ data, onChange }: AdjacentPropertyQue
           { value: 'coordinated', label: 'Coordinated with other contractors' },
           { value: 'uncoordinated', label: 'Uncoordinated' }
         ]}
-        selectedValue={data.coordination}
+        value={data.coordination}
         onChange={(value) => updateField('coordination', value)}
       />
 

@@ -100,7 +100,7 @@ export function GroundProtectionQuestion({ data, onChange }: GroundProtectionQue
             { value: 'yes', label: 'Yes' },
             { value: 'no', label: 'No' }
           ]}
-          selectedValue={data.exclusionAdequate}
+          value={data.exclusionAdequate}
           onChange={(value) => updateField('exclusionAdequate', value)}
           required
         />
@@ -139,7 +139,7 @@ export function GroundProtectionQuestion({ data, onChange }: GroundProtectionQue
           { value: 'needs-installation', label: 'Needs installation (work cannot start)' },
           { value: 'not-planned', label: 'Not planned' }
         ]}
-        selectedValue={data.barricadeStatus}
+        value={data.barricadeStatus}
         onChange={(value) => updateField('barricadeStatus', value)}
         required
       />
@@ -174,7 +174,7 @@ export function GroundProtectionQuestion({ data, onChange }: GroundProtectionQue
             { value: 'yes', label: 'Yes' },
             { value: 'no', label: 'No' }
           ]}
-          selectedValue={data.spotterAssigned}
+          value={data.spotterAssigned}
           onChange={(value) => updateField('spotterAssigned', value)}
           required
         />
@@ -225,7 +225,7 @@ export function GroundProtectionQuestion({ data, onChange }: GroundProtectionQue
           { value: 'low', label: 'Low (restricted area, limited access)' },
           { value: 'none', label: 'None (isolated site, no public nearby)' }
         ]}
-        selectedValue={data.publicTrafficVolume}
+        value={data.publicTrafficVolume}
         onChange={(value) => updateField('publicTrafficVolume', value)}
         required
       />

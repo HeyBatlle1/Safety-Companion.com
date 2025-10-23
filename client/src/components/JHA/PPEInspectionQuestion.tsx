@@ -114,7 +114,7 @@ export function PPEInspectionQuestion({ data, onChange }: PPEInspectionQuestionP
             { value: 'no', label: 'No' },
             { value: 'n/a', label: 'N/A (no harness work)' }
           ]}
-          selectedValue={data.dRingCorrect}
+          value={data.dRingCorrect}
           onChange={(value) => updateField('dRingCorrect', value)}
           required
         />
@@ -131,7 +131,7 @@ export function PPEInspectionQuestion({ data, onChange }: PPEInspectionQuestionP
             { value: 'yes', label: 'Yes' },
             { value: 'no', label: 'No' }
           ]}
-          selectedValue={data.hardHatCorrect}
+          value={data.hardHatCorrect}
           onChange={(value) => updateField('hardHatCorrect', value)}
           required
         />
@@ -151,7 +151,7 @@ export function PPEInspectionQuestion({ data, onChange }: PPEInspectionQuestionP
             { value: 'yes', label: 'Yes' },
             { value: 'no', label: 'No' }
           ]}
-          selectedValue={data.glovesAppropriate}
+          value={data.glovesAppropriate}
           onChange={(value) => updateField('glovesAppropriate', value)}
           required
         />
@@ -168,7 +168,7 @@ export function PPEInspectionQuestion({ data, onChange }: PPEInspectionQuestionP
             { value: 'yes', label: 'Yes' },
             { value: 'no', label: 'No' }
           ]}
-          selectedValue={data.glassesWorn}
+          value={data.glassesWorn}
           onChange={(value) => updateField('glassesWorn', value)}
           required
         />
@@ -189,7 +189,7 @@ export function PPEInspectionQuestion({ data, onChange }: PPEInspectionQuestionP
           { value: 'yes', label: 'Extra PPE available on-site (if damaged)' },
           { value: 'no', label: 'No spare PPE' }
         ]}
-        selectedValue={data.spareAvailable}
+        value={data.spareAvailable}
         onChange={(value) => updateField('spareAvailable', value)}
         required
       />

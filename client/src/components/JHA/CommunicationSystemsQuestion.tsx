@@ -114,7 +114,7 @@ export function CommunicationSystemsQuestion({ data, onChange }: CommunicationSy
             { value: 'yes', label: 'Yes' },
             { value: 'no', label: 'No' }
           ]}
-          selectedValue={data.groundToHeightClear}
+          value={data.groundToHeightClear}
           onChange={(value) => updateField('groundToHeightClear', value)}
           required
         />
@@ -126,7 +126,7 @@ export function CommunicationSystemsQuestion({ data, onChange }: CommunicationSy
               { value: 'yes', label: 'Yes' },
               { value: 'no', label: 'No' }
             ]}
-            selectedValue={data.craneSignalsVisible}
+            value={data.craneSignalsVisible}
             onChange={(value) => updateField('craneSignalsVisible', value)}
             required
           />
@@ -138,7 +138,7 @@ export function CommunicationSystemsQuestion({ data, onChange }: CommunicationSy
             { value: 'yes', label: 'Yes' },
             { value: 'no', label: 'No' }
           ]}
-          selectedValue={data.backgroundNoise}
+          value={data.backgroundNoise}
           onChange={(value) => updateField('backgroundNoise', value)}
           required
         />
@@ -200,7 +200,7 @@ export function CommunicationSystemsQuestion({ data, onChange }: CommunicationSy
             { value: 'yes', label: 'Yes' },
             { value: 'no', label: 'No' }
           ]}
-          selectedValue={data.crewBriefed}
+          value={data.crewBriefed}
           onChange={(value) => updateField('crewBriefed', value)}
           required
         />

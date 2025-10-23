@@ -86,7 +86,7 @@ export function FallProtectionQuestion({ data, onChange }: FallProtectionQuestio
               { value: 'full-body', label: 'Full body (correct)' },
               { value: 'other', label: 'Other (belt/chest)' }
             ]}
-            selectedValue={data.harnessType}
+            value={data.harnessType}
             onChange={(value) => updateField('harnessType', value)}
             required
           />
@@ -103,7 +103,7 @@ export function FallProtectionQuestion({ data, onChange }: FallProtectionQuestio
               { value: 'back', label: 'Back (correct)' },
               { value: 'chest', label: 'Chest (incorrect for fall arrest)' }
             ]}
-            selectedValue={data.dRingLocation}
+            value={data.dRingLocation}
             onChange={(value) => updateField('dRingLocation', value)}
             required
           />
@@ -160,7 +160,7 @@ export function FallProtectionQuestion({ data, onChange }: FallProtectionQuestio
               { value: 'monthly', label: 'Monthly' },
               { value: 'unknown', label: 'Unknown' }
             ]}
-            selectedValue={data.harnessInspected}
+            value={data.harnessInspected}
             onChange={(value) => updateField('harnessInspected', value)}
             required
           />
@@ -172,7 +172,7 @@ export function FallProtectionQuestion({ data, onChange }: FallProtectionQuestio
               { value: 'minor-wear', label: 'Minor wear' },
               { value: 'damage', label: 'Damage found' }
             ]}
-            selectedValue={data.inspectionFindings}
+            value={data.inspectionFindings}
             onChange={(value) => updateField('inspectionFindings', value)}
             required
           />
@@ -256,7 +256,7 @@ export function FallProtectionQuestion({ data, onChange }: FallProtectionQuestio
               { value: 'yes', label: 'Yes' },
               { value: 'no', label: 'No' }
             ]}
-            selectedValue={data.clearanceAdequate}
+            value={data.clearanceAdequate}
             onChange={(value) => updateField('clearanceAdequate', value)}
             required
           />

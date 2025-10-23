@@ -151,7 +151,7 @@ export function GlassHandlingQuestion({ data, onChange }: GlassHandlingQuestionP
             { value: 'over-week', label: '>1 week ago' },
             { value: 'unknown', label: 'Unknown' }
           ]}
-          selectedValue={data.cupsInspected}
+          value={data.cupsInspected}
           onChange={(value) => updateField('cupsInspected', value)}
           required
         />
@@ -164,7 +164,7 @@ export function GlassHandlingQuestion({ data, onChange }: GlassHandlingQuestionP
             { value: 'over-week', label: '>1 week ago' },
             { value: 'unknown', label: 'Unknown' }
           ]}
-          selectedValue={data.riggingInspected}
+          value={data.riggingInspected}
           onChange={(value) => updateField('riggingInspected', value)}
           required
         />
@@ -177,7 +177,7 @@ export function GlassHandlingQuestion({ data, onChange }: GlassHandlingQuestionP
             { value: 'over-week', label: '>1 week ago' },
             { value: 'unknown', label: 'Unknown' }
           ]}
-          selectedValue={data.vacuumPumpTested}
+          value={data.vacuumPumpTested}
           onChange={(value) => updateField('vacuumPumpTested', value)}
           required
         />
@@ -234,7 +234,7 @@ export function GlassHandlingQuestion({ data, onChange }: GlassHandlingQuestionP
           { value: 'slightly-off', label: 'Slightly off-center but within limits' },
           { value: 'poor', label: 'Poor distribution' }
         ]}
-        selectedValue={data.loadDistribution}
+        value={data.loadDistribution}
         onChange={(value) => updateField('loadDistribution', value)}
         required
       />

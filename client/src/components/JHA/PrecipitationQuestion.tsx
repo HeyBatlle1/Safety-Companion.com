@@ -68,53 +68,53 @@ export function PrecipitationQuestion({ data, onChange }: PrecipitationQuestionP
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Hour 1</label>
             <StructuredRadioGroup
+              label="Hour 1"
               options={[
                 { value: 'dry', label: 'Dry' },
                 { value: 'rain', label: 'Rain' },
                 { value: 'snow', label: 'Snow' }
               ]}
-              selectedValue={data.forecastHour1}
+              value={data.forecastHour1}
               onChange={(value) => updateField('forecastHour1', value)}
               required
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Hour 2</label>
             <StructuredRadioGroup
+              label="Hour 2"
               options={[
                 { value: 'dry', label: 'Dry' },
                 { value: 'rain', label: 'Rain' },
                 { value: 'snow', label: 'Snow' }
               ]}
-              selectedValue={data.forecastHour2}
+              value={data.forecastHour2}
               onChange={(value) => updateField('forecastHour2', value)}
               required
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Hour 3</label>
             <StructuredRadioGroup
+              label="Hour 3"
               options={[
                 { value: 'dry', label: 'Dry' },
                 { value: 'rain', label: 'Rain' },
                 { value: 'snow', label: 'Snow' }
               ]}
-              selectedValue={data.forecastHour3}
+              value={data.forecastHour3}
               onChange={(value) => updateField('forecastHour3', value)}
               required
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Hour 4</label>
             <StructuredRadioGroup
+              label="Hour 4"
               options={[
                 { value: 'dry', label: 'Dry' },
                 { value: 'rain', label: 'Rain' },
                 { value: 'snow', label: 'Snow' }
               ]}
-              selectedValue={data.forecastHour4}
+              value={data.forecastHour4}
               onChange={(value) => updateField('forecastHour4', value)}
               required
             />
@@ -141,7 +141,7 @@ export function PrecipitationQuestion({ data, onChange }: PrecipitationQuestionP
             { value: 'reduced', label: 'Reduced (fog/rain)' },
             { value: 'poor', label: 'Poor (<100 ft)' }
           ]}
-          selectedValue={data.currentVisibility}
+          value={data.currentVisibility}
           onChange={(value) => updateField('currentVisibility', value)}
           required
         />
@@ -152,7 +152,7 @@ export function PrecipitationQuestion({ data, onChange }: PrecipitationQuestionP
             { value: 'yes', label: 'Yes' },
             { value: 'no', label: 'No' }
           ]}
-          selectedValue={data.groundVisibility}
+          value={data.groundVisibility}
           onChange={(value) => updateField('groundVisibility', value)}
           required
         />
@@ -203,7 +203,7 @@ export function PrecipitationQuestion({ data, onChange }: PrecipitationQuestionP
           { value: 'continue-unless-heavy', label: 'Continue unless heavy' },
           { value: 'no-policy', label: 'No specific policy' }
         ]}
-        selectedValue={data.workInRainPolicy}
+        value={data.workInRainPolicy}
         onChange={(value) => updateField('workInRainPolicy', value)}
         required
       />

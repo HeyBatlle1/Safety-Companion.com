@@ -219,7 +219,7 @@ export function GlassStorageQuestion({ data, onChange }: GlassStorageQuestionPro
             { value: 'yes', label: 'Yes' },
             { value: 'no', label: 'No' }
           ]}
-          selectedValue={data.windProtected}
+          value={data.windProtected}
           onChange={(value) => updateField('windProtected', value)}
           required
         />
