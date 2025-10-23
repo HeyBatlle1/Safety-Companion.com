@@ -139,7 +139,7 @@ export function TemperatureQuestion({ data, onChange }: TemperatureQuestionProps
               { value: 'heat', label: 'Heat Stress Risk - Temp >80°F or Heat Index >90°F', color: 'orange' },
               { value: 'cold', label: 'Cold Stress Risk - Temp <40°F or Wind Chill <32°F', color: 'blue' }
             ].map((option) => (
-              <div key={option.value} className="flex items-center space-x-2">
+              <div key={option.value} className="flex items-center space-x-2 min-h-[44px]">
                 <input
                   type="radio"
                   id={`thermal-${option.value}`}
@@ -147,12 +147,12 @@ export function TemperatureQuestion({ data, onChange }: TemperatureQuestionProps
                   value={option.value}
                   checked={data.thermalRisk === option.value}
                   onChange={(e) => updateField('thermalRisk', e.target.value as any)}
-                  className="w-4 h-4"
+                  className="w-5 h-5"
                   data-testid={`radio-thermal-${option.value}`}
                 />
                 <label
                   htmlFor={`thermal-${option.value}`}
-                  className={`text-sm cursor-pointer ${
+                  className={`text-sm cursor-pointer py-2 ${
                     option.color === 'green' ? 'text-green-300' :
                     option.color === 'orange' ? 'text-orange-300' :
                     'text-blue-300'

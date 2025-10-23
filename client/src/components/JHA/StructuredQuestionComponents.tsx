@@ -191,18 +191,18 @@ export function StructuredCheckboxGroup({
       </Label>
       <div className="space-y-2 pl-1">
         {options.map((option) => (
-          <div key={option.value} className="flex items-center space-x-2">
+          <div key={option.value} className="flex items-center space-x-2 min-h-[44px]">
             <input
               type="checkbox"
               id={option.value}
               checked={selectedValues.includes(option.value)}
               onChange={() => handleToggle(option.value)}
-              className="w-4 h-4 rounded border-gray-600 bg-slate-700 text-blue-600 focus:ring-2 focus:ring-blue-500"
+              className="w-5 h-5 rounded border-gray-600 bg-slate-700 text-blue-600 focus:ring-2 focus:ring-blue-500"
               data-testid={`checkbox-${option.value}`}
             />
             <label 
               htmlFor={option.value}
-              className="text-sm text-gray-300 cursor-pointer"
+              className="text-sm text-gray-300 cursor-pointer py-2"
             >
               {option.label}
             </label>
