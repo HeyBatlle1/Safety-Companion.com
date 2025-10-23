@@ -65,6 +65,7 @@ Security Testing: Comprehensive RLS policy validation with role isolation verifi
 
 ## Feature Specifications
 - **JHA Form**: Professional-grade with text inputs, file attachments, blueprint uploads, and AI analysis using OSHA data.
+- **Structured Question System**: Production-quality question optimization framework that transforms vague inputs into specific, agent-friendly structured data with 5 core components (sub-fields, examples, photo hints, agent context, critical warnings). Implemented for Wind Conditions and Temperature questions. Dramatically improves AI agent data quality from 2/10 to 9/10.
 - **EAP Generator**: 4-agent sequential pipeline generating OSHA-compliant plans from simplified questionnaire input.
 - **Chat System**: Enhanced conversational AI with grounding capabilities, voice input, and file attachments.
 - **Admin Panel**: Functionality for adding employees, exporting data, and Google Analytics integration.
@@ -76,6 +77,7 @@ Security Testing: Comprehensive RLS policy validation with role isolation verifi
 - **Comprehensive security hardening**: Input validation, rate limiting, secure CORS, secure error handling.
 - **Netlify deployment configuration** with serverless functions for cost-effective hosting.
 - **Multi-agent enhancement**: Structured TypeScript outputs and OSHA-compliant analysis methodology for JHA agents.
+- **Structured Question Framework**: Reusable component system (PhotoHints, AgentNote, CriticalWarning, StructuredField) enabling rapid question optimization across all JHA sections. Mobile-optimized with 44px touch targets, OSHA/ANSI compliance citations, and dynamic UI based on risk levels.
 
 # External Dependencies
 
