@@ -128,15 +128,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
+      console.log('🔐 Attempting sign in...');
       
-      const { data, error } = await supabase.auth.signInWithPassword({
+      // Add timeout to prevent infinite loading
+      const signInPromise = supabase.auth.signInWithPassword({
         email,
         password,
       });
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Sign in timeout - Supabase connection issue')), 10000)
+      );
+      
+      const { data, error } = await Promise.race([signInPromise, timeoutPromise]) as any;
 
       if (error) throw error;
 
       if (data.user) {
+        console.log('🔐 Sign in successful, fetching user profile...');
         const { data: userData } = await supabase
           .from('user_profiles')
           .select('*')
@@ -152,6 +160,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         showToast('Successfully signed in');
       }
     } catch (error: any) {
+      console.error('❌ Sign in error:', error);
       showToast(error.message || 'Failed to sign in', 'error');
       throw error;
     } finally {
