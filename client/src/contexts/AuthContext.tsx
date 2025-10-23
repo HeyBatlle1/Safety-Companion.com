@@ -45,9 +45,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const initializeAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        console.log('🔐 Initializing auth...');
+        
+        // Add timeout to prevent infinite loading
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Auth timeout')), 5000)
+        );
+        
+        const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]) as any;
+        console.log('🔐 Session check complete:', !!session);
         
         if (!session) {
+          console.log('🔐 No session found, setting loading to false');
           if (mounted) setLoading(false);
           return;
         }
@@ -75,11 +85,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setLoading(false);
         }
       } catch (error) {
-        console.error('Auth error:', error);
+        console.error('❌ Auth error:', error);
         if (mounted) setLoading(false);
       }
     };
 
+    console.log('🔐 Starting auth initialization...');
     initializeAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
