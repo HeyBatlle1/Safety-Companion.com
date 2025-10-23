@@ -1,4 +1,4 @@
-import { Crane, Zap } from 'lucide-react';
+import { Construction, Zap } from 'lucide-react';
 import { StructuredCheckboxGroup, StructuredTextField, StructuredNumberField, StructuredRadioGroup, PhotoHints, AgentNote, CriticalWarning } from './StructuredQuestionComponents';
 
 export interface BuildingAccessData {
@@ -30,7 +30,7 @@ export function BuildingAccessQuestion({ data, onChange }: BuildingAccessQuestio
   return (
     <div className="space-y-6" onClick={(e) => e.stopPropagation()}>
       <div className="flex items-center space-x-2 text-blue-400 font-semibold">
-        <Crane className="w-5 h-5" />
+        <Construction className="w-5 h-5" />
         <span>BUILDING ACCESS & LIFTING EQUIPMENT</span>
       </div>
 
