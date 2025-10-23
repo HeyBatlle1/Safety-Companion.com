@@ -1,0 +1,194 @@
+Q13: Glass Panel Size and Weight Considerations
+Current: "Glass Panel Size and Weight Considerations"
+Optimized (Repurposed as Handling Risk Assessment):
+⚖️ GLASS HANDLING RISK FACTORS
+
+Panel Weight Category:
+☐ Light (<50 lbs, 1-2 person carry)
+☐ Medium (50-150 lbs, 2-3 person carry)
+☐ Heavy (150-300 lbs, 3-4 person + equipment)
+☐ Extra Heavy (>300 lbs, mechanical lift REQUIRED)
+
+Actual weight per panel: _____ lbs
+Number of crew for manual handling: _____
+Weight per person: _____ lbs (total weight ÷ crew size)
+
+Manual Handling Risk:
+☐ Low (<30 lbs per person)
+☐ Medium (30-50 lbs per person)
+☐ High (>50 lbs per person - ⚠️ STRAIN RISK)
+
+Awkward Size/Shape:
+☐ Standard rectangular (easy to grip)
+☐ Large but manageable
+☐ Oversized (>6 ft in any dimension - ⚠️ CONTROL RISK)
+☐ Irregular shape (⚠️ BALANCE RISK)
+
+Wind Exposure During Handling:
+Panel surface area: _____ sq ft (width × height)
+Wind force at 20 mph: _____ lbs (area × 1.3 lbs/sq ft)
+Can crew resist wind force? ☐ Yes ☐ No (⚠️ LOSS OF CONTROL)
+
+Crew Fatigue Factors:
+Number of panels to install today: _____
+Estimated time per panel: _____ minutes
+Total handling time: _____ minutes
+Planned rest breaks: Every _____ minutes
+
+💡 Agent Note: Wind force on large panels is the #1 "loss of control" factor in Agent 3's causal chain. 60 sq ft panel in 20 mph wind = 78 lbs lateral force.
+
+📷 Helpful Photos:
+✓ Panel size reference (person next to glass)
+✓ Crew handling panel (grip points visible)
+✓ Suction cup attachment points
+
+SECTION 5: Personnel Safety and Training (3 Questions)
+Q14: Glass Installation Team Qualifications
+Current: "Glass Installation Team Qualifications"
+Optimized:
+👷 CREW QUALIFICATIONS & EXPERIENCE
+
+Crew Size:
+Total workers: _____
+Installers: _____
+Crane operator: _____
+Ground support: _____
+Supervisor: _____
+
+Competent Person (OSHA Required):
+Name: __________________
+Role: ☐ Foreman ☐ Site Supervisor ☐ Safety Manager
+Qualifications: ☐ OSHA 30-hour ☐ Company-certified ☐ 5+ years experience
+
+Crew Experience Level:
+Foreman/Lead: _____ years in glass installation
+Crew average: ☐ <1 year ☐ 1-3 years ☐ 3-5 years ☐ >5 years
+
+Training Records:
+☐ OSHA 10-hour Construction (all crew)
+☐ OSHA 30-hour (supervisor/competent person)
+☐ Fall Protection Training (within last year)
+☐ Crane Signal Person (if applicable)
+☐ First Aid/CPR (at least one crew member)
+
+Specific Glass Installation Training:
+☐ Manufacturer training (glass handling systems)
+☐ On-the-job training (>6 months experience)
+☐ Apprenticeship program
+☐ No formal training (⚠️ COMPETENCY CONCERN)
+
+Previous Glass Installation Experience:
+☐ Same building type, same height
+☐ Similar projects (different height/type)
+☐ First time on project of this scale (⚠️ LEARNING CURVE RISK)
+
+Near-Miss History (Last 90 Days):
+☐ No near-misses or incidents
+☐ 1-2 near-misses (documented and reviewed)
+☐ 3+ near-misses (⚠️ PATTERN CONCERN)
+☐ Unknown/not tracked (⚠️ SAFETY CULTURE GAP)
+
+If near-misses occurred, were corrective actions taken?
+☐ Yes (describe): ______________
+☐ No (⚠️ REPEAT INCIDENT RISK)
+
+🚨 CRITICAL: OSHA 1926.502(k) requires competent person for fall protection.
+No identified competent person = compliance violation.
+
+💡 Agent Note: "First time at this scale" + "no formal training" = Agent 3 predicts errors in judgment under pressure.
+
+📷 Required Photos:
+✓ Training certificates (OSHA 10/30, fall protection)
+✓ Crew team photo (for emergency identification)
+✓ Competent person credentials
+
+Q15: Required PPE for Glass Installation
+Current: "Required PPE for Glass Installation"
+Optimized:
+🦺 PERSONAL PROTECTIVE EQUIPMENT (PPE)
+
+Required PPE for This Task:
+☐ Hard Hat (Type I or II)
+☐ Safety Glasses (ANSI Z87.1)
+☐ Cut-Resistant Gloves (ANSI A3 or higher for glass)
+☐ Work Gloves (general handling)
+☐ Safety Boots (steel/composite toe)
+☐ High-Visibility Vest (Class 2 or 3)
+☐ Hearing Protection (if loud equipment)
+
+Fall Protection PPE (if work >6 ft):
+☐ Full-Body Harness (ANSI A10.32)
+☐ Shock-Absorbing Lanyard or SRL
+☐ Hard Hat with Chin Strap (for overhead work)
+
+PPE Inspection Status:
+☐ All PPE inspected before shift
+☐ No defects found
+☐ Minor wear (still serviceable)
+☐ Damage found (replaced before work)
+☐ Not inspected (⚠️ EQUIPMENT FAILURE RISK)
+
+Common PPE Issues to Check:
+Harness D-ring on BACK (not chest)? ☐ Yes ☐ No
+Hard hat worn correctly (not backward)? ☐ Yes ☐ No
+Gloves appropriate for glass (cut-resistant)? ☐ Yes ☐ No
+Safety glasses worn (not on head)? ☐ Yes ☐ No
+
+PPE Availability:
+☐ Extra PPE available on-site (if damaged)
+☐ No spare PPE (⚠️ if damage occurs, work stops)
+
+💡 Agent Note: Agent 3 looks for "no cut-resistant gloves" + "glass handling" = laceration incident prediction.
+
+📷 Required Photos:
+✓ Crew wearing full PPE (head-to-toe visible)
+✓ Harness D-ring location (verify on back)
+✓ Cut-resistant gloves close-up
+✓ Hard hat with chin strap (if elevated work)
+
+Q16: Communication Systems
+Current: "Communication Systems"
+Optimized:
+📡 COMMUNICATION SYSTEMS & PROTOCOLS
+
+Primary Communication Method:
+☐ Two-Way Radios (channel: _____)
+☐ Hand Signals (crane operations)
+☐ Cell Phones
+☐ Verbal (shouting)
+☐ Combination (specify): ______________
+
+Radio/Communication Checks:
+☐ Tested before work started (all working)
+☐ Spare batteries available
+☐ Backup radios on-site
+☐ Not tested (⚠️ COORDINATION RISK)
+
+Communication Clarity:
+Can ground crew hear workers at height clearly? ☐ Yes ☐ No
+Can crane operator see hand signals from all angles? ☐ Yes ☐ No
+Is there background noise interference? ☐ Yes (describe: _____) ☐ No
+
+Emergency Communication Signals:
+Emergency stop signal: ______________
+"Man down" signal: ______________
+"Evacuate" signal: ______________
+
+All crew members briefed on emergency signals? ☐ Yes ☐ No
+
+Emergency Contact Numbers (Posted On-Site):
+911: ☐ Posted
+Site Supervisor: ______________ ☐ Posted
+Safety Manager: ______________ ☐ Posted
+Nearest Hospital: ______________ ☐ Posted
+
+Backup Communication:
+If radios fail, backup method: ______________
+☐ No backup plan (⚠️ SINGLE POINT FAILURE)
+
+💡 Agent Note: "Verbal only" + "60 ft height" = Agent 3 predicts miscommunication in causal chain (Unsafe Act → Loss of Control).
+
+📷 Required Photos:
+✓ Radio check (crew with radios)
+✓ Emergency contact numbers posted
+✓ Hand signal chart (if using crane)
