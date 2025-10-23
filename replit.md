@@ -65,7 +65,7 @@ Security Testing: Comprehensive RLS policy validation with role isolation verifi
 
 ## Feature Specifications
 - **JHA Form**: Professional-grade with text inputs, file attachments, blueprint uploads, and AI analysis using OSHA data.
-- **Structured Question System**: Production-quality question optimization framework that transforms vague inputs into specific, agent-friendly structured data with 5 core components (sub-fields, examples, photo hints, agent context, critical warnings). **ALL 16 STRUCTURED QUESTIONS COMPLETE (Q1-Q16)** with full localStorage hydration, TypeScript interfaces, production-ready safety validation, and architect approval. Includes auto-calculation logic for weight distribution, wind forces, and crew fatigue metrics.
+- **Structured Question System**: Production-quality question optimization framework that transforms vague inputs into specific, agent-friendly structured data with 5 core components (sub-fields, examples, photo hints, agent context, critical warnings). **ALL 20 STRUCTURED QUESTIONS COMPLETE (Q1-Q20)** with full localStorage hydration, TypeScript interfaces, production-ready safety validation, and architect approval. Includes auto-calculation logic for weight distribution, wind forces, and crew fatigue metrics. Emergency preparedness (Q17-Q18) and public safety sections (Q19-Q20) with OSHA 1926.760 compliance enforcement for ground-level protection.
 - **EAP Generator**: 4-agent sequential pipeline generating OSHA-compliant plans from simplified questionnaire input.
 - **Chat System**: Enhanced conversational AI with grounding capabilities, voice input, and file attachments.
 - **Admin Panel**: Functionality for adding employees, exporting data, and Google Analytics integration.
