@@ -10,6 +10,10 @@ deploymentTarget = "autoscale"
 build = ["npm", "run", "build"]
 run = ["npm", "run", "start"]
 
+[auth]
+VITE_SUPABASE_URL = "${VITE_SUPABASE_URL}"
+VITE_SUPABASE_ANON_KEY = "${VITE_SUPABASE_ANON_KEY}"
+
 [[ports]]
 localPort = 5000
 externalPort = 80
