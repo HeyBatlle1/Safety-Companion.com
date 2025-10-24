@@ -21,7 +21,15 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    // During HMR/dev, provider may temporarily unmount
+    // Return safe fallback instead of crashing
+    return {
+      user: null,
+      loading: true,
+      signIn: async () => {},
+      signUp: async () => {},
+      signOut: async () => {}
+    };
   }
   return context;
 };
@@ -29,20 +37,6 @@ export const useAuth = () => {
 interface AuthProviderProps {
   children: React.ReactNode;
 }
-
-// Helper to properly log errors
-const logError = (prefix: string, error: any) => {
-  console.error(prefix, {
-    message: error?.message,
-    status: error?.status,
-    statusText: error?.statusText,
-    code: error?.code,
-    details: error?.details,
-    hint: error?.hint,
-    name: error?.name,
-    stack: error?.stack
-  });
-};
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -60,102 +54,64 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const initializeAuth = async () => {
       try {
-        console.log('🔐 Initializing auth...');
-        console.log('🔐 Supabase URL configured:', !!import.meta.env.VITE_SUPABASE_URL);
-        console.log('🔐 Supabase Anon Key configured:', !!import.meta.env.VITE_SUPABASE_ANON_KEY);
+        const { data: { session } } = await supabase.auth.getSession();
         
-        // Check session with proper timeout
-        const sessionPromise = supabase.auth.getSession();
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Auth timeout - Supabase connection failed after 10s')), 10000)
-        );
-        
-        const { data: { session }, error: sessionError } = await Promise.race([sessionPromise, timeoutPromise]) as any;
-        
-        if (sessionError) {
-          logError('❌ Session error:', sessionError);
+        if (!session || !mounted) {
           if (mounted) setLoading(false);
           return;
         }
-        
-        console.log('🔐 Session check complete:', !!session);
-        
-        if (!session) {
-          console.log('🔐 No session found, user not logged in');
-          if (mounted) setLoading(false);
-          return;
-        }
-
-        console.log('🔐 Session found, loading user profile...');
 
         // Set basic user first
-        if (mounted) {
-          setUser({
-            id: session.user.id,
-            email: session.user.email || '',
-            role: 'field_worker'
-          });
-        }
+        const basicUser = {
+          id: session.user.id,
+          email: session.user.email || '',
+          role: 'field_worker' as string
+        };
+        
+        if (mounted) setUser(basicUser);
 
-        // Try to fetch user profile
-        try {
-          const { data: userData, error: profileError } = await supabase
-            .from('user_profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
+        // Try to fetch profile for role
+        const { data: userData } = await supabase
+          .from('user_profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
 
-          if (profileError) {
-            console.warn('⚠️ Could not load user profile:', profileError.message);
-            // Continue with basic user info
-          } else if (mounted && userData) {
-            setUser({
-              id: session.user.id,
-              email: session.user.email || '',
-              role: userData.role || 'field_worker'
-            });
-          }
-        } catch (profileErr) {
-          logError('⚠️ Profile fetch error:', profileErr);
-          // Continue with basic user info
+        if (mounted && userData?.role) {
+          setUser({ ...basicUser, role: userData.role });
         }
         
         if (mounted) setLoading(false);
       } catch (error) {
-        logError('❌ Auth initialization error:', error);
+        console.error('Auth initialization error:', error);
         if (mounted) setLoading(false);
       }
     };
 
-    console.log('🔐 Starting auth initialization...');
     initializeAuth();
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('🔐 Auth state changed:', event);
-      
-      if (session?.user) {
-        try {
-          const { data: userData } = await supabase
-            .from('user_profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
+      if (session?.user && mounted) {
+        const basicUser = {
+          id: session.user.id,
+          email: session.user.email || '',
+          role: 'field_worker' as string
+        };
+        
+        setUser(basicUser);
 
-          setUser({
-            id: session.user.id,
-            email: session.user.email || '',
-            role: userData?.role || 'field_worker'
-          });
-        } catch (err) {
-          logError('⚠️ Profile load error in state change:', err);
-          setUser({
-            id: session.user.id,
-            email: session.user.email || '',
-            role: 'field_worker'
-          });
+        // Try to get role from profile
+        const { data: userData } = await supabase
+          .from('user_profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+
+        if (userData?.role && mounted) {
+          setUser({ ...basicUser, role: userData.role });
         }
-      } else {
+      } else if (mounted) {
         setUser(null);
       }
     });
@@ -169,60 +125,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
-      console.log('🔐 Attempting sign in for:', email);
       
-      const signInPromise = supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Sign in timeout - Supabase connection issue after 15s')), 15000)
-      );
-      
-      const { data, error } = await Promise.race([signInPromise, timeoutPromise]) as any;
 
-      if (error) {
-        logError('❌ Sign in error from Supabase:', error);
-        throw new Error(error.message || 'Invalid email or password');
-      }
+      if (error) throw error;
+      if (!data?.user) throw new Error('Sign in failed');
 
-      if (!data?.user) {
-        throw new Error('Sign in failed - no user data returned');
-      }
+      const basicUser = {
+        id: data.user.id,
+        email: data.user.email || '',
+        role: 'field_worker' as string
+      };
 
-      console.log('🔐 Sign in successful, user ID:', data.user.id);
-      
-      // Fetch user profile
-      try {
-        const { data: userData, error: profileError } = await supabase
-          .from('user_profiles')
-          .select('*')
-          .eq('id', data.user.id)
-          .single();
+      // Try to get role from profile
+      const { data: userData } = await supabase
+        .from('user_profiles')
+        .select('role')
+        .eq('id', data.user.id)
+        .single();
 
-        if (profileError) {
-          console.warn('⚠️ Could not load profile:', profileError.message);
-        }
-
-        setUser({
-          id: data.user.id,
-          email: data.user.email || '',
-          role: userData?.role || 'field_worker'
-        });
-      } catch (profileErr) {
-        logError('⚠️ Profile fetch error:', profileErr);
-        // Continue with basic user
-        setUser({
-          id: data.user.id,
-          email: data.user.email || '',
-          role: 'field_worker'
-        });
-      }
-      
+      setUser(userData?.role ? { ...basicUser, role: userData.role } : basicUser);
       showToast('Successfully signed in');
     } catch (error: any) {
-      logError('❌ Sign in failed:', error);
-      showToast(error?.message || 'Failed to sign in. Please check your credentials.', 'error');
+      const message = error?.message || 'Failed to sign in';
+      showToast(message, 'error');
       throw error;
     } finally {
       setLoading(false);
@@ -232,23 +161,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signUp = async (email: string, password: string, role: string, profileData?: any) => {
     try {
       setLoading(true);
-      console.log('🔐 Attempting sign up for:', email);
       
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
       });
 
-      if (authError) {
-        logError('❌ Sign up error:', authError);
-        throw new Error(authError.message || 'Failed to create account');
-      }
-
-      if (!authData?.user) {
-        throw new Error('Sign up failed - no user data returned');
-      }
-
-      console.log('🔐 User created, creating profile...');
+      if (authError) throw authError;
+      if (!authData?.user) throw new Error('Sign up failed');
 
       // Create user profile
       const { error: dbError } = await supabase
@@ -266,10 +186,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           emergencyContactPhone: profileData?.emergencyContactPhone
         });
 
-      if (dbError) {
-        logError('❌ Profile creation error:', dbError);
-        throw new Error(dbError.message || 'Failed to create user profile');
-      }
+      if (dbError) throw dbError;
 
       setUser({
         id: authData.user.id,
@@ -277,10 +194,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         role
       });
       
-      showToast('Account created successfully! You are now logged in.');
+      showToast('Account created successfully!');
     } catch (error: any) {
-      logError('❌ Sign up failed:', error);
-      showToast(error?.message || 'Failed to create account', 'error');
+      const message = error?.message || 'Failed to create account';
+      showToast(message, 'error');
       throw error;
     } finally {
       setLoading(false);
@@ -290,20 +207,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signOut = async () => {
     try {
       setLoading(true);
-      console.log('🔐 Signing out...');
-      
       const { error } = await supabase.auth.signOut();
-
-      if (error) {
-        logError('❌ Sign out error:', error);
-        throw new Error(error.message || 'Failed to sign out');
-      }
-
+      if (error) throw error;
       setUser(null);
       showToast('Successfully signed out');
     } catch (error: any) {
-      logError('❌ Sign out failed:', error);
-      showToast(error?.message || 'Failed to sign out', 'error');
+      const message = error?.message || 'Failed to sign out';
+      showToast(message, 'error');
       throw error;
     } finally {
       setLoading(false);
