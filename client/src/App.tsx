@@ -19,6 +19,8 @@ import Profiles from '@/pages/Profiles';
 import { InsuranceAnalytics } from '@/pages/InsuranceAnalytics';
 import PatternAnalysisPage from '@/pages/PatternAnalysis';
 import StructuredQuestionsDemo from '@/pages/StructuredQuestionsDemo';
+import Reports from '@/pages/Reports';
+import ReportView from '@/pages/ReportView';
 import ToastContainer from '@/components/common/ToastContainer';
 
 function App() {
@@ -147,6 +149,20 @@ function App() {
         <Route path="/structured-questions-demo" element={
           <PrivateRoute>
             <StructuredQuestionsDemo />
+          </PrivateRoute>
+        } />
+        <Route path="/reports" element={
+          <PrivateRoute>
+            <AppLayout>
+              <Reports />
+            </AppLayout>
+          </PrivateRoute>
+        } />
+        <Route path="/reports/:reportId" element={
+          <PrivateRoute>
+            <AppLayout>
+              <ReportView />
+            </AppLayout>
           </PrivateRoute>
         } />
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -1554,35 +1554,48 @@ Progress: ${Math.round(calculateProgress())}% complete
           </motion.div>
         )}
 
-        {/* AI Analysis Results - Structured Agent View */}
+        {/* Analysis Complete Banner - NO REPORT DISPLAY */}
         {agentData && !updateComparison && (
-          <>
-            <SafetyAnalysisReport
-              agent1={agentData.agent1}
-              agent2={agentData.agent2}
-              agent3={agentData.agent3}
-              agent4={agentData.agent4}
-              metadata={agentData.metadata}
-            />
-            
-            {/* Create Daily Update Button */}
-            {currentAnalysisId && !showUpdateForm && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex justify-center mt-6"
-              >
-                <button
-                  onClick={() => setShowUpdateForm(true)}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all flex items-center space-x-2"
-                  data-testid="button-create-daily-update"
-                >
-                  <RotateCcw className="w-5 h-5" />
-                  <span>Create Daily Update</span>
-                </button>
-              </motion.div>
-            )}
-          </>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="p-8 rounded-2xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 backdrop-blur-sm border border-emerald-500/30 shadow-2xl"
+          >
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 flex items-center justify-center">
+                <CheckCircle className="w-10 h-10 text-white" />
+              </div>
+              <h2 className="text-3xl font-bold text-white mb-2">Analysis Complete!</h2>
+              <p className="text-slate-300 mb-6">
+                Your safety analysis report has been generated successfully.
+              </p>
+              
+              {/* View Report Button */}
+              {currentAnalysisId && (
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <button
+                    onClick={() => navigate(`/reports/${currentAnalysisId}`)}
+                    className="px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 flex items-center justify-center gap-2"
+                    data-testid="button-view-report"
+                  >
+                    <FileText className="w-5 h-5" />
+                    View Full Report
+                  </button>
+                  
+                  {!showUpdateForm && (
+                    <button
+                      onClick={() => setShowUpdateForm(true)}
+                      className="px-8 py-4 bg-slate-800 border border-blue-500/30 text-blue-300 font-semibold rounded-lg hover:border-blue-500/50 hover:bg-slate-700 transition-all flex items-center justify-center gap-2"
+                      data-testid="button-create-daily-update"
+                    >
+                      <RotateCcw className="w-5 h-5" />
+                      Create Daily Update
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </motion.div>
         )}
         
         {/* JHA Update Form */}
