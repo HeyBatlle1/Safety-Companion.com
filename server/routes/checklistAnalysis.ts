@@ -3,6 +3,7 @@ import { multiAgentSafety } from '../services/multiAgentSafety';
 import { db } from '../db';
 import { analysisHistory } from '../../shared/schema';
 import { eq } from 'drizzle-orm';
+import { verifySupabaseToken } from '../middleware/supabaseAuth';
 
 const router = express.Router();
 
@@ -11,7 +12,7 @@ const router = express.Router();
  * Analyze checklist data with predictive incident forecasting and weather integration
  * Using 4-agent pipeline with complete agent output tracking
  */
-router.post('/checklist-analysis', async (req, res) => {
+router.post('/checklist-analysis', verifySupabaseToken, async (req, res) => {
   try {
     const checklistData = req.body;
     
@@ -37,7 +38,7 @@ router.post('/checklist-analysis', async (req, res) => {
     const weatherData = await getWeatherForSafetyAnalysis(siteLocation);
     
     // Create analysis_history record to link agent outputs
-    const userId = (req as any).session?.userId || null;
+    const userId = (req as any).user?.id || null;
     const [analysisRecord] = await db.insert(analysisHistory).values({
       userId: userId,
       query: `JHA Analysis - ${checklistData.template || 'Site Analysis'}`,
