@@ -1,0 +1,52 @@
+TOP. We need to debug, not band-aid.
+You've added error handling multiple times. The app works in sandbox but fails in production with infinite loading loops across all devices/platforms during auth.
+That means error handling isn't the problem. Something fundamental is broken.
+Let's think like engineers debugging a production issue:
+DIAGNOSTIC QUESTIONS:
+
+What exactly happens during the loading loop?
+
+Show me the browser console logs during a failed auth attempt
+What's the last successful network request before it hangs?
+Is it stuck on Supabase auth callback? Session validation? Database query?
+
+
+What's different between sandbox and production?
+
+Environment variables properly set in Railway?
+CORS configuration correct for production domain?
+Supabase redirect URLs configured for production URL?
+Session cookie settings (secure/sameSite) breaking in production?
+
+
+Auth flow trace:
+
+User clicks sign in → Request sent to /api/login → What happens next?
+Does Supabase return a session?
+Does the session get stored correctly?
+Where does the redirect fail?
+
+
+Recent commits that might have caused this:
+
+"Add diagnostics for Supabase connections and authentication" (7 hours ago)
+"Add a timeout to user sign-in to prevent infinite loading" (7 hours ago)
+
+Those sound like symptoms of a deeper problem.
+
+STOP ADDING ERROR HANDLERS. Instead:
+
+Add console.log() statements at EVERY step of the auth flow
+Show me the exact sequence that executes during a failed login
+Identify where it stops/loops
+Show me the actual error or state that causes the hang
+
+What would cause infinite loading in production but not sandbox?
+
+Supabase redirect URL mismatch
+CORS blocking the callback
+Session storage failing (cookie settings)
+Environment variable missing/wrong
+Network timeout (no error thrown, just hangs)
+
+Show me the auth flow code and the console output from a failed production login attempt. Don't add anything - just show me what's happening.RetryClaude can make mistakes. Please double-check responses.
