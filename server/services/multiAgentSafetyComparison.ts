@@ -1,6 +1,10 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const apiKey = process.env.GEMINI_API_KEY || '';
+// Use consistent API key naming across all services
+const apiKey = process.env.GOOGLE_API_KEY;
+if (!apiKey) {
+  throw new Error('GOOGLE_API_KEY environment variable is required for multi-agent safety comparison');
+}
 const genAI = new GoogleGenerativeAI(apiKey);
 
 interface BaselineJHA {
