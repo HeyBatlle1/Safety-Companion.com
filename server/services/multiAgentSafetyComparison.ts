@@ -122,15 +122,30 @@ Return JSON:
   const result = await model.generateContent(prompt);
   const text = result.response.text();
   
+  console.log('📄 Agent 1 raw response:', text.substring(0, 500));
+  
   try {
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    // Try multiple extraction patterns
+    let jsonText = text;
+    
+    // Remove markdown code blocks if present
+    jsonText = jsonText.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+    
+    // Extract JSON object
+    const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]);
+      const parsed = JSON.parse(jsonMatch[0]);
+      console.log('✅ Agent 1 validation successful:', parsed.validationStatus);
+      return parsed;
+    } else {
+      console.warn('⚠️ No JSON object found in Agent 1 response');
     }
   } catch (e) {
-    console.error('Agent 1 JSON parse error:', e);
+    console.error('❌ Agent 1 JSON parse error:', e);
+    console.error('Raw text causing error:', text);
   }
 
+  console.log('🔄 Using Agent 1 fallback response');
   return {
     validationStatus: 'complete',
     qualityScore: 7,
@@ -191,15 +206,26 @@ Return JSON:
   const result = await model.generateContent(prompt);
   const text = result.response.text();
   
+  console.log('📄 Agent 2 raw response:', text.substring(0, 500));
+  
   try {
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    // Remove markdown code blocks if present
+    let jsonText = text.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+    
+    const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]);
+      const parsed = JSON.parse(jsonMatch[0]);
+      console.log('✅ Agent 2 risk comparison successful');
+      return parsed;
+    } else {
+      console.warn('⚠️ No JSON object found in Agent 2 response');
     }
   } catch (e) {
-    console.error('Agent 2 JSON parse error:', e);
+    console.error('❌ Agent 2 JSON parse error:', e);
+    console.error('Raw text causing error:', text);
   }
 
+  console.log('🔄 Using Agent 2 fallback response');
   return {
     currentRiskScore: baseline.riskScore || 60,
     riskScoreDelta: 0,
@@ -256,15 +282,26 @@ Return JSON:
   const result = await model.generateContent(prompt);
   const text = result.response.text();
   
+  console.log('📄 Agent 3 raw response:', text.substring(0, 500));
+  
   try {
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    // Remove markdown code blocks if present
+    let jsonText = text.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+    
+    const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]);
+      const parsed = JSON.parse(jsonMatch[0]);
+      console.log('✅ Agent 3 decision successful:', parsed.decision);
+      return parsed;
+    } else {
+      console.warn('⚠️ No JSON object found in Agent 3 response');
     }
   } catch (e) {
-    console.error('Agent 3 JSON parse error:', e);
+    console.error('❌ Agent 3 JSON parse error:', e);
+    console.error('Raw text causing error:', text);
   }
 
+  console.log('🔄 Using Agent 3 fallback response');
   return {
     decision: 'conditional',
     reasoning: 'Manual review required',
@@ -321,15 +358,26 @@ Return JSON:
   const result = await model.generateContent(prompt);
   const text = result.response.text();
   
+  console.log('📄 Agent 4 raw response:', text.substring(0, 500));
+  
   try {
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    // Remove markdown code blocks if present
+    let jsonText = text.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+    
+    const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]);
+      const parsed = JSON.parse(jsonMatch[0]);
+      console.log('✅ Agent 4 report synthesis successful');
+      return parsed;
+    } else {
+      console.warn('⚠️ No JSON object found in Agent 4 response');
     }
   } catch (e) {
-    console.error('Agent 4 JSON parse error:', e);
+    console.error('❌ Agent 4 JSON parse error:', e);
+    console.error('Raw text causing error:', text);
   }
 
+  console.log('🔄 Using Agent 4 fallback response');
   return {
     executiveSummary: 'Comparison analysis completed',
     comparisonReport: 'Report generation in progress...',
