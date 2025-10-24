@@ -15,6 +15,7 @@ import { ReportFormatter } from '../../services/reportFormatter';
 import { SafetyAnalysisReport } from '../SafetyAnalysis/SafetyAnalysisReport';
 import { JHAUpdateForm } from '../JHA/JHAUpdateForm';
 import { JHAComparisonView } from '../JHA/JHAComparisonView';
+import supabase from '@/services/supabase';
 import { ProjectLocationQuestion, type ProjectLocationData } from '../JHA/ProjectLocationQuestion';
 import { GlassInstallationQuestion, type GlassInstallationData } from '../JHA/GlassInstallationQuestion';
 import { BuildingAccessQuestion, type BuildingAccessData } from '../JHA/BuildingAccessQuestion';
@@ -829,11 +830,19 @@ const ChecklistForm = () => {
             });
           }, 30000); // Update every 30 seconds
           
+          // Get Supabase auth token
+          const { data: { session } } = await supabase.auth.getSession();
+          const authHeaders: Record<string, string> = {
+            'Content-Type': 'application/json',
+          };
+          
+          if (session?.access_token) {
+            authHeaders['Authorization'] = `Bearer ${session.access_token}`;
+          }
+          
           const response = await fetch('/api/checklist-analysis', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
+            headers: authHeaders,
             body: JSON.stringify(checklistData),
             signal: thisAbortController.signal
           });
