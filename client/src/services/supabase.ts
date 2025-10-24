@@ -3,8 +3,16 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
+console.log('🔧 Supabase Config Check:', {
+  urlExists: !!supabaseUrl,
+  urlValue: supabaseUrl ? `${supabaseUrl.substring(0, 20)}...` : 'MISSING',
+  keyExists: !!supabaseAnonKey,
+  keyValue: supabaseAnonKey ? `${supabaseAnonKey.substring(0, 20)}...` : 'MISSING'
+});
+
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error('❌ Supabase configuration missing. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to secrets.');
+  console.error('Available env vars:', Object.keys(import.meta.env).filter(k => k.startsWith('VITE_')));
 }
 
 // Singleton pattern: Store client in window to survive HMR
