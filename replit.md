@@ -8,7 +8,7 @@ Preferred communication style: Simple, everyday language.
 Hosting Preference: Netlify for production deployment over Replit due to cost considerations - wants always-on hosting without monthly fees
 UI Design: Professional, enterprise-grade styling with dark theme and blue/cyan gradients - Unified enterprise checklist system with photo uploads, severity sliders, and tablet-optimized components (44px touch targets)
 Navigation: Profiles icon positioned at the end of navigation list
-Code Organization: Checklist functionality separated from SDS chat - clean separation of concerns
+Code Organization: Checklist functionality separated from SDS chat - clean separation of concerns. Reports separated from checklist input page - checklist page handles data entry, Reports section displays analysis outputs
 Checklist System: Simplified to single enterprise mode - removed dual-mode complexity, prioritized first 6 safety checklists for AI and railway integration
 Database Health Monitoring: Available in Profile > Database tab with detailed connection testing and diagnostics - read-only for monitoring
 Security: Enterprise-grade RLS policies, audit trails, secure file uploads with virus scanning
@@ -71,6 +71,7 @@ Security Testing: Comprehensive RLS policy validation with role isolation verifi
 - **Admin Panel**: Functionality for adding employees, exporting data, and Google Analytics integration.
 - **Signup Process**: Mandatory comprehensive form requiring all profile fields.
 - **Agent Output Viewing System**: Real-time progress tracking and detailed inspection of agent reasoning chains.
+- **Reports Section**: Dedicated interface for viewing analysis reports separate from checklist input. ChecklistForm shows completion banner with CTA to view report in Reports section. SafetyAnalysisReport component remains untouched and displays in ReportView page. Navigation: ToolBox Talks icon replaced with Reports (FileText icon) linking to /reports route.
 
 ## System Design Choices
 - **Production-ready authentication system** with sessionStorage persistence and role-based signup.
