@@ -43,13 +43,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     let mounted = true;
+    let timeoutId: NodeJS.Timeout;
 
     const initializeAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        console.log('🔐 Starting auth initialization...');
+        
+        // Set a safety timeout - if auth doesn't complete in 5 seconds, stop loading
+        timeoutId = setTimeout(() => {
+          console.warn('⚠️ Auth initialization timeout - stopping loading state');
+          if (mounted) setLoading(false);
+        }, 5000);
+
+        console.log('📡 Fetching Supabase session...');
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        console.log('✅ Session fetch complete:', session ? 'User logged in' : 'No session');
+        
+        if (sessionError) {
+          console.error('❌ Session error:', sessionError);
+          clearTimeout(timeoutId);
+          if (mounted) {
+            console.log('🔓 Setting loading to false (session error)');
+            setLoading(false);
+          }
+          return;
+        }
         
         if (!session || !mounted) {
-          if (mounted) setLoading(false);
+          clearTimeout(timeoutId);
+          if (mounted) {
+            console.log('🔓 Setting loading to false (no session or not mounted)');
+            setLoading(false);
+          }
           return;
         }
 
@@ -60,23 +85,39 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           role: 'field_worker' as string
         };
         
-        if (mounted) setUser(basicUser);
+        if (mounted) {
+          setUser(basicUser);
+          // IMMEDIATELY stop loading - don't wait for profile fetch
+          clearTimeout(timeoutId);
+          console.log('🔓 Setting loading to false (user authenticated)');
+          setLoading(false);
+        }
 
-        // Try to fetch profile for role
-        const { data: userData } = await supabase
+        // Fetch profile for role in background (non-blocking)
+        console.log('📋 Fetching user profile...');
+        supabase
           .from('user_profiles')
           .select('role')
           .eq('id', session.user.id)
-          .single();
-
-        if (mounted && userData?.role) {
-          setUser({ ...basicUser, role: userData.role });
-        }
-        
-        if (mounted) setLoading(false);
+          .single()
+          .then(({ data: userData, error: profileError }) => {
+            if (profileError) {
+              console.warn('⚠️ Profile fetch error:', profileError.message);
+            } else if (mounted && userData?.role) {
+              console.log('✅ Profile loaded, updating role:', userData.role);
+              setUser({ ...basicUser, role: userData.role });
+            }
+          })
+          .catch(err => {
+            console.warn('⚠️ Profile fetch exception:', err);
+          });
       } catch (error) {
-        console.error('Auth initialization error:', error);
-        if (mounted) setLoading(false);
+        console.error('❌ Auth initialization error:', error);
+        clearTimeout(timeoutId);
+        if (mounted) {
+          console.log('🔓 Setting loading to false (exception caught)');
+          setLoading(false);
+        }
       }
     };
 
@@ -110,6 +151,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     return () => {
       mounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
       subscription.unsubscribe();
     };
   }, []);
