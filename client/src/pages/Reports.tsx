@@ -53,8 +53,10 @@ const Reports: React.FC = () => {
 
       if (response.ok) {
         const data = await response.json();
+        // Backend returns { history: [...] }
+        const historyData = data.history || data;
         // Filter for JHA/safety analysis reports (including multi-agent analysis)
-        const safetyReports = data.filter((item: any) => 
+        const safetyReports = historyData.filter((item: any) => 
           item.type === 'safety_assessment' || 
           item.type === 'jha_analysis' || 
           item.type === 'jha_multi_agent_analysis'
