@@ -161,6 +161,17 @@ const ChecklistForm = () => {
     slipFallPrecautions: [],
     workInRainPolicy: ''
   });
+  
+  // Weather Input Module - Heads-up display for environmental section
+  const [weatherInputData, setWeatherInputData] = useState({
+    temperature: '',
+    windSpeed: '',
+    conditions: '',
+    precipitation: '',
+    visibility: '',
+    humidity: ''
+  });
+  
   const [glassHandlingData, setGlassHandlingData] = useState<GlassHandlingData>({
     liftingMethod: [],
     numberOfCups: '',
@@ -673,6 +684,8 @@ const ChecklistForm = () => {
       const checklistData = {
         template: template.title,
         templateId: templateId,
+        // Weather Input Module - Heads-up display data for AI fail-safe
+        weatherInputOverride: weatherInputData,
         sections: template.sections.map(section => ({
           title: section.title,
           items: section.items.map(item => ({
@@ -1698,6 +1711,112 @@ Progress: ${Math.round(calculateProgress())}% complete
                   exit={{ opacity: 0, height: 0 }}
                   className="p-6 border-t border-blue-500/20 space-y-6"
                 >
+                  {/* Weather Input Module - Heads-Up Display for Environmental & Weather Conditions */}
+                  {section.title === 'Environmental & Weather Conditions' && (
+                    <div className="mb-6 p-6 rounded-xl bg-gradient-to-r from-cyan-500/10 to-blue-500/10 backdrop-blur-sm border border-cyan-500/30">
+                      <div className="flex items-center gap-3 mb-4">
+                        <MapPin className="w-6 h-6 text-cyan-400" />
+                        <h4 className="text-lg font-semibold text-cyan-300">Current Weather Conditions</h4>
+                        <span className="text-xs text-cyan-400/70 ml-auto">Paste data from Weather Module</span>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
+                            <Clock className="w-4 h-4" />
+                            Temperature (°F)
+                          </label>
+                          <input
+                            type="text"
+                            value={weatherInputData.temperature}
+                            onChange={(e) => setWeatherInputData(prev => ({ ...prev, temperature: e.target.value }))}
+                            placeholder="e.g., 72°F"
+                            className="w-full px-4 py-3 bg-slate-800/60 border border-slate-600/50 rounded-lg text-white placeholder-slate-500 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all"
+                            data-testid="input-weather-temperature"
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
+                            <AlertTriangle className="w-4 h-4" />
+                            Wind Speed (mph)
+                          </label>
+                          <input
+                            type="text"
+                            value={weatherInputData.windSpeed}
+                            onChange={(e) => setWeatherInputData(prev => ({ ...prev, windSpeed: e.target.value }))}
+                            placeholder="e.g., 12 mph"
+                            className="w-full px-4 py-3 bg-slate-800/60 border border-slate-600/50 rounded-lg text-white placeholder-slate-500 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all"
+                            data-testid="input-weather-wind-speed"
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-slate-300">Conditions</label>
+                          <input
+                            type="text"
+                            value={weatherInputData.conditions}
+                            onChange={(e) => setWeatherInputData(prev => ({ ...prev, conditions: e.target.value }))}
+                            placeholder="e.g., Partly Cloudy"
+                            className="w-full px-4 py-3 bg-slate-800/60 border border-slate-600/50 rounded-lg text-white placeholder-slate-500 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all"
+                            data-testid="input-weather-conditions"
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-slate-300">Precipitation</label>
+                          <input
+                            type="text"
+                            value={weatherInputData.precipitation}
+                            onChange={(e) => setWeatherInputData(prev => ({ ...prev, precipitation: e.target.value }))}
+                            placeholder="e.g., 0% or None"
+                            className="w-full px-4 py-3 bg-slate-800/60 border border-slate-600/50 rounded-lg text-white placeholder-slate-500 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all"
+                            data-testid="input-weather-precipitation"
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-slate-300">Visibility</label>
+                          <input
+                            type="text"
+                            value={weatherInputData.visibility}
+                            onChange={(e) => setWeatherInputData(prev => ({ ...prev, visibility: e.target.value }))}
+                            placeholder="e.g., 10 miles"
+                            className="w-full px-4 py-3 bg-slate-800/60 border border-slate-600/50 rounded-lg text-white placeholder-slate-500 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all"
+                            data-testid="input-weather-visibility"
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-slate-300">Humidity (%)</label>
+                          <input
+                            type="text"
+                            value={weatherInputData.humidity}
+                            onChange={(e) => setWeatherInputData(prev => ({ ...prev, humidity: e.target.value }))}
+                            placeholder="e.g., 45%"
+                            className="w-full px-4 py-3 bg-slate-800/60 border border-slate-600/50 rounded-lg text-white placeholder-slate-500 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all"
+                            data-testid="input-weather-humidity"
+                          />
+                        </div>
+                      </div>
+                      
+                      {/* Weather Summary Display */}
+                      {(weatherInputData.temperature || weatherInputData.windSpeed || weatherInputData.conditions) && (
+                        <div className="mt-4 p-4 bg-slate-800/40 rounded-lg border border-cyan-500/20">
+                          <p className="text-sm text-slate-300" data-testid="text-weather-summary">
+                            <span className="text-cyan-400 font-semibold">Current Conditions: </span>
+                            {weatherInputData.temperature && `${weatherInputData.temperature}`}
+                            {weatherInputData.conditions && `, ${weatherInputData.conditions}`}
+                            {weatherInputData.windSpeed && ` • Wind: ${weatherInputData.windSpeed}`}
+                            {weatherInputData.humidity && ` • Humidity: ${weatherInputData.humidity}`}
+                            {weatherInputData.precipitation && ` • Precipitation: ${weatherInputData.precipitation}`}
+                            {weatherInputData.visibility && ` • Visibility: ${weatherInputData.visibility}`}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
                   {section.items.map((item) => (
                     <motion.div
                       key={item.id}

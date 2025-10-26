@@ -53,7 +53,7 @@ Security Testing: Comprehensive RLS policy validation with role isolation verifi
 
 ## AI & Data Intelligence
 - **AI Embeddings**: 768-dimensional semantic vectors using pgvector and Google Gemini for contextual search.
-- **Multi-Agent Pipelines**: For JHA and EAP generation, utilizing 4-agent parallel/sequential architectures with `gemini-2.5-flash` for tasks like data validation, risk assessment, incident prediction, and report synthesis.
+- **Multi-Agent Pipelines**: For JHA and EAP generation, utilizing 4-agent parallel/sequential architectures with `gemini-2.5-flash` for tasks like data validation, risk assessment, incident prediction, and report synthesis. **Token limits massively increased** (Agent 1: 12K, Agents 2-3: 16K each) for comprehensive analysis without truncation.
 - **Pattern Analysis**: Google Gemini-powered system for identifying safety trends and actuarial data.
 
 ## UI/UX Decisions
@@ -66,6 +66,7 @@ Security Testing: Comprehensive RLS policy validation with role isolation verifi
 ## Feature Specifications
 - **JHA Form**: Professional-grade with text inputs, file attachments, blueprint uploads, and AI analysis using OSHA data.
 - **Structured Question System**: Production-quality question optimization framework that transforms vague inputs into specific, agent-friendly structured data with 5 core components (sub-fields, examples, photo hints, agent context, critical warnings). **ALL 20 STRUCTURED QUESTIONS COMPLETE (Q1-Q20)** with full localStorage hydration, TypeScript interfaces, production-ready safety validation, and architect approval. Includes auto-calculation logic for weight distribution, wind forces, and crew fatigue metrics. Emergency preparedness (Q17-Q18) and public safety sections (Q19-Q20) with OSHA 1926.760 compliance enforcement for ground-level protection.
+- **Weather Input Module**: Heads-up display at the top of Environmental & Weather Conditions section allowing users to paste current weather data from the main page's weather module. Includes 6 input fields (temperature, wind speed, conditions, precipitation, visibility, humidity) with live summary display. Data sent to AI agents as `weatherInputOverride` for fail-safe validation against user-entered structured questions.
 - **EAP Generator**: 4-agent sequential pipeline generating OSHA-compliant plans from simplified questionnaire input.
 - **Chat System**: Enhanced conversational AI with grounding capabilities, voice input, and file attachments.
 - **Admin Panel**: Functionality for adding employees, exporting data, and Google Analytics integration.
