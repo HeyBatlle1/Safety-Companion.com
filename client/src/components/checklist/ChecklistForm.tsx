@@ -1607,6 +1607,23 @@ Progress: ${Math.round(calculateProgress())}% complete
           </motion.div>
         )}
         
+        {/* MULTI-AGENT REPORT DISPLAY - Render full SafetyAnalysisReport inline */}
+        {agentData && !updateComparison && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-8"
+          >
+            <SafetyAnalysisReport
+              agent1={agentData.agent1}
+              agent2={agentData.agent2}
+              agent3={agentData.agent3}
+              agent4={agentData.agent4}
+              metadata={agentData.metadata}
+            />
+          </motion.div>
+        )}
+        
         {/* JHA Update Form */}
         {showUpdateForm && currentAnalysisId && !updateComparison && (
           <JHAUpdateForm
