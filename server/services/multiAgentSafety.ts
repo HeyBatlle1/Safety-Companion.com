@@ -392,7 +392,7 @@ export class MultiAgentSafetyAnalysis {
       agentTimings.agent1_validator = {
         model: 'gemini-2.5-flash',
         temperature: 0.3,
-        maxTokens: 4000,
+        maxTokens: 12000, // Increased 3x for comprehensive validation
         executionTimeMs: Date.now() - agent1Start,
         responseLength: JSON.stringify(validation).length
       };
@@ -419,7 +419,7 @@ export class MultiAgentSafetyAnalysis {
       agentTimings.agent2_risk_assessor = {
         model: 'gemini-2.5-flash',
         temperature: 0.7,
-        maxTokens: 8000,
+        maxTokens: 16000, // Increased 2x for detailed OSHA risk analysis
         executionTimeMs: Date.now() - agent2Start,
         responseLength: JSON.stringify(risk).length,
         oshaDataSources: risk.oshaData ? ['BLS_2023_Construction', 'NAICS_23'] : []
@@ -447,7 +447,7 @@ export class MultiAgentSafetyAnalysis {
       agentTimings.agent3_incident_predictor = {
         model: 'gemini-2.5-flash',
         temperature: 1.0,
-        maxTokens: 8000,
+        maxTokens: 16000, // Increased 2x for comprehensive Swiss Cheese analysis
         executionTimeMs: Date.now() - agent3Start,
         responseLength: JSON.stringify(prediction).length,
         confidenceLevel: prediction.confidence
@@ -530,14 +530,14 @@ export class MultiAgentSafetyAnalysis {
           agent1_validator: agentTimings.agent1_validator || {
             model: 'gemini-2.5-flash',
             temperature: 0.3,
-            maxTokens: 4000,
+            maxTokens: 12000, // Increased 3x
             executionTimeMs: 0,
             responseLength: 0
           },
           agent2_risk_assessor: agentTimings.agent2_risk_assessor || {
             model: 'gemini-2.5-flash',
             temperature: 0.7,
-            maxTokens: 8000,
+            maxTokens: 16000, // Increased 2x
             executionTimeMs: 0,
             responseLength: 0,
             oshaDataSources: []
@@ -545,7 +545,7 @@ export class MultiAgentSafetyAnalysis {
           agent3_incident_predictor: agentTimings.agent3_incident_predictor || {
             model: 'gemini-2.5-flash',
             temperature: 1.0,
-            maxTokens: 8000,
+            maxTokens: 16000, // Increased 2x
             executionTimeMs: 0,
             responseLength: 0,
             confidenceLevel: lastKnownConfidence  // Preserve real confidence from Agent 3
@@ -682,7 +682,7 @@ CRITICAL: Output must be parseable JSON. Any non-JSON text will cause system fai
 
     let result = '';
     try {
-      result = await this.callGemini(prompt, 0.3, 4000);
+      result = await this.callGemini(prompt, 0.3, 12000); // Increased 3x for comprehensive validation
       const extracted = this.extractJSON(result);
       console.log('🔍 Agent 1 extracted JSON length:', extracted.length);
       const parsed = JSON.parse(extracted);
@@ -910,7 +910,7 @@ CRITICAL: Output ONLY valid JSON. Any text outside JSON will cause parsing failu
 
     let result = '';
     try {
-      result = await this.callGemini(prompt, 0.7, 8000);
+      result = await this.callGemini(prompt, 0.7, 16000); // Increased 2x for detailed OSHA analysis
       const extracted = this.extractJSON(result);
       console.log('🔍 Agent 2 extracted JSON length:', extracted.length);
       const parsed = JSON.parse(extracted);
@@ -1268,7 +1268,7 @@ CRITICAL: Output ONLY valid JSON. Any non-JSON text will cause parsing failure.`
 
     let result = '';
     try {
-      result = await this.callGemini(prompt, 1.0, 10000); // Higher token limit for detailed output
+      result = await this.callGemini(prompt, 1.0, 16000); // Increased for comprehensive Swiss Cheese analysis
       const extracted = this.extractJSON(result);
       console.log('🔍 Agent 3 extracted JSON length:', extracted.length);
       const parsed = JSON.parse(extracted);
