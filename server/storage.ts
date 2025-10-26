@@ -49,6 +49,7 @@ export interface IStorage {
   
   // Analysis history
   getAnalysisHistory(userId: string, limit?: number): Promise<AnalysisHistory[]>;
+  getAnalysisById(analysisId: string): Promise<AnalysisHistory | undefined>;
   createAnalysisHistory(analysis: InsertAnalysisHistory): Promise<AnalysisHistory>;
   
   // Risk assessments
@@ -208,6 +209,13 @@ export class DatabaseStorage implements IStorage {
       .where(eq(analysisHistory.userId, userId))
       .orderBy(desc(analysisHistory.createdAt))
       .limit(limit);
+  }
+
+  async getAnalysisById(analysisId: string): Promise<AnalysisHistory | undefined> {
+    const result = await db.select().from(analysisHistory)
+      .where(eq(analysisHistory.id, analysisId))
+      .limit(1);
+    return result[0];
   }
 
   async createAnalysisHistory(analysis: InsertAnalysisHistory): Promise<AnalysisHistory> {

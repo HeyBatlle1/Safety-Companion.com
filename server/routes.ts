@@ -240,6 +240,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get single analysis by ID
+  app.get("/api/analysis-history/:id", requireAuth, async (req, res) => {
+    try {
+      const analysisId = req.params.id;
+      const analysis = await storage.getAnalysisById(analysisId);
+      
+      if (!analysis) {
+        return res.status(404).json({ error: 'Analysis not found' });
+      }
+      
+      // Security: Verify the analysis belongs to the requesting user
+      const userId = getUserId(req);
+      if (analysis.userId !== userId) {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+      
+      res.json(analysis);
+    } catch (error) {
+      logError(error, 'auth');
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   // Create analysis history entry with validation
   app.post("/api/analysis-history", 
     requireAuth,
