@@ -19,7 +19,16 @@ const ReportView: React.FC = () => {
 
   const fetchReport = async (id: string) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      console.log('🔍 Fetching report - getting session...');
+      
+      // Add 3-second timeout to prevent infinite loading
+      const sessionPromise = supabase.auth.getSession();
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Session fetch timeout')), 3000)
+      );
+      
+      const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]) as any;
+      console.log('✅ Session retrieved:', session ? 'Valid' : 'None');
       
       if (!session?.access_token) {
         setError('Authentication required');
@@ -80,8 +89,13 @@ const ReportView: React.FC = () => {
         }
       }
     } catch (err) {
-      console.error('Error fetching report:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load report');
+      console.error('❌ Error fetching report:', err);
+      if (err instanceof Error && err.message === 'Session fetch timeout') {
+        console.warn('⚠️ Session fetch timed out - possible auth issue');
+        setError('Authentication timeout - please refresh and try again');
+      } else {
+        setError(err instanceof Error ? err.message : 'Failed to load report');
+      }
     } finally {
       setLoading(false);
     }

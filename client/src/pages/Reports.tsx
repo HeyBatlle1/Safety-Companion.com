@@ -38,9 +38,19 @@ const Reports: React.FC = () => {
 
   const fetchReports = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      console.log('🔍 Fetching reports - getting session...');
+      
+      // Add 3-second timeout to prevent infinite loading
+      const sessionPromise = supabase.auth.getSession();
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Session fetch timeout')), 3000)
+      );
+      
+      const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]) as any;
+      console.log('✅ Session retrieved:', session ? 'Valid' : 'None');
       
       if (!session?.access_token) {
+        console.warn('⚠️ No session token - user may need to log in');
         setLoading(false);
         return;
       }
@@ -64,7 +74,11 @@ const Reports: React.FC = () => {
         setReports(safetyReports);
       }
     } catch (error) {
-      console.error('Error fetching reports:', error);
+      console.error('❌ Error fetching reports:', error);
+      // If session timeout, stop loading anyway
+      if (error instanceof Error && error.message === 'Session fetch timeout') {
+        console.warn('⚠️ Session fetch timed out - possible auth issue');
+      }
     } finally {
       setLoading(false);
     }
